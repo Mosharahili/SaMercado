@@ -1,11 +1,18 @@
 import React from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useNavigation } from "@react-navigation/native";
 
 import { useAuth } from "@hooks/useAuth";
 import { theme } from "@theme/theme";
 
+import type { RootStackParamList } from "@navigation/RootNavigator";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+
+type Nav = NativeStackNavigationProp<RootStackParamList>;
+
 export const AccountScreen: React.FC = () => {
   const { user, logout } = useAuth();
+  const navigation = useNavigation<Nav>();
 
   return (
     <View style={styles.container}>
@@ -13,6 +20,24 @@ export const AccountScreen: React.FC = () => {
         <>
           <Text style={styles.name}>{user.name}</Text>
           <Text style={styles.role}>الدور: {user.role}</Text>
+
+          {(user.role === "ADMIN" || user.role === "OWNER") && (
+            <TouchableOpacity
+              style={styles.dashboardBtn}
+              onPress={() => navigation.navigate("Admin")}
+            >
+              <Text style={styles.dashboardText}>فتح لوحة تحكم المالك / الأدمن</Text>
+            </TouchableOpacity>
+          )}
+
+          {(user.role === "VENDOR" || user.role === "OWNER") && (
+            <TouchableOpacity
+              style={styles.dashboardBtn}
+              onPress={() => navigation.navigate("Vendor")}
+            >
+              <Text style={styles.dashboardText}>فتح لوحة تحكم البائع</Text>
+            </TouchableOpacity>
+          )}
         </>
       ) : (
         <Text style={styles.name}>ضيف غير مسجل</Text>
@@ -52,6 +77,19 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: "#ffffff",
+    fontWeight: "600",
+  },
+  dashboardBtn: {
+    marginTop: 12,
+    backgroundColor: theme.colors.surface,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
+  },
+  dashboardText: {
+    color: theme.colors.primary,
     fontWeight: "600",
   },
 });
