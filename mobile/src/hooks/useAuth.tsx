@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { api } from "@api/client";
+import { api, setToken, getToken, removeToken } from "@api/client";
 
 type Role = "CUSTOMER" | "VENDOR" | "ADMIN" | "OWNER";
 
@@ -8,6 +8,8 @@ export interface AuthUser {
   name: string;
   role: Role;
   token: string;
+  permissions?: string[];
+  vendorId?: string | null;
 }
 
 interface AuthContextValue {
@@ -24,20 +26,41 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: load from secure storage
-    setLoading(false);
+    const loadUser = async () => {
+      try {
+        const token = await getToken();
+        if (token) {
+          // Verify token with backend
+          const res = await api.get("/auth/me");
+          const userData = res.data;
+          const authUser: AuthUser = {
+            id: userData.id,
+            name: userData.name,
+            role: userData.role,
+            token,
+            permissions: userData.permissions,
+            vendorId: userData.vendorId,
+          };
+          setUser(authUser);
+        }
+      } catch (err) {
+        console.error("Failed to load user:", err);
+        await removeToken();
+      } finally {
+        setLoading(false);
+      }
+    };
+    void loadUser();
   }, []);
 
   const login = async (next: AuthUser) => {
     setUser(next);
-    api.defaults.headers.common.Authorization = `Bearer ${next.token}`;
-    // TODO: persist token to secure storage
+    await setToken(next.token);
   };
 
   const logout = async () => {
     setUser(null);
-    delete api.defaults.headers.common.Authorization;
-    // TODO: clear secure storage
+    await removeToken();
   };
 
   return (

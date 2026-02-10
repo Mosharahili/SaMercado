@@ -30,6 +30,8 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
         name: res.data.user.name,
         role: res.data.user.role,
         token: res.data.token,
+        permissions: res.data.user.permissions,
+        vendorId: res.data.user.vendorId,
       });
     } catch (err) {
       if (axios.isAxiosError(err)) {

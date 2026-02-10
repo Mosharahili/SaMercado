@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View, Image } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { theme } from "@theme/theme";
@@ -7,38 +7,36 @@ import { BoosterBannerSlot } from "@components/BoosterBannerSlot";
 import { PopupModal } from "@components/PopupModal";
 import { api } from "@api/client";
 
-interface BannerDto {
+interface Market {
   id: string;
-  title: string;
+  name: string;
+  region: string;
   description?: string | null;
-  ctaText?: string | null;
-  imageUrl: string;
-}
-
-interface PopupDto {
-  id: string;
-  title: string;
-  message?: string | null;
   imageUrl?: string | null;
-  primaryCtaText?: string | null;
-  secondaryCtaText?: string | null;
+  vendorCount: number;
+  operatingFrom?: string | null;
+  operatingTo?: string | null;
+  priceRange?: string | null;
 }
 
 export const HomeScreen: React.FC = () => {
   const [heroBanners, setHeroBanners] = useState<BannerDto[]>([]);
   const [midBanners, setMidBanners] = useState<BannerDto[]>([]);
   const [popup, setPopup] = useState<PopupDto | null>(null);
+  const [featuredMarkets, setFeaturedMarkets] = useState<Market[]>([]);
 
   useEffect(() => {
     void (async () => {
-      const [heroRes, midRes, popupRes] = await Promise.all([
+      const [heroRes, midRes, popupRes, marketsRes] = await Promise.all([
         api.get<BannerDto[]>("/content/banners", { params: { placement: "HOME_HERO" } }),
         api.get<BannerDto[]>("/content/banners", { params: { placement: "HOME_MID" } }),
         api.get<PopupDto[]>("/content/popups"),
+        api.get<Market[]>("/catalog/featured-markets"),
       ]);
       setHeroBanners(heroRes.data);
       setMidBanners(midRes.data);
       setPopup(popupRes.data[0] ?? null);
+      setFeaturedMarkets(marketsRes.data);
     })();
   }, []);
 
@@ -75,7 +73,14 @@ export const HomeScreen: React.FC = () => {
         ))}
 
         <Text style={styles.sectionTitle}>الأسواق المميزة</Text>
-        {/* TODO: ربط بقائمة /catalog/featured-markets وعرض كروت الأسواق */}
+        <FlatList
+          horizontal
+          data={featuredMarkets}
+          keyExtractor={(m) => m.id}
+          contentContainerStyle={styles.marketsList}
+          showsHorizontalScrollIndicator={false}
+          renderItem={({ item }) => <MarketCard market={item} />}
+        />
 
         {midBanners.map((b) => (
           <BoosterBannerSlot
@@ -106,10 +111,21 @@ export const HomeScreen: React.FC = () => {
   );
 };
 
-const FeaturePill: React.FC<{ label: string }> = ({ label }) => (
-  <View style={styles.featurePill}>
-    <Text style={styles.featureText}>{label}</Text>
-  </View>
+const MarketCard: React.FC<{ market: Market }> = ({ market }) => (
+  <TouchableOpacity style={styles.marketCard}>
+    {market.imageUrl ? (
+      <Image source={{ uri: market.imageUrl }} style={styles.marketImage} />
+    ) : (
+      <View style={styles.marketImagePlaceholder}>
+        <Text style={styles.marketImageText}>{market.name.charAt(0)}</Text>
+      </View>
+    )}
+    <View style={styles.marketContent}>
+      <Text style={styles.marketName}>{market.name}</Text>
+      <Text style={styles.marketRegion}>{market.region}</Text>
+      <Text style={styles.marketMeta}>{market.vendorCount} بائع</Text>
+    </View>
+  </TouchableOpacity>
 );
 
 const styles = StyleSheet.create({
@@ -157,15 +173,16 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   featurePill: {
-    backgroundColor: "rgba(15,23,42,0.2)",
+    backgroundColor: "rgba(255,255,255,0.2)",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
     marginLeft: 8,
   },
-  featureText: {
-    color: "#e5e7eb",
+  featurePillText: {
+    color: "#ffffff",
     fontSize: 12,
+    fontWeight: "500",
   },
   sectionTitle: {
     marginTop: 16,
@@ -175,5 +192,67 @@ const styles = StyleSheet.create({
     textAlign: "right",
     color: theme.colors.text,
   },
+  marketsList: {
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+  },
+  marketCard: {
+    width: 160,
+    backgroundColor: theme.colors.surface,
+    borderRadius: 12,
+    marginRight: 12,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  marketImage: {
+    width: "100%",
+    height: 100,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  marketImagePlaceholder: {
+    width: "100%",
+    height: 100,
+    backgroundColor: theme.colors.primarySoft,
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  marketImageText: {
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#ffffff",
+  },
+  marketContent: {
+    padding: 12,
+  },
+  marketName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    textAlign: "right",
+  },
+  marketRegion: {
+    marginTop: 2,
+    fontSize: 12,
+    color: theme.colors.muted,
+    textAlign: "right",
+  },
+  marketMeta: {
+    marginTop: 4,
+    fontSize: 11,
+    color: theme.colors.primary,
+    textAlign: "right",
+  },
 });
+
+const FeaturePill: React.FC<{ label: string }> = ({ label }) => (
+  <View style={styles.featurePill}>
+    <Text style={styles.featurePillText}>{label}</Text>
+  </View>
+);
 

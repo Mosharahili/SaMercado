@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { FlatList, StyleSheet, Text, TouchableOpacity, View, Alert } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 import { api } from "@api/client";
 import { theme } from "@theme/theme";
@@ -24,6 +25,20 @@ export const CartScreen: React.FC = () => {
   const loadCart = async () => {
     const res = await api.get<CartItem[]>("/cart");
     setItems(res.data);
+  };
+
+  const updateQuantity = async (cartItemId: string, quantity: number) => {
+    if (quantity <= 0) {
+      await removeItem(cartItemId);
+      return;
+    }
+    await api.post("/cart/update", { cartItemId, quantity });
+    await loadCart();
+  };
+
+  const removeItem = async (cartItemId: string) => {
+    await api.post("/cart/remove", { cartItemId });
+    await loadCart();
   };
 
   useEffect(() => {
@@ -57,13 +72,34 @@ export const CartScreen: React.FC = () => {
         contentContainerStyle={{ padding: 16 }}
         renderItem={({ item }) => (
           <View style={styles.itemRow}>
-            <View style={{ flex: 1 }}>
+            <TouchableOpacity
+              style={styles.removeBtn}
+              onPress={() => void removeItem(item.id)}
+            >
+              <Ionicons name="trash" size={16} color={theme.colors.danger} />
+            </TouchableOpacity>
+            <View style={styles.itemContent}>
               <Text style={styles.itemName}>{item.product.name}</Text>
               <Text style={styles.itemPrice}>
                 {item.product.price} ر.س × {item.quantity}
               </Text>
             </View>
-            <Text style={styles.itemTotal}>{item.product.price * item.quantity} ر.س</Text>
+            <View style={styles.quantityControls}>
+              <TouchableOpacity
+                style={styles.quantityBtn}
+                onPress={() => void updateQuantity(item.id, item.quantity - 1)}
+              >
+                <Ionicons name="remove" size={16} color={theme.colors.primary} />
+              </TouchableOpacity>
+              <Text style={styles.quantityText}>{item.quantity}</Text>
+              <TouchableOpacity
+                style={styles.quantityBtn}
+                onPress={() => void updateQuantity(item.id, item.quantity + 1)}
+              >
+                <Ionicons name="add" size={16} color={theme.colors.primary} />
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.itemTotal}>{(item.product.price * item.quantity).toFixed(2)} ر.س</Text>
           </View>
         )}
         ListEmptyComponent={
@@ -132,6 +168,17 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginBottom: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  removeBtn: {
+    marginLeft: 8,
+  },
+  itemContent: {
+    flex: 1,
   },
   itemName: {
     fontSize: 15,
@@ -145,10 +192,33 @@ const styles = StyleSheet.create({
     color: theme.colors.muted,
     textAlign: "right",
   },
+  quantityControls: {
+    flexDirection: "row-reverse",
+    alignItems: "center",
+    marginLeft: 12,
+  },
+  quantityBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: theme.colors.primary,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  quantityText: {
+    marginHorizontal: 8,
+    fontSize: 14,
+    fontWeight: "600",
+    color: theme.colors.text,
+    minWidth: 20,
+    textAlign: "center",
+  },
   itemTotal: {
     fontSize: 14,
     fontWeight: "700",
     color: theme.colors.primary,
+    marginLeft: 12,
   },
   emptyText: {
     textAlign: "center",

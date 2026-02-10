@@ -1,4 +1,5 @@
 import axios from "axios";
+import * as SecureStore from "expo-secure-store";
 import Constants from "expo-constants";
 
 const apiBaseUrl =
@@ -9,9 +10,27 @@ export const api = axios.create({
   baseURL: apiBaseUrl,
 });
 
-api.interceptors.request.use(async (config) => {
-  // TODO: read token from secure storage
-  // For scaffolding, we expect caller to set Authorization header when needed.
-  return config;
-});
+const TOKEN_KEY = "auth_token";
+
+export const setToken = async (token: string) => {
+  await SecureStore.setItemAsync(TOKEN_KEY, token);
+  api.defaults.headers.common.Authorization = `Bearer ${token}`;
+};
+
+export const getToken = async (): Promise<string | null> => {
+  return await SecureStore.getItemAsync(TOKEN_KEY);
+};
+
+export const removeToken = async () => {
+  await SecureStore.deleteItemAsync(TOKEN_KEY);
+  delete api.defaults.headers.common.Authorization;
+};
+
+// Load token on app start
+(async () => {
+  const token = await getToken();
+  if (token) {
+    api.defaults.headers.common.Authorization = `Bearer ${token}`;
+  }
+})();
 
