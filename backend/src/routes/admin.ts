@@ -283,6 +283,58 @@ adminRouter.patch(
   }
 );
 
+adminRouter.post(
+  "/products",
+  requireAuth,
+  requirePermission(PermissionKey.MANAGE_PRODUCTS),
+  async (req, res) => {
+    const bodySchema = z.object({
+      name: z.string(),
+      description: z.string().optional(),
+      price: z.number(),
+      unit: z.nativeEnum(UnitType),
+      marketId: z.string(),
+      vendorId: z.string(),
+      categoryId: z.string().optional(),
+      imageUrl: z.string().optional(),
+      available: z.boolean().optional(),
+    });
+
+    const data = bodySchema.parse(req.body);
+
+    const product = await prisma.product.create({
+      data: {
+        name: data.name,
+        description: data.description,
+        price: new Prisma.Decimal(data.price),
+        unit: data.unit,
+        marketId: data.marketId,
+        vendorId: data.vendorId,
+        categoryId: data.categoryId,
+        imageUrl: data.imageUrl,
+        available: data.available ?? true,
+      },
+      include: { market: true, vendor: true, category: true },
+    });
+    res.json(product);
+  }
+);
+
+adminRouter.delete(
+  "/products/:id",
+  requireAuth,
+  requirePermission(PermissionKey.MANAGE_PRODUCTS),
+  async (req, res) => {
+    const paramsSchema = z.object({ id: z.string() });
+    const { id } = paramsSchema.parse(req.params);
+
+    await prisma.product.delete({
+      where: { id },
+    });
+    res.json({ success: true });
+  }
+);
+
 // ----- Users -----
 
 adminRouter.get(

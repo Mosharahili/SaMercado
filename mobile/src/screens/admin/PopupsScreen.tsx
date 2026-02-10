@@ -11,8 +11,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
 
 import { api } from "@api/client";
 import { theme } from "@theme/theme";
@@ -55,6 +57,7 @@ export const PopupsScreen: React.FC = () => {
   const [marketIds, setMarketIds] = useState<string[]>([]);
   const [categoryIds, setCategoryIds] = useState<string[]>([]);
   const [enabled, setEnabled] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const loadPopups = async () => {
     try {
@@ -82,6 +85,7 @@ export const PopupsScreen: React.FC = () => {
     setMarketIds([]);
     setCategoryIds([]);
     setEnabled(true);
+    setSelectedImage(null);
     setEditingPopup(null);
   };
 
@@ -100,7 +104,32 @@ export const PopupsScreen: React.FC = () => {
     setMarketIds(popup.marketIds || []);
     setCategoryIds(popup.categoryIds || []);
     setEnabled(popup.enabled);
+    setSelectedImage(popup.imageUrl);
     setModalVisible(true);
+  };
+
+  const pickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.granted === false) {
+        Alert.alert("خطأ", "يجب السماح بالوصول إلى المكتبة لاختيار الصور");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [4, 3],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert("خطأ", "تعذّر اختيار الصورة");
+    }
   };
 
   const handleSave = async () => {
@@ -111,23 +140,62 @@ export const PopupsScreen: React.FC = () => {
 
     try {
       setSaving(true);
-      const data = {
-        title: title.trim(),
-        message: message.trim() || undefined,
-        primaryCtaText: primaryCtaText.trim() || undefined,
-        secondaryCtaText: secondaryCtaText.trim() || undefined,
-        targetType,
-        marketIds: targetType === "SPECIFIC_MARKETS" ? marketIds : undefined,
-        categoryIds: targetType === "SPECIFIC_CATEGORIES" ? categoryIds : undefined,
-        enabled,
-      };
 
-      if (editingPopup) {
-        await api.patch(`/content/popups/${editingPopup.id}`, data);
-        Alert.alert("تم", "تم تحديث النافذة المنبثقة بنجاح");
+      if (selectedImage && !selectedImage.startsWith('http')) {
+        // Upload with image
+        const formData = new FormData();
+        formData.append('title', title.trim());
+        if (message.trim()) formData.append('message', message.trim());
+        if (primaryCtaText.trim()) formData.append('primaryCtaText', primaryCtaText.trim());
+        if (secondaryCtaText.trim()) formData.append('secondaryCtaText', secondaryCtaText.trim());
+        formData.append('targetType', targetType);
+        if (targetType === "SPECIFIC_MARKETS" && marketIds.length > 0) {
+          marketIds.forEach(id => formData.append('marketIds', id));
+        }
+        if (targetType === "SPECIFIC_CATEGORIES" && categoryIds.length > 0) {
+          categoryIds.forEach(id => formData.append('categoryIds', id));
+        }
+        formData.append('enabled', enabled.toString());
+
+        // Add image file
+        const response = await fetch(selectedImage);
+        const blob = await response.blob();
+        const fileName = `popup-${Date.now()}.jpg`;
+        formData.append('image', blob, fileName);
+
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        };
+
+        if (editingPopup) {
+          await api.patch(`/content/popups/${editingPopup.id}`, formData, config);
+          Alert.alert("تم", "تم تحديث النافذة المنبثقة بنجاح");
+        } else {
+          await api.post("/content/popups", formData, config);
+          Alert.alert("تم", "تم إنشاء النافذة المنبثقة بنجاح");
+        }
       } else {
-        await api.post("/content/popups", data);
-        Alert.alert("تم", "تم إنشاء النافذة المنبثقة بنجاح");
+        // Upload without image (JSON)
+        const data = {
+          title: title.trim(),
+          message: message.trim() || undefined,
+          primaryCtaText: primaryCtaText.trim() || undefined,
+          secondaryCtaText: secondaryCtaText.trim() || undefined,
+          targetType,
+          marketIds: targetType === "SPECIFIC_MARKETS" ? marketIds : undefined,
+          categoryIds: targetType === "SPECIFIC_CATEGORIES" ? categoryIds : undefined,
+          enabled,
+        };
+
+        if (editingPopup) {
+          await api.patch(`/content/popups/${editingPopup.id}`, data);
+          Alert.alert("تم", "تم تحديث النافذة المنبثقة بنجاح");
+        } else {
+          await api.post("/content/popups", data);
+          Alert.alert("تم", "تم إنشاء النافذة المنبثقة بنجاح");
+        }
       }
 
       setModalVisible(false);
@@ -138,9 +206,7 @@ export const PopupsScreen: React.FC = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  const toggle = async (id: string) => {
+  };  const toggle = async (id: string) => {
     try {
       await api.post(`/content/popups/${id}/toggle`);
       await loadPopups();
@@ -257,6 +323,16 @@ export const PopupsScreen: React.FC = () => {
               multiline
               numberOfLines={4}
             />
+
+            <Text style={styles.label}>الصورة</Text>
+            <TouchableOpacity style={styles.imagePickerBtn} onPress={() => void pickImage()}>
+              <Text style={styles.imagePickerText}>
+                {selectedImage ? "تغيير الصورة" : "اختيار صورة"}
+              </Text>
+            </TouchableOpacity>
+            {selectedImage && (
+              <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+            )}
 
             <Text style={styles.label}>نص الزر الأساسي</Text>
             <TextInput
@@ -504,6 +580,26 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  imagePickerBtn: {
+    backgroundColor: "#f3f4f6",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    marginBottom: 8,
+  },
+  imagePickerText: {
+    color: theme.colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  selectedImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 8,
   },
 });
 

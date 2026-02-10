@@ -55,20 +55,7 @@ const renderMarket = ({ item }: { item: Market }) => (
     )}
     <View style={styles.cardContent}>
       <Text style={styles.name}>{item.name}</Text>
-      <Text style={styles.region}>{item.region}</Text>
       {item.description ? <Text style={styles.description}>{item.description}</Text> : null}
-      <View style={styles.metaRow}>
-        <Text style={styles.metaText}>عدد البائعين: {item.vendorCount}</Text>
-        {item.priceRange ? (
-          <Text style={styles.metaText}>نطاق الأسعار: {item.priceRange}</Text>
-        ) : null}
-      </View>
-      {item.operatingFrom && item.operatingTo ? (
-        <Text style={styles.hours}>ساعات العمل: {item.operatingFrom} - {item.operatingTo}</Text>
-      ) : null}
-      <TouchableOpacity style={styles.button}>
-        <Text style={styles.buttonText}>تصفح السوق</Text>
-      </TouchableOpacity>
     </View>
   </TouchableOpacity>
 );

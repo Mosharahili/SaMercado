@@ -11,8 +11,10 @@ import {
   TextInput,
   TouchableOpacity,
   View,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
+import * as ImagePicker from "expo-image-picker";
 
 import { api } from "@api/client";
 import { theme } from "@theme/theme";
@@ -62,6 +64,7 @@ export const BannersScreen: React.FC = () => {
   const [actionTargetId, setActionTargetId] = useState("");
   const [externalUrl, setExternalUrl] = useState("");
   const [enabled, setEnabled] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const loadBanners = async () => {
     try {
@@ -89,6 +92,7 @@ export const BannersScreen: React.FC = () => {
     setActionTargetId("");
     setExternalUrl("");
     setEnabled(true);
+    setSelectedImage(null);
     setEditingBanner(null);
   };
 
@@ -107,7 +111,32 @@ export const BannersScreen: React.FC = () => {
     setActionTargetId(banner.actionTargetId || "");
     setExternalUrl(banner.externalUrl || "");
     setEnabled(banner.enabled);
+    setSelectedImage(banner.imageUrl);
     setModalVisible(true);
+  };
+
+  const pickImage = async () => {
+    try {
+      const permissionResult = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (permissionResult.granted === false) {
+        Alert.alert("خطأ", "يجب السماح بالوصول إلى المكتبة لاختيار الصور");
+        return;
+      }
+
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled) {
+        setSelectedImage(result.assets[0].uri);
+      }
+    } catch (err) {
+      console.error(err);
+      Alert.alert("خطأ", "تعذّر اختيار الصورة");
+    }
   };
 
   const handleSave = async () => {
@@ -118,23 +147,58 @@ export const BannersScreen: React.FC = () => {
 
     try {
       setSaving(true);
-      const data = {
-        title: title.trim(),
-        description: description.trim() || undefined,
-        ctaText: ctaText.trim() || undefined,
-        placement,
-        actionType,
-        actionTargetId: actionTargetId.trim() || undefined,
-        externalUrl: externalUrl.trim() || undefined,
-        enabled,
-      };
 
-      if (editingBanner) {
-        await api.patch(`/content/banners/${editingBanner.id}`, data);
-        Alert.alert("تم", "تم تحديث البنر بنجاح");
+      if (selectedImage && !selectedImage.startsWith('http')) {
+        // Upload with image
+        const formData = new FormData();
+        formData.append('title', title.trim());
+        if (description.trim()) formData.append('description', description.trim());
+        if (ctaText.trim()) formData.append('ctaText', ctaText.trim());
+        formData.append('placement', placement);
+        formData.append('actionType', actionType);
+        if (actionTargetId.trim()) formData.append('actionTargetId', actionTargetId.trim());
+        if (externalUrl.trim()) formData.append('externalUrl', externalUrl.trim());
+        formData.append('enabled', enabled.toString());
+
+        // Add image file
+        const response = await fetch(selectedImage);
+        const blob = await response.blob();
+        const fileName = `banner-${Date.now()}.jpg`;
+        formData.append('image', blob, fileName);
+
+        const config = {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        };
+
+        if (editingBanner) {
+          await api.patch(`/content/banners/${editingBanner.id}`, formData, config);
+          Alert.alert("تم", "تم تحديث البنر بنجاح");
+        } else {
+          await api.post("/content/banners", formData, config);
+          Alert.alert("تم", "تم إنشاء البنر بنجاح");
+        }
       } else {
-        await api.post("/content/banners", data);
-        Alert.alert("تم", "تم إنشاء البنر بنجاح");
+        // Upload without image (JSON)
+        const data = {
+          title: title.trim(),
+          description: description.trim() || undefined,
+          ctaText: ctaText.trim() || undefined,
+          placement,
+          actionType,
+          actionTargetId: actionTargetId.trim() || undefined,
+          externalUrl: externalUrl.trim() || undefined,
+          enabled,
+        };
+
+        if (editingBanner) {
+          await api.patch(`/content/banners/${editingBanner.id}`, data);
+          Alert.alert("تم", "تم تحديث البنر بنجاح");
+        } else {
+          await api.post("/content/banners", data);
+          Alert.alert("تم", "تم إنشاء البنر بنجاح");
+        }
       }
 
       setModalVisible(false);
@@ -264,6 +328,16 @@ export const BannersScreen: React.FC = () => {
               multiline
               numberOfLines={3}
             />
+
+            <Text style={styles.label}>الصورة</Text>
+            <TouchableOpacity style={styles.imagePickerBtn} onPress={() => void pickImage()}>
+              <Text style={styles.imagePickerText}>
+                {selectedImage ? "تغيير الصورة" : "اختيار صورة"}
+              </Text>
+            </TouchableOpacity>
+            {selectedImage && (
+              <Image source={{ uri: selectedImage }} style={styles.selectedImage} />
+            )}
 
             <Text style={styles.label}>نص الزر</Text>
             <TextInput
@@ -524,6 +598,26 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     fontSize: 16,
     fontWeight: "600",
+  },
+  imagePickerBtn: {
+    backgroundColor: "#f3f4f6",
+    padding: 12,
+    borderRadius: 8,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    marginBottom: 8,
+  },
+  imagePickerText: {
+    color: theme.colors.primary,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  selectedImage: {
+    width: "100%",
+    height: 150,
+    borderRadius: 8,
+    marginBottom: 8,
   },
 });
 

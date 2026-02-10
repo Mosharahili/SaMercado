@@ -21,6 +21,7 @@ type UnitType = "KILO" | "BUNDLE" | "BOX";
 interface Product {
   id: string;
   name: string;
+  description?: string | null;
   price: number;
   unit: UnitType;
   imageUrl?: string | null;
@@ -376,23 +377,18 @@ export const ProductsScreen: React.FC = () => {
                   <Text style={styles.imagePlaceholderText}>بدون صورة</Text>
                 </View>
               )}
-              <Text style={styles.name}>{item.name}</Text>
-              <Text style={styles.meta}>
-                {item.market.name} • {item.vendor.displayName}
-              </Text>
-              {item.category && (
-                <Text style={styles.category}>
-                  {item.category.type === "VEGETABLE"
-                    ? "خضار"
-                    : item.category.type === "FRUIT"
-                    ? "فواكه"
-                    : "تمور"}
+              <View style={styles.cardContent}>
+                <Text style={styles.name}>{item.name}</Text>
+                <Text style={styles.price}>
+                  {item.price} ر.س /{" "}
+                  {item.unit === "KILO" ? "كيلو" : item.unit === "BOX" ? "صندوق" : "ربطة"}
                 </Text>
-              )}
-              <Text style={styles.price}>
-                {item.price} ر.س /{" "}
-                {item.unit === "KILO" ? "كيلو" : item.unit === "BOX" ? "صندوق" : "ربطة"}
-              </Text>
+                {item.description && (
+                  <Text style={styles.description} numberOfLines={2}>
+                    {item.description}
+                  </Text>
+                )}
+              </View>
               <TouchableOpacity
                 style={styles.addBtn}
                 onPress={() => void addToCart(item.id)}
@@ -614,23 +610,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     color: theme.colors.muted,
   },
+  cardContent: {
+    paddingHorizontal: 4,
+  },
   name: {
     fontSize: 14,
     fontWeight: "700",
     textAlign: "right",
     color: theme.colors.text,
-  },
-  meta: {
-    marginTop: 2,
-    fontSize: 11,
-    color: theme.colors.muted,
-    textAlign: "right",
-  },
-  category: {
-    marginTop: 2,
-    fontSize: 11,
-    color: theme.colors.primary,
-    textAlign: "right",
   },
   price: {
     marginTop: 4,
@@ -639,8 +626,15 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
     textAlign: "right",
   },
+  description: {
+    marginTop: 4,
+    fontSize: 12,
+    color: theme.colors.muted,
+    textAlign: "right",
+    lineHeight: 16,
+  },
   addBtn: {
-    marginTop: 6,
+    marginTop: 8,
     backgroundColor: theme.colors.primary,
     borderRadius: 999,
     paddingVertical: 8,
