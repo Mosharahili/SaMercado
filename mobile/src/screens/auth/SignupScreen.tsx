@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import axios from "axios";
 
 import { api } from "@api/client";
 import { useAuth } from "@hooks/useAuth";
@@ -14,15 +15,41 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const onSignup = async () => {
-    const res = await api.post("/auth/signup", { name, email, password });
-    await login({
-      id: res.data.user.id,
-      name: res.data.user.name,
-      role: res.data.user.role,
-      token: res.data.token,
-    });
+    if (!name || !email || !password) {
+      Alert.alert("خطأ", "الرجاء إدخال الاسم والبريد الإلكتروني وكلمة المرور");
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert("خطأ", "يجب أن تكون كلمة المرور 6 أحرف على الأقل");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const res = await api.post("/auth/signup", { name, email, password });
+      await login({
+        id: res.data.user.id,
+        name: res.data.user.name,
+        role: res.data.user.role,
+        token: res.data.token,
+      });
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as any;
+        const message =
+          (data && (data.message || data.error)) ||
+          (typeof data === "string" ? data : undefined) ||
+          "تعذّر إنشاء الحساب، حاول مرة أخرى";
+        Alert.alert("خطأ", message);
+      } else {
+        Alert.alert("خطأ", "حدث خطأ غير متوقع، حاول مرة أخرى");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -56,8 +83,8 @@ export const SignupScreen: React.FC<Props> = ({ navigation }) => {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity style={styles.button} onPress={onSignup}>
-          <Text style={styles.buttonText}>تسجيل</Text>
+        <TouchableOpacity style={styles.button} onPress={onSignup} disabled={submitting}>
+          <Text style={styles.buttonText}>{submitting ? "جاري التسجيل..." : "تسجيل"}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Login")}>
           <Text style={styles.linkText}>لديك حساب؟ تسجيل الدخول</Text>

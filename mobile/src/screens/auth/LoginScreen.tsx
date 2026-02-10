@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import axios from "axios";
 
 import { api } from "@api/client";
 import { useAuth } from "@hooks/useAuth";
@@ -13,15 +14,37 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
   const { login } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [submitting, setSubmitting] = useState(false);
 
   const onLogin = async () => {
-    const res = await api.post("/auth/login", { email, password });
-    await login({
-      id: res.data.user.id,
-      name: res.data.user.name,
-      role: res.data.user.role,
-      token: res.data.token,
-    });
+    if (!email || !password) {
+      Alert.alert("خطأ", "الرجاء إدخال البريد الإلكتروني وكلمة المرور");
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      const res = await api.post("/auth/login", { email, password });
+      await login({
+        id: res.data.user.id,
+        name: res.data.user.name,
+        role: res.data.user.role,
+        token: res.data.token,
+      });
+    } catch (err) {
+      if (axios.isAxiosError(err)) {
+        const data = err.response?.data as any;
+        const message =
+          (data && (data.message || data.error)) ||
+          (typeof data === "string" ? data : undefined) ||
+          "تعذّر تسجيل الدخول، حاول مرة أخرى";
+        Alert.alert("خطأ", message);
+      } else {
+        Alert.alert("خطأ", "حدث خطأ غير متوقع، حاول مرة أخرى");
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -48,8 +71,8 @@ export const LoginScreen: React.FC<Props> = ({ navigation }) => {
           value={password}
           onChangeText={setPassword}
         />
-        <TouchableOpacity style={styles.button} onPress={onLogin}>
-          <Text style={styles.buttonText}>دخول</Text>
+        <TouchableOpacity style={styles.button} onPress={onLogin} disabled={submitting}>
+          <Text style={styles.buttonText}>{submitting ? "جاري الدخول..." : "دخول"}</Text>
         </TouchableOpacity>
         <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
           <Text style={styles.linkText}>مستخدم جديد؟ إنشاء حساب</Text>

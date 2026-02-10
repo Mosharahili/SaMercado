@@ -3,11 +3,14 @@ import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { theme } from "@theme/theme";
+import { useAuth } from "@hooks/useAuth";
 import type { AdminStackParamList } from "@navigation/stacks/AdminStack";
 
 type Props = NativeStackScreenProps<AdminStackParamList, "OwnerDashboard">;
 
 export const OwnerDashboardScreen: React.FC<Props> = ({ navigation }) => {
+  const { logout } = useAuth();
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>لوحة تحكم المالك</Text>
@@ -21,6 +24,7 @@ export const OwnerDashboardScreen: React.FC<Props> = ({ navigation }) => {
         <DashboardTile label="التحليلات" onPress={() => navigation.navigate("Analytics")} />
         <DashboardTile label="الإعدادات" onPress={() => navigation.navigate("Settings")} />
         <DashboardTile label="المدراء" onPress={() => navigation.navigate("Admins")} />
+        <DashboardTile label="تسجيل الخروج" onPress={() => void logout()} />
       </View>
     </View>
   );
