@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { z } from "zod";
-import { PermissionKey, UserRole, Prisma } from "@prisma/client";
+import { PermissionKey, UserRole, Prisma, UnitType } from "@prisma/client";
 
 import { prisma } from "../lib/prisma";
 import { requireAuth, requirePermission, requireRole } from "../middleware/auth";
@@ -265,7 +265,7 @@ adminRouter.patch(
       name: z.string().optional(),
       description: z.string().optional(),
       price: z.number().optional(),
-      unit: z.string().optional(),
+      unit: z.nativeEnum(UnitType).optional(),
       available: z.boolean().optional(),
     });
 

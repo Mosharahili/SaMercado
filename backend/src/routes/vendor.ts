@@ -42,7 +42,7 @@ vendorRouter.get(
         order: true,
         product: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { order: { createdAt: "desc" } },
       take: 10,
     });
 
@@ -156,7 +156,7 @@ vendorRouter.get(
         },
         product: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy: { order: { createdAt: "desc" } },
     });
 
     res.json(items);
