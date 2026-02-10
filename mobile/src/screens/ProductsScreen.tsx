@@ -169,6 +169,11 @@ export const ProductsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>المنتجات</Text>
+        <Text style={styles.headerSubtitle}>اكتشف مجموعة واسعة من المنتجات الطازجة</Text>
+      </View>
+
       <View style={styles.filtersContainer}>
         <View style={styles.searchRow}>
           <TextInput
@@ -429,6 +434,24 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  header: {
+    padding: 20,
+    backgroundColor: "#ffffff",
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    textAlign: "right",
+    color: theme.colors.text,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: theme.colors.muted,
+    textAlign: "right",
+    marginTop: 4,
   },
   loadingContainer: {
     flex: 1,

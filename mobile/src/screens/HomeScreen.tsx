@@ -49,15 +49,16 @@ export const HomeScreen: React.FC = () => {
           start={{ x: 0, y: 0 }}
           end={{ x: 1, y: 1 }}
         >
-          <Text style={styles.heroTitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
-          <Text style={styles.heroSubtitle}>أسواق الرياض بين يديك بجودة مضمونة وتوصيل سريع</Text>
-          <TouchableOpacity style={styles.heroButton}>
-            <Text style={styles.heroButtonText}>تصفح الأسواق</Text>
-          </TouchableOpacity>
-          <View style={styles.featuresRow}>
-            <FeaturePill label="جودة مضمونة" />
-            <FeaturePill label="توصيل سريع" />
-            <FeaturePill label="طازج يوميًا" />
+          <View style={styles.heroContent}>
+            <Text style={styles.heroTitle}>اطلب خضارك وفواكهك</Text>
+            <Text style={styles.heroSubtitle}>مباشرة من أسواق الرياض</Text>
+            <Text style={styles.heroDescription}>جودة مضمونة • توصيل سريع • طازج يوميًا</Text>
+            <TouchableOpacity style={styles.heroButton}>
+              <Text style={styles.heroButtonText}>تصفح الأسواق</Text>
+            </TouchableOpacity>
+          </View>
+          <View style={styles.heroImagePlaceholder}>
+            <Text style={styles.heroImageText}>🛒</Text>
           </View>
         </LinearGradient>
 
@@ -72,7 +73,7 @@ export const HomeScreen: React.FC = () => {
           />
         ))}
 
-        <Text style={styles.sectionTitle}>الأسواق المميزة</Text>
+        <Text style={styles.sectionTitle}>الأسواق</Text>
         <FlatList
           horizontal
           data={featuredMarkets}
@@ -137,40 +138,67 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   hero: {
-    paddingTop: 56,
-    paddingBottom: 24,
-    paddingHorizontal: 16,
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    paddingTop: 60,
+    paddingBottom: 40,
+    paddingHorizontal: 20,
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
+    minHeight: 250,
+  },
+  heroContent: {
+    flex: 1,
+    justifyContent: "center",
   },
   heroTitle: {
     color: "#ffffff",
-    fontSize: 22,
+    fontSize: 28,
     fontWeight: "800",
     textAlign: "right",
+    marginBottom: 8,
   },
   heroSubtitle: {
-    marginTop: 8,
-    color: "#e5e7eb",
-    fontSize: 13,
+    color: "#ffffff",
+    fontSize: 18,
+    fontWeight: "600",
     textAlign: "right",
+    marginBottom: 8,
+  },
+  heroDescription: {
+    color: "#e5e7eb",
+    fontSize: 14,
+    textAlign: "right",
+    marginBottom: 20,
   },
   heroButton: {
-    marginTop: 16,
     alignSelf: "flex-start",
     backgroundColor: "#ffffff",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 25,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
   heroButtonText: {
     color: theme.colors.primary,
     fontWeight: "700",
-    fontSize: 14,
+    fontSize: 16,
   },
-  featuresRow: {
-    flexDirection: "row-reverse",
-    marginTop: 20,
+  heroImagePlaceholder: {
+    position: "absolute",
+    top: 40,
+    left: 20,
+    width: 80,
+    height: 80,
+    backgroundColor: "rgba(255,255,255,0.2)",
+    borderRadius: 40,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  heroImageText: {
+    fontSize: 40,
   },
   featurePill: {
     backgroundColor: "rgba(255,255,255,0.2)",
@@ -185,40 +213,42 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   sectionTitle: {
-    marginTop: 16,
-    marginHorizontal: 16,
-    fontSize: 18,
+    marginTop: 32,
+    marginHorizontal: 20,
+    fontSize: 20,
     fontWeight: "700",
     textAlign: "right",
     color: theme.colors.text,
+    marginBottom: 16,
   },
   marketsList: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingBottom: 20,
   },
   marketCard: {
-    width: 160,
-    backgroundColor: theme.colors.surface,
-    borderRadius: 12,
-    marginRight: 12,
+    width: 220,
+    backgroundColor: "#ffffff",
+    borderRadius: 16,
+    marginRight: 16,
     shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
+    shadowRadius: 8,
+    elevation: 6,
+    overflow: "hidden",
   },
   marketImage: {
     width: "100%",
-    height: 100,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    height: 120,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
   },
   marketImagePlaceholder: {
     width: "100%",
-    height: 100,
+    height: 120,
     backgroundColor: theme.colors.primarySoft,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -228,7 +258,7 @@ const styles = StyleSheet.create({
     color: "#ffffff",
   },
   marketContent: {
-    padding: 12,
+    padding: 16,
   },
   marketName: {
     fontSize: 14,
