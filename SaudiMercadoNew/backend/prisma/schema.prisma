@@ -1,0 +1,337 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Core user and roles
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  passwordHash String
+  name         String
+  phone        String?
+  role         UserRole     @default(CUSTOMER)
+  permissions  Permission[] // granular admin permissions
+
+  vendor       Vendor?
+  adminProfile Admin?
+
+  pushToken String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  orders          Order[]
+  cartItems       CartItem[]
+  notifications   Notification[]
+  analyticsEvents AnalyticsEvent[]
+}
+
+model Permission {
+  id     String        @id @default(cuid())
+  key    PermissionKey
+  user   User          @relation(fields: [userId], references: [id])
+  userId String
+
+  createdAt DateTime @default(now())
+}
+
+model Admin {
+  id     String @id @default(cuid())
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @unique
+  // extra admin metadata if needed
+}
+
+model Vendor {
+  id          String  @id @default(cuid())
+  user        User    @relation(fields: [userId], references: [id])
+  userId      String  @unique
+  displayName String
+  description String?
+
+  markets  MarketVendor[]
+  products Product[]
+  orders   OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Market {
+  id            String  @id @default(cuid())
+  name          String
+  region        String
+  description   String?
+  imageUrl      String?
+  vendorCount   Int     @default(0)
+  operatingFrom String?
+  operatingTo   String?
+  priceRange    String?
+
+  marketVendors MarketVendor[]
+  products      Product[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MarketVendor {
+  id       String @id @default(cuid())
+  market   Market @relation(fields: [marketId], references: [id])
+  marketId String
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  vendorId String
+}
+
+enum CategoryType {
+  VEGETABLE
+  FRUIT
+  DATES
+}
+
+model Category {
+  id       String       @id @default(cuid())
+  name     String
+  type     CategoryType
+  products Product[]
+}
+
+enum UnitType {
+  KILO
+  BUNDLE
+  BOX
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  price       Decimal  @db.Decimal(10, 2)
+  unit        UnitType
+  available   Boolean  @default(true)
+
+  market   Market @relation(fields: [marketId], references: [id])
+  marketId String
+
+  vendor   Vendor @relation(fields: [vendorId], references: [id])
+  vendorId String
+
+  category   Category? @relation(fields: [categoryId], references: [id])
+  categoryId String?
+
+  orderItems OrderItem[]
+  cartItems  CartItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  quantity  Int     @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  NEW
+  PROCESSING
+  PREPARING
+  READY_FOR_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  STC_PAY
+  MADA
+  APPLE_PAY
+  CASH_ON_DELIVERY
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  user        User        @relation(fields: [userId], references: [id])
+  userId      String
+  status      OrderStatus @default(NEW)
+  items       OrderItem[]
+  payment     Payment?
+  deliveryFee Decimal     @db.Decimal(10, 2)
+  subtotal    Decimal     @db.Decimal(10, 2)
+  taxAmount   Decimal     @db.Decimal(10, 2)
+  total       Decimal     @db.Decimal(10, 2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  order     Order   @relation(fields: [orderId], references: [id])
+  orderId   String
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+  vendor    Vendor  @relation(fields: [vendorId], references: [id])
+  vendorId  String
+  quantity  Int
+  unitPrice Decimal @db.Decimal(10, 2)
+  lineTotal Decimal @db.Decimal(10, 2)
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  order         Order         @relation(fields: [orderId], references: [id])
+  orderId       String        @unique
+  method        PaymentMethod
+  status        PaymentStatus @default(PENDING)
+  provider      String?
+  transactionId String?
+  rawResponse   Json?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum BannerPlacement {
+  HOME_HERO
+  HOME_MID
+  PRODUCT_TOP
+  PRODUCT_INLINE
+}
+
+enum BannerClickActionType {
+  PRODUCT
+  MARKET
+  CATEGORY
+  EXTERNAL_LINK
+  NONE
+}
+
+model Banner {
+  id             String                @id @default(cuid())
+  title          String
+  description    String?
+  imageUrl       String
+  ctaText        String?
+  placement      BannerPlacement
+  actionType     BannerClickActionType @default(NONE)
+  actionTargetId String?
+  externalUrl    String?
+  startAt        DateTime?
+  endAt          DateTime?
+  enabled        Boolean               @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum PopupTargetType {
+  ALL_USERS
+  LOGGED_IN
+  NEW_USERS
+  SPECIFIC_MARKETS
+  SPECIFIC_CATEGORIES
+}
+
+model Popup {
+  id               String          @id @default(cuid())
+  title            String
+  message          String?
+  imageUrl         String?
+  primaryCtaText   String?
+  secondaryCtaText String?
+  targetType       PopupTargetType
+  marketIds        String[] // list of Market IDs when SPECIFIC_MARKETS
+  categoryIds      String[] // list of Category IDs when SPECIFIC_CATEGORIES
+  startAt          DateTime?
+  endAt            DateTime?
+  enabled          Boolean         @default(true)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notification {
+  id        String    @id @default(cuid())
+  user      User?     @relation(fields: [userId], references: [id])
+  userId    String?
+  title     String
+  body      String
+  data      Json?
+  sentAt    DateTime?
+  createdAt DateTime  @default(now())
+}
+
+enum AnalyticsEventType {
+  PRODUCT_VIEW
+  ADD_TO_CART
+  CHECKOUT_START
+  ORDER_COMPLETED
+  CART_ABANDONED
+}
+
+model AnalyticsEvent {
+  id        String             @id @default(cuid())
+  user      User?              @relation(fields: [userId], references: [id])
+  userId    String?
+  type      AnalyticsEventType
+  marketId  String?
+  vendorId  String?
+  productId String?
+  metadata  Json?
+  createdAt DateTime           @default(now())
+}
+
+model AppSettings {
+  id             String  @id @default("app_settings_singleton")
+  appName        String  @default("Saudi Mercado – سعودي ميركادو")
+  primaryColor   String  @default("#16a34a")
+  secondaryColor String  @default("#22c55e")
+  logoUrl        String?
+
+  deliveryFee Decimal @default(0.00) @db.Decimal(10, 2)
+  taxRate     Decimal @default(0.00) @db.Decimal(5, 2) // percentage
+
+  stcPayConfig   Json?
+  madaConfig     Json?
+  applePayConfig Json?
+
+  notificationConfig Json?
+}
+
+enum UserRole {
+  CUSTOMER
+  VENDOR
+  ADMIN
+  OWNER
+}
+
+enum PermissionKey {
+  MANAGE_BANNERS
+  MANAGE_POPUPS
+  MANAGE_MARKETS
+  MANAGE_VENDORS
+  MANAGE_PRODUCTS
+  VIEW_ANALYTICS
+  MANAGE_ORDERS
+  MANAGE_USERS
+  MANAGE_PAYMENTS
+}
