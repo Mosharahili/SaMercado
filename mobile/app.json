@@ -12,11 +12,13 @@
       "resizeMode": "contain",
       "backgroundColor": "#0f172a"
     },
-    "android": {
-      "package": "com.saudimercado.app"
-    },
     "ios": {
-      "bundleIdentifier": "com.saudimercado.app"
+      "bundleIdentifier": "com.saudimercado.app",
+      "newArchEnabled": false
+    },
+    "android": {
+      "package": "com.saudimercado.app",
+      "newArchEnabled": false
     },
     "extra": {
       "eas": {
