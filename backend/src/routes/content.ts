@@ -75,6 +75,34 @@ contentRouter.get("/popups", optionalAuth, async (req, res) => {
   res.json(filtered);
 });
 
+// Owner/Admin: list all banners for management
+contentRouter.get(
+  "/admin/banners",
+  requireAuth,
+  requireRole(UserRole.ADMIN, UserRole.OWNER),
+  requirePermission(PermissionKey.MANAGE_BANNERS),
+  async (req, res) => {
+    const banners = await prisma.banner.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(banners);
+  }
+);
+
+// Owner/Admin: list all popups for management
+contentRouter.get(
+  "/admin/popups",
+  requireAuth,
+  requireRole(UserRole.ADMIN, UserRole.OWNER),
+  requirePermission(PermissionKey.MANAGE_POPUPS),
+  async (req, res) => {
+    const popups = await prisma.popup.findMany({
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(popups);
+  }
+);
+
 // Owner/Admin: manage banners
 contentRouter.post(
   "/banners",
@@ -180,6 +208,23 @@ contentRouter.post(
   }
 );
 
+contentRouter.delete(
+  "/banners/:id",
+  requireAuth,
+  requireRole(UserRole.ADMIN, UserRole.OWNER),
+  requirePermission(PermissionKey.MANAGE_BANNERS),
+  async (req, res) => {
+    const paramsSchema = z.object({ id: z.string() });
+    const { id } = paramsSchema.parse(req.params);
+
+    await prisma.banner.delete({
+      where: { id },
+    });
+
+    res.json({ success: true });
+  }
+);
+
 // Owner/Admin: manage popups
 contentRouter.post(
   "/popups",
@@ -259,6 +304,46 @@ contentRouter.patch(
     });
 
     res.json(popup);
+  }
+);
+
+contentRouter.post(
+  "/popups/:id/toggle",
+  requireAuth,
+  requireRole(UserRole.ADMIN, UserRole.OWNER),
+  requirePermission(PermissionKey.MANAGE_POPUPS),
+  async (req, res) => {
+    const paramsSchema = z.object({ id: z.string() });
+    const { id } = paramsSchema.parse(req.params);
+
+    const current = await prisma.popup.findUnique({ where: { id } });
+    if (!current) {
+      return res.status(404).json({ error: "النافذة المنبثقة غير موجودة" });
+    }
+
+    const popup = await prisma.popup.update({
+      where: { id },
+      data: { enabled: !current.enabled },
+    });
+
+    res.json(popup);
+  }
+);
+
+contentRouter.delete(
+  "/popups/:id",
+  requireAuth,
+  requireRole(UserRole.ADMIN, UserRole.OWNER),
+  requirePermission(PermissionKey.MANAGE_POPUPS),
+  async (req, res) => {
+    const paramsSchema = z.object({ id: z.string() });
+    const { id } = paramsSchema.parse(req.params);
+
+    await prisma.popup.delete({
+      where: { id },
+    });
+
+    res.json({ success: true });
   }
 );
 

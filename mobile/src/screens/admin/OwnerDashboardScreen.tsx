@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { StyleSheet, Text, TouchableOpacity, View, ScrollView } from "react-native";
 import type { NativeStackScreenProps } from "@react-navigation/native-stack";
 
 import { theme } from "@theme/theme";
@@ -12,27 +12,90 @@ export const OwnerDashboardScreen: React.FC<Props> = ({ navigation }) => {
   const { logout } = useAuth();
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>لوحة تحكم المالك</Text>
-      <View style={styles.grid}>
-        <DashboardTile label="البنرات" onPress={() => navigation.navigate("Banners")} />
-        <DashboardTile label="النوافذ المنبثقة" onPress={() => navigation.navigate("Popups")} />
-        <DashboardTile label="الأسواق" onPress={() => navigation.navigate("Markets")} />
-        <DashboardTile label="البائعون" onPress={() => navigation.navigate("Vendors")} />
-        <DashboardTile label="المنتجات" onPress={() => navigation.navigate("Products")} />
-        <DashboardTile label="الطلبات" onPress={() => navigation.navigate("Orders")} />
-        <DashboardTile label="التحليلات" onPress={() => navigation.navigate("Analytics")} />
-        <DashboardTile label="الإعدادات" onPress={() => navigation.navigate("Settings")} />
-        <DashboardTile label="المدراء" onPress={() => navigation.navigate("Admins")} />
-        <DashboardTile label="تسجيل الخروج" onPress={() => void logout()} />
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+      <View style={styles.header}>
+        <Text style={styles.title}>لوحة تحكم المالك</Text>
+        <Text style={styles.subtitle}>إدارة شاملة للمنصة والمستخدمين</Text>
       </View>
-    </View>
+
+      <View style={styles.grid}>
+        <DashboardCard
+          title="البنرات"
+          subtitle="إدارة الإعلانات والعروض"
+          icon="📢"
+          onPress={() => navigation.navigate("Banners")}
+        />
+        <DashboardCard
+          title="النوافذ المنبثقة"
+          subtitle="الرسائل المستهدفة"
+          icon="💬"
+          onPress={() => navigation.navigate("Popups")}
+        />
+        <DashboardCard
+          title="الأسواق"
+          subtitle="إدارة الأسواق والمناطق"
+          icon="🏪"
+          onPress={() => navigation.navigate("Markets")}
+        />
+        <DashboardCard
+          title="البائعون"
+          subtitle="إدارة حسابات البائعين"
+          icon="👥"
+          onPress={() => navigation.navigate("Vendors")}
+        />
+        <DashboardCard
+          title="المنتجات"
+          subtitle="مراجعة وإدارة المنتجات"
+          icon="📦"
+          onPress={() => navigation.navigate("Products")}
+        />
+        <DashboardCard
+          title="الطلبات"
+          subtitle="مراقبة وإدارة الطلبات"
+          icon="📋"
+          onPress={() => navigation.navigate("Orders")}
+        />
+        <DashboardCard
+          title="التحليلات"
+          subtitle="التقارير والإحصائيات"
+          icon="📊"
+          onPress={() => navigation.navigate("Analytics")}
+        />
+        <DashboardCard
+          title="الإعدادات"
+          subtitle="إعدادات النظام"
+          icon="⚙️"
+          onPress={() => navigation.navigate("Settings")}
+        />
+        <DashboardCard
+          title="المدراء"
+          subtitle="إدارة صلاحيات المدراء"
+          icon="👑"
+          onPress={() => navigation.navigate("Admins")}
+        />
+      </View>
+
+      <TouchableOpacity style={styles.logoutBtn} onPress={() => void logout()}>
+        <Text style={styles.logoutText}>تسجيل الخروج</Text>
+      </TouchableOpacity>
+    </ScrollView>
   );
 };
 
-const DashboardTile: React.FC<{ label: string; onPress: () => void }> = ({ label, onPress }) => (
-  <TouchableOpacity style={styles.tile} onPress={onPress}>
-    <Text style={styles.tileText}>{label}</Text>
+const DashboardCard: React.FC<{
+  title: string;
+  subtitle: string;
+  icon: string;
+  onPress: () => void;
+}> = ({ title, subtitle, icon, onPress }) => (
+  <TouchableOpacity style={styles.card} onPress={onPress}>
+    <View style={styles.cardContent}>
+      <Text style={styles.cardIcon}>{icon}</Text>
+      <View style={styles.cardText}>
+        <Text style={styles.cardTitle}>{title}</Text>
+        <Text style={styles.cardSubtitle}>{subtitle}</Text>
+      </View>
+    </View>
   </TouchableOpacity>
 );
 
@@ -40,29 +103,76 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: theme.colors.background,
+  },
+  contentContainer: {
     padding: 16,
+    paddingBottom: 32,
+  },
+  header: {
+    marginBottom: 24,
   },
   title: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: "700",
     textAlign: "right",
-    marginBottom: 16,
+    color: theme.colors.text,
+    marginBottom: 4,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: theme.colors.muted,
+    textAlign: "right",
   },
   grid: {
     flexDirection: "row-reverse",
     flexWrap: "wrap",
+    gap: 12,
   },
-  tile: {
-    width: "46%",
+  card: {
+    width: "48%",
     backgroundColor: "#ffffff",
-    borderRadius: 12,
+    borderRadius: 16,
     padding: 16,
-    margin: 4,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 4,
+    marginBottom: 12,
   },
-  tileText: {
-    textAlign: "right",
+  cardContent: {
+    alignItems: "center",
+  },
+  cardIcon: {
+    fontSize: 32,
+    marginBottom: 8,
+  },
+  cardText: {
+    alignItems: "center",
+  },
+  cardTitle: {
+    fontSize: 14,
     fontWeight: "600",
+    textAlign: "center",
     color: theme.colors.text,
+    marginBottom: 2,
+  },
+  cardSubtitle: {
+    fontSize: 12,
+    color: theme.colors.muted,
+    textAlign: "center",
+  },
+  logoutBtn: {
+    backgroundColor: "#ef4444",
+    padding: 16,
+    borderRadius: 12,
+    alignItems: "center",
+    marginTop: 24,
+  },
+  logoutText: {
+    color: "#ffffff",
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
 

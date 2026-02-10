@@ -3,6 +3,18 @@ import { api, setToken, getToken, removeToken } from "@api/client";
 
 type Role = "CUSTOMER" | "VENDOR" | "ADMIN" | "OWNER";
 
+export type PermissionKey =
+  | "MANAGE_BANNERS"
+  | "MANAGE_POPUPS"
+  | "MANAGE_MARKETS"
+  | "MANAGE_VENDORS"
+  | "MANAGE_PRODUCTS"
+  | "VIEW_ANALYTICS"
+  | "MANAGE_ORDERS"
+  | "MANAGE_USERS"
+  | "MANAGE_PAYMENTS"
+  | "SEND_NOTIFICATIONS";
+
 export interface AuthUser {
   id: string;
   name: string;

@@ -9,6 +9,7 @@ export const theme = {
     muted: "#6b7280",
     text: "#111827",
     danger: "#ef4444",
+    error: "#dc2626",
     border: "#e5e7eb"
   },
   spacing: (factor: number) => factor * 8

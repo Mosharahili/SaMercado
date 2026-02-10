@@ -5,7 +5,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import { theme } from "@theme/theme";
 import { BoosterBannerSlot } from "@components/BoosterBannerSlot";
 import { PopupModal } from "@components/PopupModal";
-import { api } from "@api/client";
+import { api, BannerDto, PopupDto } from "@api/client";
 
 interface Market {
   id: string;

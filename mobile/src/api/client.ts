@@ -34,3 +34,34 @@ export const removeToken = async () => {
   }
 })();
 
+// API Types
+export interface BannerDto {
+  id: string;
+  title: string;
+  description: string | null;
+  imageUrl: string;
+  placement: string;
+  enabled: boolean;
+  ctaText?: string | null;
+  actionType?: string;
+  actionTargetId?: string | null;
+  externalUrl?: string | null;
+  startAt?: string | null;
+  endAt?: string | null;
+}
+
+export interface PopupDto {
+  id: string;
+  title: string;
+  message: string | null;
+  imageUrl: string | null;
+  targetType: string;
+  enabled: boolean;
+  primaryCtaText?: string | null;
+  secondaryCtaText?: string | null;
+  marketIds?: string[];
+  categoryIds?: string[];
+  startAt?: string | null;
+  endAt?: string | null;
+}
+

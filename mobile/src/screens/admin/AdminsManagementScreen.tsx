@@ -51,6 +51,7 @@ export const AdminsManagementScreen: React.FC = () => {
 
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedPermissions, setSelectedPermissions] = useState<PermissionKey[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const isOwner = user?.role === "OWNER";
 
@@ -157,11 +158,23 @@ export const AdminsManagementScreen: React.FC = () => {
           />
 
           <Text style={styles.sectionTitle}>المستخدمون</Text>
+          <TextInput
+            style={styles.searchInput}
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="البحث بالبريد الإلكتروني..."
+            placeholderTextColor={theme.colors.muted}
+          />
           <FlatList
-            data={users}
+            data={users.filter(user =>
+              user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              user.name.toLowerCase().includes(searchQuery.toLowerCase())
+            )}
             keyExtractor={(u) => u.id}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>لا توجد حسابات مستخدمين.</Text>
+              <Text style={styles.emptyText}>
+                {searchQuery ? "لا توجد نتائج للبحث." : "لا توجد حسابات مستخدمين."}
+              </Text>
             }
             renderItem={({ item }) => (
               <TouchableOpacity
@@ -263,6 +276,16 @@ const styles = StyleSheet.create({
     textAlign: "right",
     marginBottom: 4,
     marginTop: 8,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: "#d1d5db",
+    borderRadius: 8,
+    padding: 8,
+    fontSize: 14,
+    textAlign: "right",
+    backgroundColor: "#ffffff",
+    marginBottom: 8,
   },
   emptyText: {
     fontSize: 12,
