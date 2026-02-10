@@ -1,51 +1,49 @@
-import React from "react";
-import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { useNavigation } from "@react-navigation/native";
+import React from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+} from 'react-native';
+import { useAuth } from '@hooks/useAuth';
+import { theme } from '@theme/theme';
 
-import { useAuth } from "@hooks/useAuth";
-import { theme } from "@theme/theme";
-
-import type { RootStackParamList } from "@navigation/RootNavigator";
-import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-
-type Nav = NativeStackNavigationProp<RootStackParamList>;
-
-export const AccountScreen: React.FC = () => {
+export const AccountScreen = () => {
   const { user, logout } = useAuth();
-  const navigation = useNavigation<Nav>();
+
+  const handleLogout = () => {
+    logout();
+  };
 
   return (
     <View style={styles.container}>
-      {user ? (
-        <>
-          <Text style={styles.name}>{user.name}</Text>
-          <Text style={styles.role}>الدور: {user.role}</Text>
+      <View style={styles.profileSection}>
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.avatar}
+        />
+        <Text style={styles.userName}>{user?.name || 'المستخدم'}</Text>
+        <Text style={styles.userEmail}>{user?.email}</Text>
+      </View>
 
-          {(user.role === "ADMIN" || user.role === "OWNER") && (
-            <TouchableOpacity
-              style={styles.dashboardBtn}
-              onPress={() => navigation.navigate("Admin")}
-            >
-              <Text style={styles.dashboardText}>فتح لوحة تحكم المالك / الأدمن</Text>
-            </TouchableOpacity>
-          )}
-
-          {(user.role === "VENDOR" || user.role === "OWNER") && (
-            <TouchableOpacity
-              style={styles.dashboardBtn}
-              onPress={() => navigation.navigate("Vendor")}
-            >
-              <Text style={styles.dashboardText}>فتح لوحة تحكم البائع</Text>
-            </TouchableOpacity>
-          )}
-        </>
-      ) : (
-        <Text style={styles.name}>ضيف غير مسجل</Text>
-      )}
-
-      <TouchableOpacity style={styles.logoutBtn} onPress={() => void logout()}>
-        <Text style={styles.logoutText}>{user ? "تسجيل الخروج" : "تسجيل الدخول"}</Text>
-      </TouchableOpacity>
+      <View style={styles.menuSection}>
+        <TouchableOpacity style={styles.menuItem}>
+          <Text style={styles.menuItemText}>طلباتي</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem}>
+          <Text style={styles.menuItemText}>المفضلة</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem}>
+          <Text style={styles.menuItemText}>إعدادات الحساب</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem}>
+          <Text style={styles.menuItemText}>المساعدة</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
+          <Text style={[styles.menuItemText, styles.logoutText]}>تسجيل الخروج</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -53,44 +51,45 @@ export const AccountScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
     backgroundColor: theme.colors.background,
   },
-  name: {
-    fontSize: 20,
-    fontWeight: "700",
+  profileSection: {
+    backgroundColor: theme.colors.surface,
+    padding: theme.spacing.xl,
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
+  },
+  avatar: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    marginBottom: theme.spacing.md,
+  },
+  userName: {
+    fontSize: theme.typography.fontSize.xl,
+    fontWeight: theme.typography.fontWeight.bold,
     color: theme.colors.text,
-    marginBottom: 8,
+    marginBottom: theme.spacing.xs,
   },
-  role: {
-    fontSize: 14,
-    color: theme.colors.muted,
-    marginBottom: 16,
+  userEmail: {
+    fontSize: theme.typography.fontSize.md,
+    color: theme.colors.textSecondary,
   },
-  logoutBtn: {
-    marginTop: 12,
-    backgroundColor: theme.colors.primary,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999,
+  menuSection: {
+    backgroundColor: theme.colors.surface,
+    margin: theme.spacing.md,
+    borderRadius: theme.borderRadius.md,
+  },
+  menuItem: {
+    padding: theme.spacing.lg,
+    borderBottomWidth: 1,
+    borderBottomColor: theme.colors.border,
+  },
+  menuItemText: {
+    fontSize: theme.typography.fontSize.md,
+    color: theme.colors.text,
   },
   logoutText: {
-    color: "#ffffff",
-    fontWeight: "600",
-  },
-  dashboardBtn: {
-    marginTop: 12,
-    backgroundColor: theme.colors.surface,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-  },
-  dashboardText: {
-    color: theme.colors.primary,
-    fontWeight: "600",
+    color: theme.colors.error,
   },
 });
-
