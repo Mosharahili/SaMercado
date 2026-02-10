@@ -1,0 +1,15 @@
+.DS_Store
+
+# Node
+**/node_modules/
+**/dist/
+
+# Env
+**/.env
+
+# Uploads
+backend/uploads/
+
+# Expo
+mobile/.expo/
+mobile/web-build/
