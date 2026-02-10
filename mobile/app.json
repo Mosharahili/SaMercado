@@ -22,7 +22,7 @@
       "eas": {
         "projectId": "saudi-mercado-placeholder"
       },
-      "apiBaseUrl": "http://localhost:4000/api"
+      "apiBaseUrl": "https://samercado.onrender.com/api"
     },
     "plugins": [
       "expo-asset"
