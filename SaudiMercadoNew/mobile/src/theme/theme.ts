@@ -20,8 +20,8 @@ export const theme = {
     info: '#06b6d4',
   },
   gradients: {
-    primary: ['#16a34a', '#22c55e'],
-    secondary: ['#f59e0b', '#fbbf24'],
+    primary: ['#16a34a', '#22c55e'] as const,
+    secondary: ['#f59e0b', '#fbbf24'] as const,
   },
   spacing: {
     xs: 4,
@@ -49,10 +49,10 @@ export const theme = {
       xxxl: 32,
     },
     fontWeight: {
-      normal: '400',
-      medium: '500',
-      semibold: '600',
-      bold: '700',
+      normal: 'normal' as const,
+      medium: '500' as const,
+      semibold: '600' as const,
+      bold: 'bold' as const,
     },
   },
   dimensions: {

@@ -28,6 +28,19 @@ export const BoosterBannerSlot: React.FC<BoosterBannerSlotProps> = ({
 }) => {
   const filteredBanners = banners.filter(b => b.placement === placement);
 
+  const getImageHeight = (placement: Banner['placement']) => {
+    switch (placement) {
+      case 'HOME_HERO':
+        return 200;
+      case 'PRODUCT_INLINE':
+        return 150;
+      default:
+        return 180;
+    }
+  };
+
+  const imageHeight = getImageHeight(placement);
+
   if (filteredBanners.length === 0) return null;
 
   // For simplicity, show the first banner
@@ -40,7 +53,7 @@ export const BoosterBannerSlot: React.FC<BoosterBannerSlotProps> = ({
   return (
     <TouchableOpacity style={styles.container} onPress={handlePress}>
       <LinearGradient colors={theme.gradients.primary} style={styles.gradient}>
-        <Image source={{ uri: banner.imageUrl }} style={styles.image} />
+        <Image source={{ uri: banner.imageUrl }} style={[styles.image, { height: imageHeight }]} />
         <View style={styles.overlay}>
           <Text style={styles.title}>{banner.title}</Text>
           {banner.description && (
@@ -68,7 +81,6 @@ const styles = StyleSheet.create({
   },
   image: {
     width: '100%',
-    height: placement === 'HOME_HERO' ? 200 : placement === 'PRODUCT_INLINE' ? 150 : 180,
     resizeMode: 'cover',
   },
   overlay: {
