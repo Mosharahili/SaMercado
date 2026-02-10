@@ -5,6 +5,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  Alert,
 } from 'react-native';
 import { useAuth } from '@hooks/useAuth';
 import { theme } from '@theme/theme';
@@ -16,11 +17,27 @@ export const AccountScreen = () => {
     logout();
   };
 
+  const handleOrders = () => {
+    Alert.alert('طلباتي', 'سيتم إضافة هذه الميزة قريباً');
+  };
+
+  const handleFavorites = () => {
+    Alert.alert('المفضلة', 'سيتم إضافة هذه الميزة قريباً');
+  };
+
+  const handleSettings = () => {
+    Alert.alert('إعدادات الحساب', 'سيتم إضافة هذه الميزة قريباً');
+  };
+
+  const handleHelp = () => {
+    Alert.alert('المساعدة', 'للدعم، يرجى الاتصال بنا على support@samercado.com');
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.profileSection}>
         <Image
-          source={require('../../../assets/icon.png')}
+          source={require('../../assets/icon.png')}
           style={styles.avatar}
         />
         <Text style={styles.userName}>{user?.name || 'المستخدم'}</Text>
@@ -28,16 +45,16 @@ export const AccountScreen = () => {
       </View>
 
       <View style={styles.menuSection}>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleOrders}>
           <Text style={styles.menuItemText}>طلباتي</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleFavorites}>
           <Text style={styles.menuItemText}>المفضلة</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleSettings}>
           <Text style={styles.menuItemText}>إعدادات الحساب</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.menuItem}>
+        <TouchableOpacity style={styles.menuItem} onPress={handleHelp}>
           <Text style={styles.menuItemText}>المساعدة</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>

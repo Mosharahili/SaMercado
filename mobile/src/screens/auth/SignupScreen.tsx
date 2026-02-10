@@ -1,144 +1,143 @@
-import React, { useState } from "react";
-import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-import axios from "axios";
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  Image,
+} from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { useAuth } from '@hooks/useAuth';
+import { theme } from '@theme/theme';
+import { AuthStackParamList } from '@navigation/stacks/AuthStack';
 
-import { api } from "@api/client";
-import { useAuth } from "@hooks/useAuth";
-import { theme } from "@theme/theme";
-import type { NativeStackScreenProps } from "@react-navigation/native-stack";
-import type { AuthStackParamList } from "@navigation/stacks/AuthStack";
+type SignupScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, 'Signup'>;
 
-type Props = NativeStackScreenProps<AuthStackParamList, "Signup">;
+export const SignupScreen = () => {
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const { register } = useAuth();
+  const navigation = useNavigation<SignupScreenNavigationProp>();
 
-export const SignupScreen: React.FC<Props> = ({ navigation }) => {
-  const { login } = useAuth();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-
-  const onSignup = async () => {
-    if (!name || !email || !password) {
-      Alert.alert("خطأ", "الرجاء إدخال الاسم والبريد الإلكتروني وكلمة المرور");
-      return;
-    }
-    if (password.length < 6) {
-      Alert.alert("خطأ", "يجب أن تكون كلمة المرور 6 أحرف على الأقل");
-      return;
-    }
-
+  const handleSignup = async () => {
     try {
-      setSubmitting(true);
-      const res = await api.post("/auth/signup", { name, email, password });
-      await login({
-        id: res.data.user.id,
-        name: res.data.user.name,
-        role: res.data.user.role,
-        token: res.data.token,
-        permissions: res.data.user.permissions,
-        vendorId: res.data.user.vendorId,
-      });
-    } catch (err) {
-      if (axios.isAxiosError(err)) {
-        const data = err.response?.data as any;
-        const message =
-          (data && (data.message || data.error)) ||
-          (typeof data === "string" ? data : undefined) ||
-          "تعذّر إنشاء الحساب، حاول مرة أخرى";
-        Alert.alert("خطأ", message);
-      } else {
-        Alert.alert("خطأ", "حدث خطأ غير متوقع، حاول مرة أخرى");
-      }
-    } finally {
-      setSubmitting(false);
+      await register(email, password, name);
+    } catch (error) {
+      Alert.alert('خطأ', 'فشل التسجيل');
     }
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-    >
-      <View style={styles.card}>
-        <Text style={styles.title}>إنشاء حساب</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="الاسم الكامل"
-          placeholderTextColor="#9ca3af"
-          value={name}
-          onChangeText={setName}
+    <LinearGradient colors={theme.gradients.primary} style={styles.container}>
+      <View style={styles.content}>
+        <Image
+          source={require('../../assets/icon.png')}
+          style={styles.logo}
         />
-        <TextInput
-          style={styles.input}
-          placeholder="البريد الإلكتروني"
-          placeholderTextColor="#9ca3af"
-          keyboardType="email-address"
-          autoCapitalize="none"
-          value={email}
-          onChangeText={setEmail}
-        />
-        <TextInput
-          style={styles.input}
-          placeholder="كلمة المرور"
-          placeholderTextColor="#9ca3af"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        />
-        <TouchableOpacity style={styles.button} onPress={onSignup} disabled={submitting}>
-          <Text style={styles.buttonText}>{submitting ? "جاري التسجيل..." : "تسجيل"}</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-          <Text style={styles.linkText}>لديك حساب؟ تسجيل الدخول</Text>
-        </TouchableOpacity>
+        <Text style={styles.title}>سعودي ميركادو</Text>
+        <Text style={styles.subtitle}>انضم إلينا اليوم</Text>
+
+        <View style={styles.form}>
+          <TextInput
+            style={styles.input}
+            placeholder="الاسم الكامل"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="البريد الإلكتروني"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="كلمة المرور"
+            value={password}
+            onChangeText={setPassword}
+            secureTextEntry
+          />
+
+          <TouchableOpacity style={styles.button} onPress={handleSignup}>
+            <Text style={styles.buttonText}>إنشاء حساب</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.link}
+            onPress={() => navigation.navigate('Login')}
+          >
+            <Text style={styles.linkText}>لديك حساب؟ سجل الدخول</Text>
+          </TouchableOpacity>
+        </View>
       </View>
-    </KeyboardAvoidingView>
+    </LinearGradient>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: theme.colors.background,
   },
-  card: {
-    width: "85%",
-    backgroundColor: "#ffffff",
-    borderRadius: 16,
-    padding: 24,
+  content: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: theme.spacing.lg,
+  },
+  logo: {
+    width: 100,
+    height: 100,
+    marginBottom: theme.spacing.md,
   },
   title: {
-    fontSize: 20,
-    fontWeight: "700",
-    textAlign: "right",
-    marginBottom: 16,
+    fontSize: theme.typography.fontSize.xxxl,
+    fontWeight: theme.typography.fontWeight.bold,
+    color: 'white',
+    marginBottom: theme.spacing.sm,
+  },
+  subtitle: {
+    fontSize: theme.typography.fontSize.md,
+    color: 'white',
+    textAlign: 'center',
+    marginBottom: theme.spacing.xl,
+  },
+  form: {
+    width: '100%',
+    maxWidth: 400,
   },
   input: {
-    borderWidth: 1,
-    borderColor: theme.colors.border,
-    borderRadius: 999,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginBottom: 12,
-    textAlign: "right",
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    fontSize: theme.typography.fontSize.md,
+    textAlign: 'right',
   },
   button: {
-    backgroundColor: theme.colors.primary,
-    paddingVertical: 12,
-    borderRadius: 999,
-    alignItems: "center",
-    marginTop: 4,
+    backgroundColor: 'white',
+    borderRadius: theme.borderRadius.md,
+    padding: theme.spacing.md,
+    alignItems: 'center',
+    marginBottom: theme.spacing.md,
   },
   buttonText: {
-    color: "#ffffff",
-    fontWeight: "700",
+    color: theme.colors.primary,
+    fontSize: theme.typography.fontSize.lg,
+    fontWeight: theme.typography.fontWeight.semibold,
+  },
+  link: {
+    alignItems: 'center',
   },
   linkText: {
-    marginTop: 12,
-    textAlign: "center",
-    color: theme.colors.muted,
+    color: 'white',
+    fontSize: theme.typography.fontSize.md,
+    textDecorationLine: 'underline',
   },
 });
-

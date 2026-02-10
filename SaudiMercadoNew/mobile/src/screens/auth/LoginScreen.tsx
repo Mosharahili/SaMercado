@@ -35,7 +35,7 @@ export const LoginScreen = () => {
     <LinearGradient colors={theme.gradients.primary} style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../../../assets/icon.png')}
+          source={require('../../assets/icon.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>سعودي ميركادو</Text>

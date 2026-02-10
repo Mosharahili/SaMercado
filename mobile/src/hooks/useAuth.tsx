@@ -1,55 +1,103 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { api } from "@api/client";
+import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
+import * as SecureStore from 'expo-secure-store';
+import api from '../api/client';
 
-type Role = "CUSTOMER" | "VENDOR" | "ADMIN" | "OWNER";
-
-export interface AuthUser {
+interface User {
   id: string;
+  email: string;
   name: string;
-  role: Role;
-  token: string;
+  role: 'CUSTOMER' | 'VENDOR' | 'ADMIN' | 'OWNER';
+  permissions?: string[];
 }
 
-interface AuthContextValue {
-  user: AuthUser | null;
-  loading: boolean;
-  login: (user: AuthUser) => Promise<void>;
+interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  register: (email: string, password: string, name: string) => Promise<void>;
 }
 
-const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [user, setUser] = useState<AuthUser | null>(null);
-  const [loading, setLoading] = useState(true);
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // TODO: load from secure storage
-    setLoading(false);
+    checkAuthState();
   }, []);
 
-  const login = async (next: AuthUser) => {
-    setUser(next);
-    api.defaults.headers.common.Authorization = `Bearer ${next.token}`;
-    // TODO: persist token to secure storage
+  const checkAuthState = async () => {
+    try {
+      const token = await SecureStore.getItemAsync('authToken');
+      if (token) {
+        // Verify token with backend
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        await SecureStore.setItemAsync('userData', JSON.stringify(response.data.user));
+      }
+    } catch (error) {
+      console.error('Error checking auth state:', error);
+      // Token invalid, clear it
+      await SecureStore.deleteItemAsync('authToken');
+      await SecureStore.deleteItemAsync('userData');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const login = async (email: string, password: string) => {
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user: userData } = response.data;
+      
+      setUser(userData);
+      await SecureStore.setItemAsync('authToken', token);
+      await SecureStore.setItemAsync('userData', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    setUser(null);
-    delete api.defaults.headers.common.Authorization;
-    // TODO: clear secure storage
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      await SecureStore.deleteItemAsync('authToken');
+      await SecureStore.deleteItemAsync('userData');
+    }
+  };
+
+  const register = async (email: string, password: string, name: string) => {
+    try {
+      const response = await api.post('/auth/register', { email, password, name });
+      const { token, user: userData } = response.data;
+      
+      setUser(userData);
+      await SecureStore.setItemAsync('authToken', token);
+      await SecureStore.setItemAsync('userData', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>{children}</AuthContext.Provider>
+    <AuthContext.Provider value={{ user, isLoading, login, logout, register }}>
+      {children}
+    </AuthContext.Provider>
   );
 };
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth must be used within AuthProvider");
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
   }
-  return ctx;
-}
-
+  return context;
+};

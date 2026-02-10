@@ -1,5 +1,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import api from '../api/client';
 
 interface User {
   id: string;
@@ -30,49 +31,60 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkAuthState = async () => {
     try {
       const token = await SecureStore.getItemAsync('authToken');
-      const userData = await SecureStore.getItemAsync('userData');
-      if (token && userData) {
-        setUser(JSON.parse(userData));
+      if (token) {
+        // Verify token with backend
+        const response = await api.get('/auth/me');
+        setUser(response.data.user);
+        await SecureStore.setItemAsync('userData', JSON.stringify(response.data.user));
       }
     } catch (error) {
       console.error('Error checking auth state:', error);
+      // Token invalid, clear it
+      await SecureStore.deleteItemAsync('authToken');
+      await SecureStore.deleteItemAsync('userData');
     } finally {
       setIsLoading(false);
     }
   };
 
   const login = async (email: string, password: string) => {
-    // Implement login API call
-    // For now, mock
-    const mockUser: User = {
-      id: '1',
-      email,
-      name: 'User',
-      role: 'CUSTOMER',
-    };
-    setUser(mockUser);
-    await SecureStore.setItemAsync('authToken', 'mock-token');
-    await SecureStore.setItemAsync('userData', JSON.stringify(mockUser));
+    try {
+      const response = await api.post('/auth/login', { email, password });
+      const { token, user: userData } = response.data;
+      
+      setUser(userData);
+      await SecureStore.setItemAsync('authToken', token);
+      await SecureStore.setItemAsync('userData', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Login error:', error);
+      throw error;
+    }
   };
 
   const logout = async () => {
-    setUser(null);
-    await SecureStore.deleteItemAsync('authToken');
-    await SecureStore.deleteItemAsync('userData');
+    try {
+      await api.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      await SecureStore.deleteItemAsync('authToken');
+      await SecureStore.deleteItemAsync('userData');
+    }
   };
 
   const register = async (email: string, password: string, name: string) => {
-    // Implement register API call
-    // Mock
-    const mockUser: User = {
-      id: '1',
-      email,
-      name,
-      role: 'CUSTOMER',
-    };
-    setUser(mockUser);
-    await SecureStore.setItemAsync('authToken', 'mock-token');
-    await SecureStore.setItemAsync('userData', JSON.stringify(mockUser));
+    try {
+      const response = await api.post('/auth/register', { email, password, name });
+      const { token, user: userData } = response.data;
+      
+      setUser(userData);
+      await SecureStore.setItemAsync('authToken', token);
+      await SecureStore.setItemAsync('userData', JSON.stringify(userData));
+    } catch (error) {
+      console.error('Register error:', error);
+      throw error;
+    }
   };
 
   return (
