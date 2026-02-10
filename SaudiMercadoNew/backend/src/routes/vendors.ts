@@ -18,7 +18,7 @@ router.get('/', authenticate, authorize('ADMIN', 'OWNER'), checkPermission('MANA
     const vendors = await prisma.vendor.findMany({
       include: {
         user: { select: { email: true, name: true } },
-        marketVendors: {
+        markets: {
           include: {
             market: { select: { name: true } },
           },
@@ -39,7 +39,7 @@ router.get('/profile', authenticate, authorize('VENDOR'), async (req: any, res) 
     const vendor = await prisma.vendor.findUnique({
       where: { userId: req.user.id },
       include: {
-        marketVendors: {
+        markets: {
           include: {
             market: true,
           },
@@ -112,8 +112,8 @@ router.post('/:id/markets', authenticate, authorize('ADMIN', 'OWNER'), checkPerm
   try {
     const { marketId } = z.object({ marketId: z.string() }).parse(req.body);
 
-    const existing = await prisma.marketVendor.findUnique({
-      where: { marketId_vendorId: { marketId, vendorId: req.params.id } },
+    const existing = await prisma.marketVendor.findFirst({
+      where: { marketId, vendorId: req.params.id },
     });
 
     if (existing) {
@@ -133,12 +133,10 @@ router.post('/:id/markets', authenticate, authorize('ADMIN', 'OWNER'), checkPerm
 // Remove vendor from market
 router.delete('/:id/markets/:marketId', authenticate, authorize('ADMIN', 'OWNER'), checkPermission('MANAGE_VENDORS'), async (req: any, res) => {
   try {
-    await prisma.marketVendor.delete({
+    await prisma.marketVendor.deleteMany({
       where: {
-        marketId_vendorId: {
-          marketId: req.params.marketId,
-          vendorId: req.params.id,
-        },
+        marketId: req.params.marketId,
+        vendorId: req.params.id,
       },
     });
 

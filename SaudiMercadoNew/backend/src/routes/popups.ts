@@ -38,7 +38,7 @@ router.get('/active', authenticate, async (req: any, res) => {
     };
 
     // Filter by target
-    const targetConditions = [];
+    const targetConditions: { targetType: string }[] = [];
 
     // All users
     targetConditions.push({ targetType: 'ALL_USERS' });

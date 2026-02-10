@@ -9,7 +9,7 @@ router.get('/', authenticate, authorize('ADMIN', 'OWNER'), checkPermission('VIEW
   try {
     const { dateFrom, dateTo } = req.query;
 
-    const dateFilter = {};
+    const dateFilter: any = {};
     if (dateFrom) dateFilter.createdAt = { gte: new Date(dateFrom as string) };
     if (dateTo) dateFilter.createdAt = { ...dateFilter.createdAt, lte: new Date(dateTo as string) };
 

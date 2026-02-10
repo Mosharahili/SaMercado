@@ -114,7 +114,7 @@ router.post('/', authenticate, async (req: any, res) => {
       return res.status(400).json({ error: 'Cart is empty' });
     }
 
-    const subtotal = cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const subtotal = cartItems.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0);
     const taxRate = 0.05; // 5%
     const taxAmount = subtotal * taxRate;
     const total = subtotal + deliveryFee + taxAmount;
@@ -139,8 +139,8 @@ router.post('/', authenticate, async (req: any, res) => {
             productId: item.productId,
             vendorId: item.product.vendorId,
             quantity: item.quantity,
-            unitPrice: item.product.price,
-            lineTotal: item.product.price * item.quantity,
+            unitPrice: Number(item.product.price),
+            lineTotal: Number(item.product.price) * item.quantity,
           },
         })
       )
