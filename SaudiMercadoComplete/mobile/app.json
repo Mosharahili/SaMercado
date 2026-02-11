@@ -1,0 +1,32 @@
+{
+  "expo": {
+    "name": "Saudi Mercado – سعودي ميركادو",
+    "slug": "saudi-mercado-complete",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "saudimercado",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#052e16"
+    },
+    "ios": {
+      "bundleIdentifier": "com.saudimercado.complete",
+      "newArchEnabled": false,
+      "supportsTablet": true
+    },
+    "android": {
+      "package": "com.saudimercado.complete",
+      "newArchEnabled": false
+    },
+    "plugins": [
+      "expo-secure-store",
+      "expo-notifications"
+    ],
+    "extra": {
+      "apiBaseUrl": "https://samercado.onrender.com/api"
+    }
+  }
+}

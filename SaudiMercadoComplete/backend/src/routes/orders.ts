@@ -1,0 +1,211 @@
+import { PaymentMethod, PaymentStatus, Prisma } from '@prisma/client';
+import { Router } from 'express';
+import { z } from 'zod';
+import prisma from '../lib/prisma';
+import { authenticate, requirePermission } from '../middleware/auth';
+import { PERMISSIONS } from '../constants/permissions';
+import { generateOrderNumber } from '../utils/order';
+import { emitOrderUpdate } from '../realtime/socket';
+
+const router = Router();
+
+const checkoutSchema = z.object({
+  paymentMethod: z.enum(['STC_PAY', 'MADA', 'APPLE_PAY', 'CASH_ON_DELIVERY']),
+  deliveryFee: z.number().nonnegative().default(15),
+  taxRate: z.number().nonnegative().default(0.15),
+  notes: z.string().optional(),
+});
+
+const statusSchema = z.object({
+  status: z.enum(['NEW', 'PROCESSING', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERED', 'COMPLETED', 'CANCELLED']),
+});
+
+router.post('/checkout', authenticate, async (req, res) => {
+  const body = checkoutSchema.parse(req.body);
+
+  const cart = await prisma.cart.findUnique({
+    where: { userId: req.user!.id },
+    include: {
+      items: {
+        include: {
+          product: true,
+        },
+      },
+    },
+  });
+
+  if (!cart || cart.items.length === 0) {
+    return res.status(400).json({ error: 'Cart is empty' });
+  }
+
+  const marketIds = Array.from(new Set(cart.items.map((item) => item.product.marketId)));
+  if (marketIds.length > 1) {
+    return res.status(400).json({ error: 'Checkout supports one market per order currently' });
+  }
+
+  const subtotal = cart.items.reduce((acc, item) => {
+    return acc + Number(item.product.price) * item.quantity;
+  }, 0);
+
+  const taxAmount = subtotal * body.taxRate;
+  const totalAmount = subtotal + body.deliveryFee + taxAmount;
+
+  const order = await prisma.$transaction(async (tx) => {
+    const created = await tx.order.create({
+      data: {
+        orderNumber: generateOrderNumber(),
+        customerId: req.user!.id,
+        marketId: marketIds[0],
+        subtotal,
+        deliveryFee: body.deliveryFee,
+        taxAmount,
+        totalAmount,
+        notes: body.notes,
+        items: {
+          create: cart.items.map((item) => ({
+            productId: item.productId,
+            vendorId: item.product.vendorId,
+            quantity: item.quantity,
+            unitPrice: item.product.price,
+            totalPrice: new Prisma.Decimal(Number(item.product.price) * item.quantity),
+          })),
+        },
+      },
+      include: {
+        items: true,
+      },
+    });
+
+    await tx.payment.create({
+      data: {
+        orderId: created.id,
+        method: body.paymentMethod as PaymentMethod,
+        status: body.paymentMethod === 'CASH_ON_DELIVERY' ? PaymentStatus.PENDING : PaymentStatus.PENDING,
+        amount: created.totalAmount,
+      },
+    });
+
+    await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
+
+    return created;
+  });
+
+  emitOrderUpdate(order.id, {
+    type: 'order_created',
+    orderId: order.id,
+    status: order.status,
+  });
+
+  return res.status(201).json({ order });
+});
+
+router.get('/', authenticate, async (req, res) => {
+  const { status, vendorId, marketId, dateFrom, dateTo } = req.query;
+
+  let where: any = {};
+
+  if (req.user!.role === 'CUSTOMER') {
+    where.customerId = req.user!.id;
+  }
+
+  if (req.user!.role === 'VENDOR') {
+    const vendor = await prisma.vendor.findFirst({ where: { userId: req.user!.id } });
+    if (!vendor) return res.json({ orders: [] });
+    where.items = {
+      some: {
+        vendorId: vendor.id,
+      },
+    };
+  }
+
+  if (status) where.status = String(status);
+  if (marketId) where.marketId = String(marketId);
+  if (vendorId) {
+    where.items = {
+      some: {
+        ...(where.items?.some || {}),
+        vendorId: String(vendorId),
+      },
+    };
+  }
+
+  if (dateFrom || dateTo) {
+    where.createdAt = {
+      ...(dateFrom ? { gte: new Date(String(dateFrom)) } : {}),
+      ...(dateTo ? { lte: new Date(String(dateTo)) } : {}),
+    };
+  }
+
+  const orders = await prisma.order.findMany({
+    where,
+    include: {
+      customer: true,
+      market: true,
+      payment: true,
+      items: {
+        include: {
+          product: true,
+          vendor: { include: { user: true } },
+        },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+  });
+
+  return res.json({ orders });
+});
+
+router.patch('/:id/status', authenticate, requirePermission(PERMISSIONS.MANAGE_ORDERS), async (req, res) => {
+  const body = statusSchema.parse(req.body);
+
+  const order = await prisma.order.update({
+    where: { id: req.params.id },
+    data: { status: body.status },
+    include: { payment: true },
+  });
+
+  emitOrderUpdate(order.id, {
+    type: 'status_changed',
+    orderId: order.id,
+    status: order.status,
+  });
+
+  return res.json({ order });
+});
+
+router.get('/:id', authenticate, async (req, res) => {
+  const order = await prisma.order.findUnique({
+    where: { id: req.params.id },
+    include: {
+      customer: true,
+      payment: true,
+      market: true,
+      items: {
+        include: {
+          product: { include: { images: true } },
+          vendor: { include: { user: true } },
+        },
+      },
+    },
+  });
+
+  if (!order) {
+    return res.status(404).json({ error: 'Order not found' });
+  }
+
+  if (req.user!.role === 'CUSTOMER' && order.customerId !== req.user!.id) {
+    return res.status(403).json({ error: 'Forbidden' });
+  }
+
+  if (req.user!.role === 'VENDOR') {
+    const vendor = await prisma.vendor.findFirst({ where: { userId: req.user!.id } });
+    const hasVendorItem = order.items.some((item) => item.vendorId === vendor?.id);
+    if (!hasVendorItem) {
+      return res.status(403).json({ error: 'Forbidden' });
+    }
+  }
+
+  return res.json({ order });
+});
+
+export default router;

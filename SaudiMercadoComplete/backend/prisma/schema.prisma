@@ -1,0 +1,386 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  CUSTOMER
+  VENDOR
+  ADMIN
+  OWNER
+}
+
+enum OrderStatus {
+  NEW
+  PROCESSING
+  PREPARING
+  READY_FOR_DELIVERY
+  DELIVERED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentMethod {
+  STC_PAY
+  MADA
+  APPLE_PAY
+  CASH_ON_DELIVERY
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum BannerPlacement {
+  HOME_HERO
+  HOME_MID
+  HOME_BOTTOM
+  PRODUCT_TOP
+  PRODUCT_INLINE
+}
+
+enum PopupTargetType {
+  ALL_USERS
+  LOGGED_IN
+  NEW_USERS
+  SPECIFIC_MARKETS
+  SPECIFIC_CATEGORIES
+}
+
+enum PopupTrigger {
+  APP_OPEN
+  PAGE_OPEN
+}
+
+enum AnalyticsEventType {
+  PAGE_VIEW
+  PRODUCT_VIEW
+  ADD_TO_CART
+  CHECKOUT_STARTED
+  ORDER_PLACED
+  PAYMENT_SUCCESS
+  PAYMENT_FAILED
+  BANNER_CLICK
+  POPUP_CLICK
+}
+
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  passwordHash     String
+  name             String
+  phone            String?
+  role             Role             @default(CUSTOMER)
+  isActive         Boolean          @default(true)
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  adminProfile     Admin?
+  vendorProfile    Vendor?
+  customerCart     Cart?
+  customerOrders   Order[]          @relation("CustomerOrders")
+  notifications    Notification[]
+  permissions      UserPermission[]
+  analyticsEvents  AnalyticsEvent[]
+
+  createdAdmins    Admin[]          @relation("AdminCreatedBy")
+  createdBanners   Banner[]         @relation("BannerCreatedBy")
+  createdPopups    Popup[]          @relation("PopupCreatedBy")
+}
+
+model Permission {
+  id          String           @id @default(cuid())
+  code        String           @unique
+  label       String
+  createdAt   DateTime         @default(now())
+
+  users       UserPermission[]
+}
+
+model UserPermission {
+  userId       String
+  permissionId String
+
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  permission   Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([userId, permissionId])
+}
+
+model Admin {
+  id            String   @id @default(cuid())
+  userId         String   @unique
+  createdById    String?
+  createdAt      DateTime @default(now())
+
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdBy      User?    @relation("AdminCreatedBy", fields: [createdById], references: [id])
+}
+
+model Vendor {
+  id               String         @id @default(cuid())
+  userId            String         @unique
+  businessName      String
+  businessPhone     String?
+  isApproved        Boolean        @default(false)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+
+  user              User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  products          Product[]
+  marketLinks       VendorMarket[]
+  orderItems        OrderItem[]
+}
+
+model Market {
+  id               String         @id @default(cuid())
+  name             String
+  region           String
+  location         String?
+  description      String?
+  operatingHours   String?
+  priceRange       String?
+  imageUrl         String?
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  products         Product[]
+  vendorLinks      VendorMarket[]
+  orders           Order[]
+  popupTargets     PopupMarketTarget[]
+}
+
+model VendorMarket {
+  vendorId         String
+  marketId         String
+  assignedAt       DateTime @default(now())
+
+  vendor           Vendor   @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  market           Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@id([vendorId, marketId])
+}
+
+model Category {
+  id               String         @id @default(cuid())
+  nameAr           String
+  slug             String         @unique
+  isActive         Boolean        @default(true)
+  createdAt        DateTime       @default(now())
+
+  products         Product[]
+  popupTargets     PopupCategoryTarget[]
+}
+
+model Product {
+  id               String          @id @default(cuid())
+  name             String
+  description      String?
+  unit             String
+  price            Decimal         @db.Decimal(10, 2)
+  isAvailable      Boolean         @default(true)
+  stockQuantity    Int?
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+
+  marketId         String
+  vendorId         String
+  categoryId       String
+
+  market           Market          @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  vendor           Vendor          @relation(fields: [vendorId], references: [id], onDelete: Cascade)
+  category         Category        @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  images           ProductImage[]
+  cartItems        CartItem[]
+  orderItems       OrderItem[]
+}
+
+model ProductImage {
+  id               String          @id @default(cuid())
+  productId        String
+  imageUrl         String
+  sortOrder        Int             @default(0)
+
+  product          Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model Cart {
+  id               String         @id @default(cuid())
+  userId           String         @unique
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items            CartItem[]
+}
+
+model CartItem {
+  id               String         @id @default(cuid())
+  cartId           String
+  productId        String
+  quantity         Int            @default(1)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  cart             Cart           @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product          Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([cartId, productId])
+}
+
+model Order {
+  id               String         @id @default(cuid())
+  orderNumber      String         @unique
+  customerId       String
+  marketId         String
+  status           OrderStatus    @default(NEW)
+  subtotal         Decimal        @db.Decimal(10, 2)
+  deliveryFee      Decimal        @db.Decimal(10, 2)
+  taxAmount        Decimal        @db.Decimal(10, 2)
+  totalAmount      Decimal        @db.Decimal(10, 2)
+  notes            String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  customer         User           @relation("CustomerOrders", fields: [customerId], references: [id], onDelete: Cascade)
+  market           Market         @relation(fields: [marketId], references: [id], onDelete: Restrict)
+  items            OrderItem[]
+  payment          Payment?
+}
+
+model OrderItem {
+  id               String         @id @default(cuid())
+  orderId          String
+  productId        String
+  vendorId         String
+  quantity         Int
+  unitPrice        Decimal        @db.Decimal(10, 2)
+  totalPrice       Decimal        @db.Decimal(10, 2)
+
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product          Product        @relation(fields: [productId], references: [id], onDelete: Restrict)
+  vendor           Vendor         @relation(fields: [vendorId], references: [id], onDelete: Restrict)
+}
+
+model Payment {
+  id               String         @id @default(cuid())
+  orderId          String         @unique
+  method           PaymentMethod
+  status           PaymentStatus  @default(PENDING)
+  amount           Decimal        @db.Decimal(10, 2)
+  transactionId    String?
+  failureReason    String?
+  providerPayload  Json?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model Banner {
+  id               String           @id @default(cuid())
+  title            String
+  description      String?
+  imageUrl         String
+  placement        BannerPlacement
+  ctaText          String?
+  actionType       String           @default("NONE")
+  actionValue      String?
+  startsAt         DateTime?
+  endsAt           DateTime?
+  isEnabled        Boolean          @default(true)
+  sortOrder        Int              @default(0)
+  createdById      String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  createdBy         User?           @relation("BannerCreatedBy", fields: [createdById], references: [id])
+}
+
+model Popup {
+  id                String              @id @default(cuid())
+  title             String
+  message           String?
+  imageUrl          String?
+  trigger           PopupTrigger        @default(APP_OPEN)
+  targetType        PopupTargetType     @default(ALL_USERS)
+  pageKey           String?
+  primaryCtaText    String?
+  primaryActionType String?             @default("NONE")
+  primaryActionValue String?
+  secondaryCtaText  String?
+  secondaryActionType String?           @default("NONE")
+  secondaryActionValue String?
+  isDismissible     Boolean             @default(true)
+  startsAt          DateTime?
+  endsAt            DateTime?
+  isEnabled         Boolean             @default(true)
+  createdById       String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  createdBy         User?               @relation("PopupCreatedBy", fields: [createdById], references: [id])
+  marketTargets     PopupMarketTarget[]
+  categoryTargets   PopupCategoryTarget[]
+}
+
+model PopupMarketTarget {
+  popupId           String
+  marketId          String
+
+  popup             Popup      @relation(fields: [popupId], references: [id], onDelete: Cascade)
+  market            Market     @relation(fields: [marketId], references: [id], onDelete: Cascade)
+
+  @@id([popupId, marketId])
+}
+
+model PopupCategoryTarget {
+  popupId           String
+  categoryId        String
+
+  popup             Popup      @relation(fields: [popupId], references: [id], onDelete: Cascade)
+  category          Category   @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+
+  @@id([popupId, categoryId])
+}
+
+model Notification {
+  id                String    @id @default(cuid())
+  userId            String
+  title             String
+  body              String
+  type              String
+  isRead            Boolean   @default(false)
+  metadata          Json?
+  createdAt         DateTime  @default(now())
+
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model AnalyticsEvent {
+  id                String             @id @default(cuid())
+  userId            String?
+  eventType         AnalyticsEventType
+  eventName         String
+  payload           Json?
+  createdAt         DateTime           @default(now())
+
+  user              User?              @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model SystemSetting {
+  id                String    @id @default(cuid())
+  key               String    @unique
+  value             Json
+  description       String?
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
