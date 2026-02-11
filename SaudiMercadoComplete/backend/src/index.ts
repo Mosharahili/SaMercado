@@ -7,6 +7,7 @@ import path from 'path';
 import { Server } from 'socket.io';
 
 import { env } from './config/env';
+import { ensureSchemaCompat } from './bootstrap/ensureSchemaCompat';
 import { errorHandler } from './middleware/errorHandler';
 import { setSocket } from './realtime/socket';
 
@@ -79,6 +80,14 @@ app.use('/api/upload', uploadRoutes);
 
 app.use(errorHandler);
 
-server.listen(env.port, () => {
-  console.log(`SaudiMercado backend running on port ${env.port}`);
+const start = async () => {
+  await ensureSchemaCompat();
+  server.listen(env.port, () => {
+    console.log(`SaudiMercado backend running on port ${env.port}`);
+  });
+};
+
+start().catch((error) => {
+  console.error('Failed to start backend:', error);
+  process.exit(1);
 });
