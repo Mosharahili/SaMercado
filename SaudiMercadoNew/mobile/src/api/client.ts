@@ -2,8 +2,17 @@ import axios from 'axios';
 import Constants from 'expo-constants';
 import * as SecureStore from 'expo-secure-store';
 
+const rawBaseUrl =
+  process.env.EXPO_PUBLIC_API_BASE_URL ||
+  Constants.expoConfig?.extra?.apiBaseUrl ||
+  'http://localhost:3000/api';
+
+// Keep a single backend contract for all environments: /api/*
+const normalizedBaseUrl = rawBaseUrl.replace(/\/+$/, '');
+const baseUrl = normalizedBaseUrl.endsWith('/api') ? normalizedBaseUrl : `${normalizedBaseUrl}/api`;
+
 const api = axios.create({
-  baseURL: process.env.EXPO_PUBLIC_API_BASE_URL || Constants.expoConfig?.extra?.apiBaseUrl || 'http://localhost:3000/api',
+  baseURL: baseUrl,
   timeout: 10000,
 });
 

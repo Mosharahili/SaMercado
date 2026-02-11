@@ -73,4 +73,9 @@ router.get('/me', authenticate, async (req: any, res) => {
   res.json({ user: req.user });
 });
 
+router.post('/logout', authenticate, async (_req, res) => {
+  // JWT auth is stateless; client deletes the token locally.
+  res.json({ message: 'Logged out successfully' });
+});
+
 export default router;
