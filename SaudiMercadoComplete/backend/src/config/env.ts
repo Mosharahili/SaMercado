@@ -13,6 +13,7 @@ const requireEnv = (key: string, fallback?: string): string => {
 export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: Number(process.env.PORT || 3000),
+  host: process.env.HOST || '0.0.0.0',
   jwtSecret: requireEnv('JWT_SECRET', 'change-me-in-production'),
   clientOrigin: process.env.CLIENT_ORIGIN || '*',
   uploadsDir: process.env.UPLOADS_DIR || 'uploads',
