@@ -21,14 +21,52 @@ export const SignupScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { register } = useAuth();
   const navigation = useNavigation<SignupScreenNavigationProp>();
 
+  const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+    if (typeof error !== 'object' || error === null) {
+      return fallbackMessage;
+    }
+
+    const axiosLikeError = error as {
+      response?: { data?: { error?: string; message?: string } };
+      message?: string;
+    };
+
+    return (
+      axiosLikeError.response?.data?.error ||
+      axiosLikeError.response?.data?.message ||
+      axiosLikeError.message ||
+      fallbackMessage
+    );
+  };
+
   const handleSignup = async () => {
+    if (isSubmitting) return;
+
+    if (!name.trim() || !email.trim() || !password.trim()) {
+      setErrorMessage('يرجى تعبئة جميع الحقول');
+      return;
+    }
+
+    if (password.trim().length < 6) {
+      setErrorMessage('كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
     try {
+      setErrorMessage('');
+      setIsSubmitting(true);
       await register(email, password, name);
     } catch (error) {
-      Alert.alert('خطأ', 'فشل التسجيل');
+      const message = getErrorMessage(error, 'فشل التسجيل');
+      setErrorMessage(message);
+      Alert.alert('خطأ', message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -36,7 +74,7 @@ export const SignupScreen = () => {
     <LinearGradient colors={theme.gradients.primary} style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../../assets/icon.png')}
+          source={require('../../../assets/icon.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>سعودي ميركادو</Text>
@@ -65,13 +103,21 @@ export const SignupScreen = () => {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleSignup}>
-            <Text style={styles.buttonText}>إنشاء حساب</Text>
+          <TouchableOpacity
+            style={[styles.button, isSubmitting && styles.buttonDisabled]}
+            onPress={handleSignup}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? 'جاري إنشاء الحساب...' : 'إنشاء حساب'}
+            </Text>
           </TouchableOpacity>
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <TouchableOpacity
             style={styles.link}
             onPress={() => navigation.navigate('Login')}
+            disabled={isSubmitting}
           >
             <Text style={styles.linkText}>لديك حساب؟ سجل الدخول</Text>
           </TouchableOpacity>
@@ -126,6 +172,15 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     alignItems: 'center',
     marginBottom: theme.spacing.md,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  errorText: {
+    color: '#fee2e2',
+    textAlign: 'center',
+    marginBottom: theme.spacing.md,
+    fontSize: theme.typography.fontSize.sm,
   },
   buttonText: {
     color: theme.colors.primary,

@@ -21,13 +21,22 @@ const popupSchema = z.object({
   secondaryActionType: z.enum(['PRODUCT', 'MARKET', 'CATEGORY', 'EXTERNAL_LINK', 'NONE']).default('NONE'),
   secondaryActionValue: z.string().optional(),
   isDismissible: z.boolean().optional(),
-  startsAt: z.string().datetime().optional(),
-  endsAt: z.string().datetime().optional(),
+  startsAt: z.string().optional(),
+  endsAt: z.string().optional(),
   isEnabled: z.boolean().optional(),
   imageUrl: z.string().optional(),
   marketIds: z.array(z.string()).optional(),
   categoryIds: z.array(z.string()).optional(),
 });
+
+const parseOptionalDate = (value?: string) => {
+  if (!value?.trim()) return { ok: true as const, value: undefined };
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) {
+    return { ok: false as const };
+  }
+  return { ok: true as const, value: parsed };
+};
 
 router.get('/active', async (req, res) => {
   const pageKey = req.query.pageKey ? String(req.query.pageKey) : undefined;
@@ -84,6 +93,11 @@ router.get('/', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), asyn
 
 router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), async (req, res) => {
   const data = popupSchema.parse(req.body);
+  const startsAt = parseOptionalDate(data.startsAt);
+  const endsAt = parseOptionalDate(data.endsAt);
+  if (!startsAt.ok || !endsAt.ok) {
+    return res.status(400).json({ error: 'Invalid date format. Use a valid date value.' });
+  }
 
   const popup = await prisma.popup.create({
     data: {
@@ -99,8 +113,8 @@ router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), asy
       secondaryActionType: data.secondaryActionType,
       secondaryActionValue: data.secondaryActionValue,
       isDismissible: data.isDismissible,
-      startsAt: data.startsAt ? new Date(data.startsAt) : undefined,
-      endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
+      startsAt: startsAt.value,
+      endsAt: endsAt.value,
       isEnabled: data.isEnabled,
       imageUrl: data.imageUrl,
       createdById: req.user!.id,
@@ -141,6 +155,11 @@ router.post('/:id/image', authenticate, requirePermission(PERMISSIONS.MANAGE_POP
 
 router.put('/:id', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), async (req, res) => {
   const data = popupSchema.partial().parse(req.body);
+  const startsAt = parseOptionalDate(data.startsAt);
+  const endsAt = parseOptionalDate(data.endsAt);
+  if (!startsAt.ok || !endsAt.ok) {
+    return res.status(400).json({ error: 'Invalid date format. Use a valid date value.' });
+  }
 
   const popup = await prisma.$transaction(async (tx) => {
     await tx.popupMarketTarget.deleteMany({ where: { popupId: req.params.id } });
@@ -150,8 +169,8 @@ router.put('/:id', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), a
       where: { id: req.params.id },
       data: {
         ...data,
-        startsAt: data.startsAt ? new Date(data.startsAt) : undefined,
-        endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
+        startsAt: startsAt.value,
+        endsAt: endsAt.value,
         marketTargets: data.marketIds?.length
           ? {
               createMany: {

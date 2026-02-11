@@ -38,65 +38,85 @@ router.post('/checkout', authenticate, async (req, res) => {
     return res.status(400).json({ error: 'Cart is empty' });
   }
 
-  const marketIds = Array.from(new Set(cart.items.map((item) => item.product.marketId)));
-  if (marketIds.length > 1) {
-    return res.status(400).json({ error: 'Checkout supports one market per order currently' });
+  const unavailable = cart.items.find((item) => !item.product.isAvailable);
+  if (unavailable) {
+    return res.status(400).json({ error: `Product unavailable: ${unavailable.product.name}` });
   }
 
-  const subtotal = cart.items.reduce((acc, item) => {
-    return acc + Number(item.product.price) * item.quantity;
-  }, 0);
+  const groupedByMarket = new Map<string, typeof cart.items>();
+  for (const item of cart.items) {
+    const bucket = groupedByMarket.get(item.product.marketId) || [];
+    bucket.push(item);
+    groupedByMarket.set(item.product.marketId, bucket);
+  }
 
-  const taxAmount = subtotal * body.taxRate;
-  const totalAmount = subtotal + body.deliveryFee + taxAmount;
+  const orders = await prisma.$transaction(async (tx) => {
+    const createdOrders: Array<{
+      id: string;
+      orderNumber: string;
+      status: string;
+      marketId: string;
+      subtotal: Prisma.Decimal;
+      deliveryFee: Prisma.Decimal;
+      taxAmount: Prisma.Decimal;
+      totalAmount: Prisma.Decimal;
+    }> = [];
 
-  const order = await prisma.$transaction(async (tx) => {
-    const created = await tx.order.create({
-      data: {
-        orderNumber: generateOrderNumber(),
-        customerId: req.user!.id,
-        marketId: marketIds[0],
-        subtotal,
-        deliveryFee: body.deliveryFee,
-        taxAmount,
-        totalAmount,
-        notes: body.notes,
-        items: {
-          create: cart.items.map((item) => ({
-            productId: item.productId,
-            vendorId: item.product.vendorId,
-            quantity: item.quantity,
-            unitPrice: item.product.price,
-            totalPrice: new Prisma.Decimal(Number(item.product.price) * item.quantity),
-          })),
+    for (const [marketId, marketItems] of groupedByMarket.entries()) {
+      const subtotal = marketItems.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0);
+      const taxAmount = subtotal * body.taxRate;
+      const totalAmount = subtotal + body.deliveryFee + taxAmount;
+
+      const created = await tx.order.create({
+        data: {
+          orderNumber: generateOrderNumber(),
+          customerId: req.user!.id,
+          marketId,
+          subtotal,
+          deliveryFee: body.deliveryFee,
+          taxAmount,
+          totalAmount,
+          notes: body.notes,
+          items: {
+            create: marketItems.map((item) => ({
+              productId: item.productId,
+              vendorId: item.product.vendorId,
+              quantity: item.quantity,
+              unitPrice: item.product.price,
+              totalPrice: new Prisma.Decimal(Number(item.product.price) * item.quantity),
+            })),
+          },
         },
-      },
-      include: {
-        items: true,
-      },
-    });
+      });
 
-    await tx.payment.create({
-      data: {
-        orderId: created.id,
-        method: body.paymentMethod as PaymentMethod,
-        status: body.paymentMethod === 'CASH_ON_DELIVERY' ? PaymentStatus.PENDING : PaymentStatus.PENDING,
-        amount: created.totalAmount,
-      },
-    });
+      await tx.payment.create({
+        data: {
+          orderId: created.id,
+          method: body.paymentMethod as PaymentMethod,
+          status: body.paymentMethod === 'CASH_ON_DELIVERY' ? PaymentStatus.PENDING : PaymentStatus.PENDING,
+          amount: created.totalAmount,
+        },
+      });
+
+      createdOrders.push(created);
+    }
 
     await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
-
-    return created;
+    return createdOrders;
   });
 
-  emitOrderUpdate(order.id, {
-    type: 'order_created',
-    orderId: order.id,
-    status: order.status,
-  });
+  for (const order of orders) {
+    emitOrderUpdate(order.id, {
+      type: 'order_created',
+      orderId: order.id,
+      status: order.status,
+    });
+  }
 
-  return res.status(201).json({ order });
+  return res.status(201).json({
+    order: orders[0],
+    orders,
+  });
 });
 
 router.get('/', authenticate, async (req, res) => {

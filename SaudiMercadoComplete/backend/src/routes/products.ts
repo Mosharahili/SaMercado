@@ -24,7 +24,8 @@ router.get('/', async (req, res) => {
   const search = String(query.search || '').trim();
 
   const where: any = {
-    isAvailable: query.isAvailable === 'false' ? false : true,
+    ...(query.isAvailable === 'true' ? { isAvailable: true } : {}),
+    ...(query.isAvailable === 'false' ? { isAvailable: false } : {}),
     ...(query.categoryId ? { categoryId: String(query.categoryId) } : {}),
     ...(query.marketId ? { marketId: String(query.marketId) } : {}),
     ...(query.vendorId ? { vendorId: String(query.vendorId) } : {}),

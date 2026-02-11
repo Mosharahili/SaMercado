@@ -1,0 +1,3 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild -project /Users/mosharahili/Desktop/SaMercado/SaudiMercadoNew/mobile/ios/SaudiMercado.xcodeproj -configuration Debug -scheme SaudiMercado -destination id=BD661AC2-178B-4E54-AB88-F9A1BBBEB434
+

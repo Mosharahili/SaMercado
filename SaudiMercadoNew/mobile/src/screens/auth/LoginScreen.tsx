@@ -20,14 +20,47 @@ type LoginScreenNavigationProp = NativeStackNavigationProp<AuthStackParamList, '
 export const LoginScreen = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const { login } = useAuth();
   const navigation = useNavigation<LoginScreenNavigationProp>();
 
+  const getErrorMessage = (error: unknown, fallbackMessage: string) => {
+    if (typeof error !== 'object' || error === null) {
+      return fallbackMessage;
+    }
+
+    const axiosLikeError = error as {
+      response?: { data?: { error?: string; message?: string } };
+      message?: string;
+    };
+
+    return (
+      axiosLikeError.response?.data?.error ||
+      axiosLikeError.response?.data?.message ||
+      axiosLikeError.message ||
+      fallbackMessage
+    );
+  };
+
   const handleLogin = async () => {
+    if (isSubmitting) return;
+
+    if (!email.trim() || !password.trim()) {
+      setErrorMessage('يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      return;
+    }
+
     try {
+      setErrorMessage('');
+      setIsSubmitting(true);
       await login(email, password);
     } catch (error) {
-      Alert.alert('خطأ', 'فشل تسجيل الدخول');
+      const message = getErrorMessage(error, 'فشل تسجيل الدخول');
+      setErrorMessage(message);
+      Alert.alert('خطأ', message);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -35,7 +68,7 @@ export const LoginScreen = () => {
     <LinearGradient colors={theme.gradients.primary} style={styles.container}>
       <View style={styles.content}>
         <Image
-          source={require('../../assets/icon.png')}
+          source={require('../../../assets/icon.png')}
           style={styles.logo}
         />
         <Text style={styles.title}>سعودي ميركادو</Text>
@@ -58,13 +91,21 @@ export const LoginScreen = () => {
             secureTextEntry
           />
 
-          <TouchableOpacity style={styles.button} onPress={handleLogin}>
-            <Text style={styles.buttonText}>تسجيل الدخول</Text>
+          <TouchableOpacity
+            style={[styles.button, isSubmitting && styles.buttonDisabled]}
+            onPress={handleLogin}
+            disabled={isSubmitting}
+          >
+            <Text style={styles.buttonText}>
+              {isSubmitting ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
+            </Text>
           </TouchableOpacity>
+          {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
 
           <TouchableOpacity
             style={styles.link}
             onPress={() => navigation.navigate('Signup')}
+            disabled={isSubmitting}
           >
             <Text style={styles.linkText}>ليس لديك حساب؟ سجل الآن</Text>
           </TouchableOpacity>
@@ -119,6 +160,15 @@ const styles = StyleSheet.create({
     padding: theme.spacing.md,
     alignItems: 'center',
     marginBottom: theme.spacing.md,
+  },
+  buttonDisabled: {
+    opacity: 0.7,
+  },
+  errorText: {
+    color: '#fee2e2',
+    textAlign: 'center',
+    marginBottom: theme.spacing.md,
+    fontSize: theme.typography.fontSize.sm,
   },
   buttonText: {
     color: theme.colors.primary,

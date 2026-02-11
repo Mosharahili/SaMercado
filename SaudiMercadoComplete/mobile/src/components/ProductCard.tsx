@@ -17,61 +17,73 @@ export const ProductCard = ({
 
   return (
     <View style={styles.card}>
-      {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.placeholder} />}
-      <Text style={styles.name}>{product.name}</Text>
-      <View style={styles.badge}>
-        <Text style={styles.badgeText}>{product.category?.nameAr}</Text>
+      <View style={styles.mediaWrap}>
+        {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.placeholder} />}
+        <View style={styles.badge}>
+          <Text style={styles.badgeText}>{product.category?.nameAr}</Text>
+        </View>
       </View>
-      <Text style={styles.meta}>{product.vendor?.businessName}</Text>
-      <Text style={styles.meta}>{product.market?.name}</Text>
-      <Text style={styles.meta}>الوحدة: {product.unit}</Text>
-      <Text style={styles.price}>{formatSAR(Number(product.price))}</Text>
+      <View style={styles.body}>
+        <Text style={styles.name} numberOfLines={2}>
+          {product.name}
+        </Text>
+        <Text style={styles.meta}>{product.market?.name}</Text>
+        <Text style={styles.meta}>{product.vendor?.businessName}</Text>
 
-      <Pressable onPress={onAdd} style={styles.addButton}>
-        <MaterialCommunityIcons name="cart-plus" size={18} color="white" />
-        <Text style={styles.addText}>إضافة</Text>
-      </Pressable>
+        <View style={styles.bottomRow}>
+          <View style={styles.priceWrap}>
+            <Text style={styles.unit}>/{product.unit}</Text>
+            <Text style={styles.price}>{formatSAR(Number(product.price))}</Text>
+          </View>
+          <Pressable onPress={onAdd} style={styles.addButton}>
+            <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
+            <Text style={styles.addText}>إضافة</Text>
+          </Pressable>
+        </View>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    width: '48.5%',
     backgroundColor: 'rgba(255,255,255,0.97)',
     borderRadius: theme.radius.lg,
-    padding: 10,
+    overflow: 'hidden',
     ...theme.shadow.card,
+  },
+  mediaWrap: {
+    position: 'relative',
   },
   image: {
     width: '100%',
-    height: 100,
-    borderRadius: 10,
-    marginBottom: 8,
+    height: 140,
   },
   placeholder: {
     width: '100%',
-    height: 100,
-    borderRadius: 10,
-    marginBottom: 8,
-    backgroundColor: '#dcfce7',
+    height: 140,
+    backgroundColor: '#cffafe',
+  },
+  body: {
+    padding: 10,
   },
   name: {
     fontWeight: '800',
     color: theme.colors.text,
     textAlign: 'right',
+    minHeight: 42,
   },
   badge: {
-    alignSelf: 'flex-end',
-    marginTop: 5,
-    marginBottom: 3,
-    backgroundColor: '#bbf7d0',
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    backgroundColor: 'rgba(12,74,110,0.82)',
     borderRadius: theme.radius.pill,
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
   badgeText: {
-    color: '#166534',
+    color: 'white',
     fontSize: 11,
     fontWeight: '700',
   },
@@ -80,18 +92,34 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     fontSize: 12,
   },
+  bottomRow: {
+    marginTop: 8,
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: 10,
+  },
+  priceWrap: {
+    flexDirection: 'row-reverse',
+    alignItems: 'baseline',
+    gap: 4,
+  },
   price: {
-    marginTop: 6,
     textAlign: 'right',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '900',
     color: theme.colors.primary,
   },
+  unit: {
+    color: '#0e7490',
+    fontSize: 12,
+    fontWeight: '700',
+  },
   addButton: {
-    marginTop: 8,
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.md,
-    paddingVertical: 8,
+    paddingVertical: 7,
+    paddingHorizontal: 10,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row-reverse',
@@ -100,5 +128,6 @@ const styles = StyleSheet.create({
   addText: {
     color: 'white',
     fontWeight: '700',
+    fontSize: 12,
   },
 });

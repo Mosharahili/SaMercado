@@ -2,19 +2,25 @@ import React, { useEffect, useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { ScreenContainer } from '@components/ScreenContainer';
+import { AppButton } from '@components/AppButton';
 import { api } from '@api/client';
 
 const statusOptions = ['NEW', 'PROCESSING', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
 
 export const OwnerOrdersScreen = () => {
   const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const load = async () => {
+    setLoading(true);
     try {
       const response = await api.get<{ orders: any[] }>('/orders');
       setOrders(response.orders || []);
-    } catch {
+    } catch (error: any) {
       setOrders([]);
+      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر تحميل الطلبات');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -33,12 +39,31 @@ export const OwnerOrdersScreen = () => {
 
   return (
     <ScreenContainer>
+      <AppButton label={loading ? 'جارِ التحديث...' : 'تحديث الطلبات'} onPress={load} variant="ghost" />
+
+      {!orders.length ? (
+        <View style={styles.emptyCard}>
+          <Text style={styles.emptyText}>لا توجد طلبات حالياً</Text>
+          <Text style={styles.emptySub}>عند إتمام أي عملية شراء ستظهر هنا مباشرة.</Text>
+        </View>
+      ) : null}
+
       {orders.map((order) => (
         <View key={order.id} style={styles.item}>
           <Text style={styles.title}>#{order.orderNumber}</Text>
-          <Text style={styles.meta}>الحالة الحالية: {order.status}</Text>
-          <Text style={styles.meta}>طريقة الدفع: {order.payment?.method}</Text>
-          <Text style={styles.meta}>المجموع: {order.totalAmount} ر.س</Text>
+          <Text style={styles.meta}>العميل: {order.customer?.name || '-'}</Text>
+          <Text style={styles.meta}>السوق: {order.market?.name || '-'}</Text>
+          <Text style={styles.meta}>طريقة الدفع: {order.payment?.method || '-'}</Text>
+          <Text style={styles.meta}>حالة الدفع: {order.payment?.status || '-'}</Text>
+          <Text style={styles.meta}>الإجمالي: {order.totalAmount} ر.س</Text>
+
+          <View style={styles.itemsWrap}>
+            {(order.items || []).map((item: any) => (
+              <Text key={item.id} style={styles.itemLine}>
+                {item.product?.name} x {item.quantity}
+              </Text>
+            ))}
+          </View>
 
           <View style={styles.pickerWrap}>
             <Picker selectedValue={order.status} onValueChange={(status) => setStatus(order.id, status)}>
@@ -47,6 +72,10 @@ export const OwnerOrdersScreen = () => {
               ))}
             </Picker>
           </View>
+
+          <Pressable onPress={load} style={styles.refreshBtn}>
+            <Text style={styles.refreshText}>حفظ الحالة</Text>
+          </Pressable>
         </View>
       ))}
     </ScreenContainer>
@@ -54,14 +83,53 @@ export const OwnerOrdersScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  emptyCard: {
+    backgroundColor: 'rgba(255,255,255,0.96)',
+    borderRadius: 14,
+    padding: 16,
+    gap: 6,
+  },
+  emptyText: {
+    textAlign: 'right',
+    color: '#0f2f3d',
+    fontWeight: '800',
+  },
+  emptySub: {
+    textAlign: 'right',
+    color: '#4a6572',
+  },
   item: { backgroundColor: 'rgba(255,255,255,0.96)', borderRadius: 12, padding: 12, gap: 5 },
-  title: { textAlign: 'right', fontWeight: '900', color: '#14532d' },
-  meta: { textAlign: 'right', color: '#4b5563' },
+  title: { textAlign: 'right', fontWeight: '900', color: '#0f2f3d' },
+  meta: { textAlign: 'right', color: '#4a6572' },
+  itemsWrap: {
+    borderWidth: 1,
+    borderColor: '#cffafe',
+    borderRadius: 10,
+    padding: 8,
+    gap: 2,
+    backgroundColor: '#ecfeff',
+  },
+  itemLine: {
+    textAlign: 'right',
+    color: '#155e75',
+    fontSize: 12,
+  },
   pickerWrap: {
     borderWidth: 1,
-    borderColor: '#bbf7d0',
+    borderColor: '#99f6e4',
     borderRadius: 10,
     overflow: 'hidden',
-    backgroundColor: '#f0fdf4',
+    backgroundColor: '#f0fdfa',
+  },
+  refreshBtn: {
+    marginTop: 4,
+    borderRadius: 8,
+    backgroundColor: '#ccfbf1',
+    paddingVertical: 8,
+    alignItems: 'center',
+  },
+  refreshText: {
+    color: '#0f766e',
+    fontWeight: '700',
   },
 });

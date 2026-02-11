@@ -13,6 +13,10 @@ export type CustomerTabParamList = {
 
 export type OwnerStackParamList = {
   OwnerDashboard: undefined;
+  OwnerStoreMarkets: undefined;
+  OwnerStoreProducts: undefined;
+  OwnerStoreCart: undefined;
+  OwnerStoreAccount: undefined;
   OwnerBanners: undefined;
   OwnerPopups: undefined;
   OwnerAdmins: undefined;
@@ -33,6 +37,10 @@ export type VendorStackParamList = {
 
 export type AdminStackParamList = {
   AdminDashboard: undefined;
+  AdminStoreMarkets: undefined;
+  AdminStoreProducts: undefined;
+  AdminStoreCart: undefined;
+  AdminStoreAccount: undefined;
   AdminMarkets: undefined;
   AdminProducts: undefined;
   AdminOrders: undefined;

@@ -39,14 +39,21 @@ export const CartScreen = () => {
         await api.post('/cart/items', { productId: item.product.id, quantity: item.quantity });
       }
 
-      const response = await api.post<{ order: { orderNumber: string } }>('/orders/checkout', {
+      const response = await api.post<{ order?: { orderNumber: string }; orders?: Array<{ orderNumber: string }> }>('/orders/checkout', {
         paymentMethod,
         deliveryFee: delivery,
         taxRate: 0.15,
       });
 
       clearCart();
-      Alert.alert('تم تأكيد الطلب', `رقم الطلب: ${response.order.orderNumber}`);
+      const orderNumbers = (response.orders || []).map((order) => order.orderNumber).filter(Boolean);
+      if (orderNumbers.length > 1) {
+        Alert.alert('تم تأكيد الطلب', `تم إنشاء ${orderNumbers.length} طلبات: ${orderNumbers.join(' - ')}`);
+      } else if (response.order?.orderNumber) {
+        Alert.alert('تم تأكيد الطلب', `رقم الطلب: ${response.order.orderNumber}`);
+      } else {
+        Alert.alert('تم تأكيد الطلب', 'تم إرسال طلبك بنجاح');
+      }
     } catch (error: any) {
       Alert.alert('فشل الإتمام', error?.response?.data?.error || error.message || 'تعذر إتمام الطلب');
     } finally {

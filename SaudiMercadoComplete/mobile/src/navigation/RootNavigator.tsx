@@ -26,7 +26,7 @@ export const RootNavigator = () => {
         ...DefaultTheme,
         colors: {
           ...DefaultTheme.colors,
-          background: '#ecfdf5',
+          background: theme.colors.bg,
           primary: theme.colors.primary,
         },
       }}
@@ -49,7 +49,7 @@ export const RootNavigator = () => {
 const styles = StyleSheet.create({
   loading: {
     flex: 1,
-    backgroundColor: '#ecfdf5',
+    backgroundColor: theme.colors.bg,
     alignItems: 'center',
     justifyContent: 'center',
   },

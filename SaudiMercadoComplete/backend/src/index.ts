@@ -82,8 +82,9 @@ app.use(errorHandler);
 
 const start = async () => {
   await ensureSchemaCompat();
-  server.listen(env.port, env.host, () => {
-    console.log(`SaudiMercado backend running on ${env.host}:${env.port}`);
+  // Bind on all interfaces in hosted environments (e.g. Render) to ensure port detection.
+  server.listen(env.port, () => {
+    console.log(`SaudiMercado backend running on port ${env.port}`);
   });
 };
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { RefreshControl, StyleSheet, Text } from 'react-native';
+import { StyleSheet, Text } from 'react-native';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
 import { MarketCard } from '@components/MarketCard';
@@ -9,13 +9,14 @@ import { mockMarkets } from '@utils/mockData';
 
 export const MarketsScreen = () => {
   const [markets, setMarkets] = useState<Market[]>(mockMarkets);
-  const [refreshing, setRefreshing] = useState(false);
 
   const fetchMarkets = async () => {
     try {
       const response = await api.get<{ markets: Market[] }>('/markets');
       if (response.markets?.length) {
         setMarkets(response.markets);
+      } else {
+        setMarkets([]);
       }
     } catch (_error) {
       setMarkets(mockMarkets);
@@ -28,8 +29,8 @@ export const MarketsScreen = () => {
 
   return (
     <ScreenContainer>
-      <AppHeader title="الأسواق" subtitle="تصفح أسواق الجملة في الرياض" />
-      <Text style={styles.hint}>اختر السوق المناسب وابدأ التسوق مباشرة من الموردين</Text>
+      <AppHeader title="الأسواق" subtitle="الأسواق التي نعمل معها" />
+      <Text style={styles.hint}>نعرض لك أسواقنا المعتمدة لمتابعة مصدر المنتجات والجودة.</Text>
 
       {markets.map((market) => (
         <MarketCard key={market.id} market={market} />
@@ -41,7 +42,7 @@ export const MarketsScreen = () => {
 const styles = StyleSheet.create({
   hint: {
     textAlign: 'right',
-    color: '#dcfce7',
+    color: '#155e75',
     marginBottom: 4,
   },
 });

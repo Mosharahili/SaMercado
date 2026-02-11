@@ -16,22 +16,14 @@ const storage = multer.diskStorage({
   },
 });
 
-const allowedMime = [
-  'image/jpeg',
-  'image/png',
-  'image/webp',
-  'image/gif',
-  'image/svg+xml',
-  'image/jpg',
-];
-
 export const upload = multer({
   storage,
   limits: {
     fileSize: 20 * 1024 * 1024,
   },
   fileFilter: (_req, file, cb) => {
-    if (allowedMime.includes(file.mimetype)) {
+    // Allow all image/* MIME types to support more client capture formats.
+    if (file.mimetype.toLowerCase().startsWith('image/')) {
       cb(null, true);
     } else {
       cb(new Error('Unsupported image format'));

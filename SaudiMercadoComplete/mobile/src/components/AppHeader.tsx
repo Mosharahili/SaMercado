@@ -25,19 +25,19 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: '#bbf7d0',
+    borderColor: '#a5f3fc',
   },
   textWrap: {
     flex: 1,
   },
   title: {
-    color: 'white',
+    color: '#0f2f3d',
     fontSize: 20,
     fontWeight: '800',
     textAlign: 'right',
   },
   subtitle: {
-    color: '#dcfce7',
+    color: '#4a6572',
     fontSize: 13,
     textAlign: 'right',
     marginTop: 2,

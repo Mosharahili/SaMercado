@@ -7,8 +7,21 @@ const compatStatements = [
 ];
 
 export const ensureSchemaCompat = async () => {
-  for (const statement of compatStatements) {
-    await prisma.$executeRawUnsafe(statement);
+  try {
+    for (const statement of compatStatements) {
+      await prisma.$executeRawUnsafe(statement);
+    }
+  } catch (error: any) {
+    const prismaCode = error?.code;
+    const sqlState = error?.meta?.code;
+
+    // Some pooled PostgreSQL providers can reject prepared statements used in raw SQL.
+    // Do not block startup if compat SQL cannot run in that environment.
+    if (prismaCode === 'P2010' && sqlState === '42P05') {
+      console.warn('Skipping schema compatibility raw SQL due to pooled prepared-statement conflict (42P05).');
+      return;
+    }
+
+    throw error;
   }
 };
-

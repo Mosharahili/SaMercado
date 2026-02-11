@@ -6,7 +6,16 @@ import { PERMISSIONS } from '../constants/permissions';
 
 const router = Router();
 
-router.get('/', authenticate, requirePermission(PERMISSIONS.MANAGE_VENDORS), async (_req, res) => {
+router.get('/', authenticate, async (req, res) => {
+  const allowed =
+    req.user?.role === 'OWNER' ||
+    req.user?.permissions.includes(PERMISSIONS.MANAGE_VENDORS) ||
+    req.user?.permissions.includes(PERMISSIONS.MANAGE_PRODUCTS);
+
+  if (!allowed) {
+    return res.status(403).json({ error: 'Insufficient permissions' });
+  }
+
   const vendors = await prisma.vendor.findMany({
     include: {
       user: true,

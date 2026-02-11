@@ -1,0 +1,6 @@
+2026-02-11 17:10:21.828 xcodebuild[12456:7887746] Writing error result bundle to /var/folders/wb/7w6zmdq96yb8dp61dzfv93q80000gn/T/ResultBundle_2026-11-02_17-10-0021.xcresult
+xcodebuild: error: Unable to find a destination matching the provided destination specifier:
+		{ id:BD661AC2-178B-4E54-AB88-F9A1BBBEB434 }
+
+	Ineligible destinations for the "SaudiMercado" scheme:
+		{ platform:iOS, id:dvtdevice-DVTiPhonePlaceholder-iphoneos:placeholder, name:Any iOS Device, error:iOS 26.2 is not installed. Please download and install the platform from Xcode > Settings > Components. }

@@ -31,17 +31,27 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const checkAuthState = async () => {
     try {
       const token = await SecureStore.getItemAsync('authToken');
-      if (token) {
-        // Verify token with backend
-        const response = await api.get('/auth/me');
-        setUser(response.data.user);
-        await SecureStore.setItemAsync('userData', JSON.stringify(response.data.user));
+      const cachedUser = await SecureStore.getItemAsync('userData');
+
+      if (cachedUser) {
+        setUser(JSON.parse(cachedUser));
       }
+
+      if (!token) return;
+
+      // Do not block initial UI while waiting for slow backend cold starts.
+      setIsLoading(false);
+
+      // Verify token with backend in the background.
+      const response = await api.get('/auth/me');
+      setUser(response.data.user);
+      await SecureStore.setItemAsync('userData', JSON.stringify(response.data.user));
     } catch (error) {
       console.error('Error checking auth state:', error);
       // Token invalid, clear it
       await SecureStore.deleteItemAsync('authToken');
       await SecureStore.deleteItemAsync('userData');
+      setUser(null);
     } finally {
       setIsLoading(false);
     }

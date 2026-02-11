@@ -1,30 +1,228 @@
 import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
+import * as ImagePicker from 'expo-image-picker';
 import { ScreenContainer } from '@components/ScreenContainer';
-import { api } from '@api/client';
+import { AppButton } from '@components/AppButton';
+import { api, UploadFile } from '@api/client';
+import { Category, Market, Product } from '@app-types/models';
+
+type VendorOption = { id: string; businessName: string; user?: { name?: string } };
+
+const unitOptions = ['كيلو', 'ربطة', 'صندوق'];
 
 export const OwnerProductsScreen = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [markets, setMarkets] = useState<Market[]>([]);
+  const [vendors, setVendors] = useState<VendorOption[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [price, setPrice] = useState('');
+  const [unit, setUnit] = useState('كيلو');
+  const [marketId, setMarketId] = useState('');
+  const [vendorId, setVendorId] = useState('');
+  const [categoryId, setCategoryId] = useState('');
+  const [selectedImage, setSelectedImage] = useState<UploadFile | null>(null);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    const [productsRes, marketsRes, vendorsRes, categoriesRes] = await Promise.allSettled([
+      api.get<{ products: Product[] }>('/products'),
+      api.get<{ markets: Market[] }>('/markets?includeInactive=true'),
+      api.get<{ vendors: VendorOption[] }>('/vendors'),
+      api.get<{ categories: Category[] }>('/categories'),
+    ]);
+
+    const productsData = productsRes.status === 'fulfilled' ? productsRes.value.products || [] : [];
+    const marketsData = marketsRes.status === 'fulfilled' ? marketsRes.value.markets || [] : [];
+    const vendorsData = vendorsRes.status === 'fulfilled' ? vendorsRes.value.vendors || [] : [];
+    const categoriesData = categoriesRes.status === 'fulfilled' ? categoriesRes.value.categories || [] : [];
+
+    setProducts(productsData);
+    setMarkets(marketsData);
+    setVendors(vendorsData);
+    setCategories(categoriesData);
+
+    if (!marketId && marketsData.length) setMarketId(marketsData[0].id);
+    if (!vendorId && vendorsData.length) setVendorId(vendorsData[0].id);
+    if (!categoryId && categoriesData.length) setCategoryId(categoriesData[0].id);
+  };
 
   useEffect(() => {
-    (async () => {
-      try {
-        const response = await api.get<{ products: any[] }>('/products');
-        setProducts(response.products || []);
-      } catch {
-        setProducts([]);
-      }
-    })();
+    load();
   }, []);
+
+  const resetForm = () => {
+    setEditingId(null);
+    setName('');
+    setDescription('');
+    setPrice('');
+    setUnit('كيلو');
+    setSelectedImage(null);
+  };
+
+  const pickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: false, quality: 0.9 });
+      if (result.canceled || !result.assets?.length) return;
+
+      const asset = result.assets[0];
+      const rawName = asset.fileName || asset.uri.split('/').pop() || `product-${Date.now()}.jpg`;
+      const safeName = rawName.replace(/\s+/g, '_');
+      setSelectedImage({
+        uri: asset.uri,
+        name: safeName,
+        type: asset.mimeType || 'image/jpeg',
+      });
+    } catch (error: any) {
+      Alert.alert('خطأ', error?.message || 'تعذر اختيار الصورة');
+    }
+  };
+
+  const save = async () => {
+    if (!name.trim() || !price.trim() || !marketId || !vendorId || !categoryId) {
+      Alert.alert('تنبيه', 'يرجى تعبئة جميع الحقول الأساسية');
+      return;
+    }
+
+    const priceValue = Number(price);
+    if (Number.isNaN(priceValue) || priceValue <= 0) {
+      Alert.alert('تنبيه', 'يرجى إدخال سعر صحيح');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      let id = editingId;
+      if (editingId) {
+        await api.put(`/products/${editingId}`, {
+          name,
+          description,
+          unit,
+          price: priceValue,
+          marketId,
+          vendorId,
+          categoryId,
+        });
+      } else {
+        const created = await api.post<{ product: Product }>('/products', {
+          name,
+          description,
+          unit,
+          price: priceValue,
+          marketId,
+          vendorId,
+          categoryId,
+        });
+        id = created.product.id;
+      }
+
+      if (id && selectedImage) {
+        await api.upload(`/products/${id}/images`, selectedImage);
+      }
+
+      Alert.alert('تم', editingId ? 'تم تحديث المنتج' : 'تمت إضافة المنتج');
+      resetForm();
+      load();
+    } catch (error: any) {
+      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'فشل حفظ المنتج');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const startEdit = (product: Product) => {
+    setEditingId(product.id);
+    setName(product.name || '');
+    setDescription(product.description || '');
+    setPrice(String(product.price || ''));
+    setUnit(product.unit || 'كيلو');
+    setMarketId(product.marketId || product.market?.id || '');
+    setVendorId(product.vendorId || product.vendor?.id || '');
+    setCategoryId(product.categoryId || product.category?.id || '');
+    setSelectedImage(null);
+  };
+
+  const remove = async (id: string) => {
+    try {
+      await api.del(`/products/${id}`);
+      Alert.alert('تم', 'تم حذف المنتج');
+      load();
+    } catch (error: any) {
+      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر حذف المنتج');
+    }
+  };
+
+  const marketOptions = markets.filter((m) => m.isActive !== false);
 
   return (
     <ScreenContainer>
+      <View style={styles.card}>
+        <Text style={styles.title}>{editingId ? 'تعديل منتج' : 'إضافة منتج'}</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="اسم المنتج" textAlign="right" />
+        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder="الوصف" textAlign="right" />
+        <TextInput style={styles.input} value={price} onChangeText={setPrice} placeholder="السعر" keyboardType="decimal-pad" textAlign="right" />
+
+        <View style={styles.pickerWrap}>
+          <Picker selectedValue={unit} onValueChange={setUnit}>
+            {unitOptions.map((option) => (
+              <Picker.Item key={option} label={option} value={option} />
+            ))}
+          </Picker>
+        </View>
+
+        <View style={styles.pickerWrap}>
+          <Picker selectedValue={marketId} onValueChange={setMarketId}>
+            {marketOptions.map((market) => (
+              <Picker.Item key={market.id} label={market.name} value={market.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <View style={styles.pickerWrap}>
+          <Picker selectedValue={vendorId} onValueChange={setVendorId}>
+            {vendors.map((vendor) => (
+              <Picker.Item key={vendor.id} label={vendor.businessName} value={vendor.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <View style={styles.pickerWrap}>
+          <Picker selectedValue={categoryId} onValueChange={setCategoryId}>
+            {categories.map((category) => (
+              <Picker.Item key={category.id} label={category.nameAr} value={category.id} />
+            ))}
+          </Picker>
+        </View>
+
+        <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة المنتج'} onPress={pickImage} variant="ghost" />
+        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.preview} /> : null}
+
+        <AppButton label={editingId ? 'حفظ التعديلات' : 'إضافة المنتج'} onPress={save} loading={saving} />
+        {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
+      </View>
+
       {products.map((product) => (
         <View key={product.id} style={styles.item}>
-          <Text style={styles.title}>{product.name}</Text>
-          <Text style={styles.meta}>السوق: {product.market?.name}</Text>
-          <Text style={styles.meta}>البائع: {product.vendor?.businessName}</Text>
-          <Text style={styles.meta}>السعر: {product.price} ر.س</Text>
+          {product.images?.[0]?.imageUrl ? (
+            <Image source={{ uri: api.resolveAssetUrl(product.images[0].imageUrl) }} style={styles.itemImage} />
+          ) : null}
+          <Text style={styles.itemTitle}>{product.name}</Text>
+          <Text style={styles.itemMeta}>السوق: {product.market?.name}</Text>
+          <Text style={styles.itemMeta}>البائع: {product.vendor?.businessName}</Text>
+          <Text style={styles.itemMeta}>السعر: {product.price} ر.س / {product.unit}</Text>
+
+          <View style={styles.actionRow}>
+            <Pressable onPress={() => startEdit(product)} style={styles.actionBtn}>
+              <Text style={styles.actionText}>تعديل</Text>
+            </Pressable>
+            <Pressable onPress={() => remove(product.id)} style={styles.actionDanger}>
+              <Text style={styles.actionDangerText}>حذف</Text>
+            </Pressable>
+          </View>
         </View>
       ))}
     </ScreenContainer>
@@ -32,7 +230,64 @@ export const OwnerProductsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  item: { backgroundColor: 'rgba(255,255,255,0.96)', borderRadius: 12, padding: 12 },
-  title: { textAlign: 'right', fontWeight: '800', color: '#14532d' },
-  meta: { textAlign: 'right', color: '#4b5563' },
+  card: { backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: 16, padding: 14, gap: 8 },
+  title: { textAlign: 'right', fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
+  input: {
+    borderWidth: 1,
+    borderColor: '#99f6e4',
+    borderRadius: 10,
+    backgroundColor: '#f0fdfa',
+    paddingVertical: 10,
+    paddingHorizontal: 12,
+  },
+  pickerWrap: {
+    borderWidth: 1,
+    borderColor: '#99f6e4',
+    borderRadius: 10,
+    overflow: 'hidden',
+    backgroundColor: '#f0fdfa',
+  },
+  preview: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    backgroundColor: '#cffafe',
+  },
+  item: { backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: 12, padding: 12, gap: 5 },
+  itemImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 10,
+    marginBottom: 6,
+    backgroundColor: '#cffafe',
+  },
+  itemTitle: { textAlign: 'right', fontWeight: '800', color: '#0f2f3d' },
+  itemMeta: { textAlign: 'right', color: '#4a6572' },
+  actionRow: {
+    marginTop: 6,
+    flexDirection: 'row-reverse',
+    gap: 8,
+  },
+  actionBtn: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+    backgroundColor: '#ecfeff',
+  },
+  actionText: {
+    color: '#0f766e',
+    fontWeight: '700',
+  },
+  actionDanger: {
+    flex: 1,
+    borderRadius: 8,
+    paddingVertical: 8,
+    alignItems: 'center',
+    backgroundColor: '#fee2e2',
+  },
+  actionDangerText: {
+    color: '#b91c1c',
+    fontWeight: '700',
+  },
 });

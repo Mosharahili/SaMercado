@@ -4,7 +4,6 @@ import prisma from '../lib/prisma';
 import { authenticate, requirePermission } from '../middleware/auth';
 import { PERMISSIONS } from '../constants/permissions';
 import { upload } from '../middleware/upload';
-import { isInSchedule } from '../utils/popup';
 
 const router = Router();
 
@@ -15,8 +14,6 @@ const bannerSchema = z.object({
   ctaText: z.string().optional(),
   actionType: z.enum(['PRODUCT', 'MARKET', 'CATEGORY', 'EXTERNAL_LINK', 'NONE']).default('NONE'),
   actionValue: z.string().optional(),
-  startsAt: z.string().datetime().optional(),
-  endsAt: z.string().datetime().optional(),
   isEnabled: z.boolean().optional(),
   sortOrder: z.number().int().optional(),
   imageUrl: z.string().optional(),
@@ -33,7 +30,7 @@ router.get('/active', async (req, res) => {
     orderBy: [{ sortOrder: 'asc' }, { createdAt: 'desc' }],
   });
 
-  return res.json({ banners: banners.filter((b) => isInSchedule(b.startsAt, b.endsAt)) });
+  return res.json({ banners });
 });
 
 router.get('/', authenticate, requirePermission(PERMISSIONS.MANAGE_BANNERS), async (_req, res) => {
@@ -46,8 +43,6 @@ router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_BANNERS), as
   const banner = await prisma.banner.create({
     data: {
       ...data,
-      startsAt: data.startsAt ? new Date(data.startsAt) : undefined,
-      endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
       createdById: req.user!.id,
       imageUrl: data.imageUrl || '',
     },
@@ -77,11 +72,7 @@ router.put('/:id', authenticate, requirePermission(PERMISSIONS.MANAGE_BANNERS), 
   const data = bannerSchema.partial().parse(req.body);
   const banner = await prisma.banner.update({
     where: { id: req.params.id },
-    data: {
-      ...data,
-      startsAt: data.startsAt ? new Date(data.startsAt) : undefined,
-      endsAt: data.endsAt ? new Date(data.endsAt) : undefined,
-    },
+    data,
   });
 
   return res.json({ banner });

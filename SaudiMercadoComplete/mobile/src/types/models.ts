@@ -29,6 +29,7 @@ export interface Market {
   operatingHours?: string;
   priceRange?: string;
   imageUrl?: string;
+  isActive?: boolean;
   _count?: {
     vendorLinks: number;
     products: number;
@@ -48,11 +49,15 @@ export interface ProductImage {
 
 export interface Product {
   id: string;
+  marketId?: string;
+  vendorId?: string;
+  categoryId?: string;
   name: string;
   description?: string;
   unit: string;
   price: number;
   isAvailable: boolean;
+  stockQuantity?: number | null;
   category: Category;
   market: Market;
   vendor: {
@@ -74,6 +79,10 @@ export interface Banner {
   ctaText?: string;
   actionType?: string;
   actionValue?: string;
+  isEnabled?: boolean;
+  sortOrder?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Popup {
@@ -81,9 +90,20 @@ export interface Popup {
   title: string;
   message?: string;
   imageUrl?: string;
+  targetType?: 'ALL_USERS' | 'LOGGED_IN' | 'NEW_USERS' | 'SPECIFIC_MARKETS' | 'SPECIFIC_CATEGORIES';
+  trigger?: 'APP_OPEN' | 'PAGE_OPEN';
   primaryCtaText?: string;
+  primaryActionType?: string;
+  primaryActionValue?: string;
   secondaryCtaText?: string;
+  secondaryActionType?: string;
+  secondaryActionValue?: string;
   isDismissible: boolean;
+  startsAt?: string;
+  endsAt?: string;
+  isEnabled?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface CartItem {

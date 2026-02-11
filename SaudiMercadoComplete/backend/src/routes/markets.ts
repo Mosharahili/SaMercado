@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
 import { authenticate, requirePermission } from '../middleware/auth';
@@ -18,7 +19,9 @@ const marketSchema = z.object({
 });
 
 router.get('/', async (_req, res) => {
+  const includeInactive = _req.query.includeInactive === 'true';
   const markets = await prisma.market.findMany({
+    where: includeInactive ? undefined : { isActive: true },
     include: {
       _count: {
         select: {
@@ -71,8 +74,16 @@ router.put('/:id', authenticate, requirePermission(PERMISSIONS.MANAGE_MARKETS), 
 });
 
 router.delete('/:id', authenticate, requirePermission(PERMISSIONS.MANAGE_MARKETS), async (req, res) => {
-  await prisma.market.delete({ where: { id: req.params.id } });
-  return res.json({ message: 'Market deleted' });
+  try {
+    await prisma.market.delete({ where: { id: req.params.id } });
+    return res.json({ message: 'Market deleted' });
+  } catch (error) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      await prisma.market.update({ where: { id: req.params.id }, data: { isActive: false } });
+      return res.json({ message: 'Market has existing orders, so it was archived instead of deleted' });
+    }
+    throw error;
+  }
 });
 
 export default router;

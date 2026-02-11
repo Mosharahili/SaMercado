@@ -1,9 +1,8 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
-import { AppButton } from '@components/AppButton';
 import { BannerCarousel } from '@components/BannerCarousel';
 import { MarketCard } from '@components/MarketCard';
 import { theme } from '@theme/theme';
@@ -17,7 +16,7 @@ const features = [
   { icon: 'leaf-circle-outline', label: 'طازج يوميًا' },
 ] as const;
 
-export const HomeScreen = ({ navigation }: any) => {
+export const HomeScreen = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
   const [markets, setMarkets] = useState<Market[]>([]);
   const [popup, setPopup] = useState<Popup | null>(null);
@@ -49,6 +48,7 @@ export const HomeScreen = ({ navigation }: any) => {
   }, []);
 
   const marketCards = useMemo(() => (markets.length ? markets : mockMarkets), [markets]);
+  const popupImage = api.resolveAssetUrl(popup?.imageUrl);
 
   return (
     <ScreenContainer>
@@ -58,7 +58,7 @@ export const HomeScreen = ({ navigation }: any) => {
 
       <View style={styles.heroCard}>
         <Text style={styles.heroTitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
-        <AppButton label="تصفح الأسواق" onPress={() => navigation?.navigate('Markets')} />
+        <Text style={styles.heroHint}>أفضل جودة يومية من أسواقنا المعتمدة في الرياض</Text>
       </View>
 
       <View style={styles.featureRow}>
@@ -70,30 +70,25 @@ export const HomeScreen = ({ navigation }: any) => {
         ))}
       </View>
 
-      <Text style={styles.sectionTitle}>أسواق مميزة</Text>
+      <Text style={styles.sectionTitle}>الأسواق المتاحة</Text>
       {marketCards.map((market) => (
-        <MarketCard key={market.id} market={market} onBrowse={() => navigation?.navigate('Markets')} />
+        <MarketCard key={market.id} market={market} />
       ))}
 
       <View style={styles.bottomBanner}>
         <Text style={styles.bottomTitle}>عرض نهاية الأسبوع</Text>
-        <Text style={styles.bottomDesc}>استخدم كود SAUDI10 واحصل على خصم إضافي</Text>
+        <Text style={styles.bottomDesc}>شحن أسرع وأسعار يومية محدثة مباشرة من السوق</Text>
       </View>
 
       <Modal visible={popupVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
             <Text style={styles.modalTitle}>{popup?.title || 'إعلان'}</Text>
+            {popupImage ? <Image source={{ uri: popupImage }} style={styles.modalImage} /> : null}
             <Text style={styles.modalMessage}>{popup?.message || 'تابع أحدث العروض الحصرية اليوم'}</Text>
-            <View style={styles.modalActions}>
-              <AppButton
-                label={popup?.primaryCtaText || 'تصفح المنتج'}
-                onPress={() => setPopupVisible(false)}
-              />
-              <Pressable onPress={() => setPopupVisible(false)} style={styles.dismissBtn}>
-                <Text style={styles.dismissText}>{popup?.secondaryCtaText || 'لاحقًا'}</Text>
-              </Pressable>
-            </View>
+            <Pressable onPress={() => setPopupVisible(false)} style={styles.dismissBtn}>
+              <Text style={styles.dismissText}>{popup?.secondaryCtaText || 'إغلاق'}</Text>
+            </Pressable>
           </View>
         </View>
       </Modal>
@@ -106,7 +101,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.95)',
     borderRadius: 18,
     padding: theme.spacing.lg,
-    gap: 12,
+    gap: 8,
   },
   heroTitle: {
     textAlign: 'right',
@@ -114,8 +109,12 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '900',
   },
+  heroHint: {
+    textAlign: 'right',
+    color: theme.colors.textMuted,
+  },
   featureRow: {
-    flexDirection: 'row',
+    flexDirection: 'row-reverse',
     gap: 10,
   },
   featureBox: {
@@ -129,12 +128,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   featureText: {
-    color: '#14532d',
+    color: '#0f766e',
     fontWeight: '700',
     fontSize: 11,
   },
   sectionTitle: {
-    color: 'white',
+    color: '#0f2f3d',
     fontWeight: '900',
     fontSize: 20,
     textAlign: 'right',
@@ -142,24 +141,24 @@ const styles = StyleSheet.create({
   bottomBanner: {
     marginTop: 4,
     borderWidth: 1,
-    borderColor: '#86efac',
+    borderColor: '#67e8f9',
     borderRadius: 16,
     padding: 16,
-    backgroundColor: 'rgba(20,83,45,0.65)',
+    backgroundColor: 'rgba(34,211,238,0.18)',
   },
   bottomTitle: {
-    color: '#bbf7d0',
+    color: '#0e7490',
     textAlign: 'right',
     fontWeight: '800',
   },
   bottomDesc: {
-    color: 'white',
+    color: theme.colors.text,
     textAlign: 'right',
     marginTop: 4,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
+    backgroundColor: 'rgba(0,0,0,0.35)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 20,
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'white',
     borderRadius: 18,
     padding: 18,
-    gap: 8,
+    gap: 10,
   },
   modalTitle: {
     textAlign: 'right',
@@ -177,20 +176,24 @@ const styles = StyleSheet.create({
     fontWeight: '900',
     color: theme.colors.text,
   },
+  modalImage: {
+    width: '100%',
+    height: 170,
+    borderRadius: 12,
+    backgroundColor: '#cffafe',
+  },
   modalMessage: {
     textAlign: 'right',
     color: theme.colors.textMuted,
   },
-  modalActions: {
-    gap: 10,
-    marginTop: 10,
-  },
   dismissBtn: {
     alignItems: 'center',
     paddingVertical: 8,
+    borderRadius: 10,
+    backgroundColor: '#ecfeff',
   },
   dismissText: {
-    color: '#14532d',
+    color: '#0f766e',
     fontWeight: '700',
   },
 });

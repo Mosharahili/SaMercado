@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
+import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
@@ -8,111 +7,108 @@ import { ProductCard } from '@components/ProductCard';
 import { BannerCarousel } from '@components/BannerCarousel';
 import { useCart } from '@hooks/useCart';
 import { api } from '@api/client';
-import { Banner, Category, Market, Product } from '@app-types/models';
-import { mockBanners, mockCategories, mockMarkets, mockProducts } from '@utils/mockData';
+import { Banner, Product } from '@app-types/models';
+import { mockBanners, mockProducts } from '@utils/mockData';
 import { theme } from '@theme/theme';
 
 export const ProductsScreen = () => {
   const { addToCart } = useCart();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [categoryId, setCategoryId] = useState('');
-  const [marketId, setMarketId] = useState('');
-  const [vendorId, setVendorId] = useState('');
-  const [priceMin, setPriceMin] = useState('');
-  const [priceMax, setPriceMax] = useState('');
 
   const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [categories, setCategories] = useState<Category[]>(mockCategories);
-  const [markets, setMarkets] = useState<Market[]>(mockMarkets);
-  const [banners, setBanners] = useState<Banner[]>(mockBanners);
+  const [topBanners, setTopBanners] = useState<Banner[]>(mockBanners);
+  const [inlineOffers, setInlineOffers] = useState<Banner[]>([]);
 
-  const fetchData = async () => {
+  const fetchProducts = async (keyword?: string) => {
+    const q = keyword ?? search;
     try {
-      const [p, c, m, b] = await Promise.all([
-        api.get<{ products: Product[] }>(`/products?search=${encodeURIComponent(search)}&categoryId=${categoryId}&marketId=${marketId}&vendorId=${vendorId}&minPrice=${priceMin}&maxPrice=${priceMax}`),
-        api.get<{ categories: Category[] }>('/categories'),
-        api.get<{ markets: Market[] }>('/markets'),
-        api.get<{ banners: Banner[] }>('/banners/active?placement=PRODUCT_TOP'),
-      ]);
-
-      if (p.products?.length) setProducts(p.products);
-      if (c.categories?.length) setCategories(c.categories);
-      if (m.markets?.length) setMarkets(m.markets);
-      if (b.banners?.length) setBanners(b.banners);
+      const response = await api.get<{ products: Product[] }>(`/products?search=${encodeURIComponent(q.trim())}`);
+      setProducts(response.products || []);
     } catch (_error) {
       setProducts(mockProducts);
     }
   };
 
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      try {
+        const [productsRes, topRes, offerRes] = await Promise.all([
+          api.get<{ products: Product[] }>('/products'),
+          api.get<{ banners: Banner[] }>('/banners/active?placement=PRODUCT_TOP'),
+          api.get<{ banners: Banner[] }>('/banners/active?placement=PRODUCT_INLINE'),
+        ]);
+
+        setProducts(productsRes.products?.length ? productsRes.products : mockProducts);
+        setTopBanners(topRes.banners?.length ? topRes.banners : mockBanners);
+        setInlineOffers(offerRes.banners || []);
+      } catch (_error) {
+        setProducts(mockProducts);
+        setTopBanners(mockBanners);
+      }
+    };
+
+    load();
   }, []);
 
-  const filtered = useMemo(() => {
+  const visibleProducts = useMemo(() => {
+    if (!search.trim()) return products;
+
     return products.filter((product) => {
-      const matchSearch = search.trim()
-        ? product.name.toLowerCase().includes(search.toLowerCase()) ||
-          product.market.name.toLowerCase().includes(search.toLowerCase())
-        : true;
-
-      const matchCategory = categoryId ? product.category.id === categoryId : true;
-      const matchMarket = marketId ? product.market.id === marketId : true;
-      const matchVendor = vendorId ? product.vendor.id === vendorId : true;
-      const min = priceMin ? Number(priceMin) : 0;
-      const max = priceMax ? Number(priceMax) : Number.MAX_SAFE_INTEGER;
-      const matchPrice = Number(product.price) >= min && Number(product.price) <= max;
-
-      return matchSearch && matchCategory && matchMarket && matchVendor && matchPrice;
+      const keyword = search.toLowerCase();
+      return (
+        product.name.toLowerCase().includes(keyword) ||
+        product.market.name.toLowerCase().includes(keyword) ||
+        product.vendor.businessName.toLowerCase().includes(keyword)
+      );
     });
-  }, [products, search, categoryId, marketId, vendorId, priceMin, priceMax]);
+  }, [products, search]);
+
+  const topOffer = inlineOffers[0];
+  const topOfferImage = api.resolveAssetUrl(topOffer?.imageUrl);
 
   return (
     <ScreenContainer>
-      <AppHeader title="المنتجات" subtitle="خضار / فواكه / تمور" />
+      <AppHeader title="المنتجات" subtitle="تشكيلة يومية طازجة" />
 
-      <BannerCarousel banners={banners} />
+      <BannerCarousel banners={topBanners} />
 
-      <View style={styles.filterCard}>
+      {topOffer ? (
+        <View style={styles.offerCard}>
+          <Text style={styles.offerTag}>عرض خاص</Text>
+          {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} /> : null}
+          <Text style={styles.offerTitle}>{topOffer.title}</Text>
+          {!!topOffer.description && <Text style={styles.offerDesc}>{topOffer.description}</Text>}
+        </View>
+      ) : null}
+
+      <View style={styles.searchWrap}>
+        <Pressable
+          style={styles.searchBtn}
+          onPress={() => {
+            setSearch(searchInput);
+            fetchProducts(searchInput);
+          }}
+        >
+          <MaterialCommunityIcons name="magnify" size={20} color="white" />
+        </Pressable>
         <TextInput
-          style={styles.search}
-          value={search}
-          onChangeText={setSearch}
-          placeholder="ابحث عن المنتج أو السوق"
+          style={styles.searchInput}
+          value={searchInput}
+          onChangeText={setSearchInput}
+          placeholder="ابحث عن منتج أو سوق أو بائع"
           placeholderTextColor="#6b7280"
           textAlign="right"
+          onSubmitEditing={() => {
+            setSearch(searchInput);
+            fetchProducts(searchInput);
+          }}
         />
-
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={categoryId} onValueChange={setCategoryId}>
-            <Picker.Item label="كل الفئات" value="" />
-            {categories.map((category) => (
-              <Picker.Item key={category.id} label={category.nameAr} value={category.id} />
-            ))}
-          </Picker>
-        </View>
-
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={marketId} onValueChange={setMarketId}>
-            <Picker.Item label="كل الأسواق" value="" />
-            {markets.map((market) => (
-              <Picker.Item key={market.id} label={market.name} value={market.id} />
-            ))}
-          </Picker>
-        </View>
-
-        <View style={styles.inlineInputs}>
-          <TextInput style={styles.numberInput} value={priceMin} onChangeText={setPriceMin} keyboardType="numeric" placeholder="أقل سعر" textAlign="center" />
-          <TextInput style={styles.numberInput} value={priceMax} onChangeText={setPriceMax} keyboardType="numeric" placeholder="أعلى سعر" textAlign="center" />
-        </View>
-
-        <Pressable style={styles.applyBtn} onPress={fetchData}>
-          <Text style={styles.applyText}>تطبيق الفلاتر</Text>
-        </Pressable>
       </View>
 
       <View style={styles.rowBetween}>
-        <Text style={styles.countText}>عدد المنتجات: {filtered.length}</Text>
+        <Text style={styles.countText}>عدد المنتجات: {visibleProducts.length}</Text>
         <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={styles.toggleBtn}>
           <MaterialCommunityIcons name={viewMode === 'grid' ? 'view-list' : 'view-grid'} size={20} color="white" />
           <Text style={styles.toggleText}>{viewMode === 'grid' ? 'عرض قائمة' : 'عرض شبكي'}</Text>
@@ -120,21 +116,16 @@ export const ProductsScreen = () => {
       </View>
 
       <FlatList
-        data={filtered}
+        data={visibleProducts}
         key={viewMode}
         numColumns={viewMode === 'grid' ? 2 : 1}
         keyExtractor={(item) => item.id}
         columnWrapperStyle={viewMode === 'grid' ? { justifyContent: 'space-between' } : undefined}
-        contentContainerStyle={{ gap: 10, paddingBottom: 24 }}
+        contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
         scrollEnabled={false}
-        renderItem={({ item, index }) => (
-          <View style={{ width: viewMode === 'grid' ? '48.5%' : '100%' }}>
+        renderItem={({ item }) => (
+          <View style={{ width: viewMode === 'grid' ? '48.7%' : '100%' }}>
             <ProductCard product={item} onAdd={() => addToCart(item)} />
-            {index === 1 ? (
-              <View style={styles.inlineBanner}>
-                <Text style={styles.inlineBannerText}>عرض خاص داخل الصفحة</Text>
-              </View>
-            ) : null}
           </View>
         )}
       />
@@ -143,48 +134,60 @@ export const ProductsScreen = () => {
 };
 
 const styles = StyleSheet.create({
-  filterCard: {
-    backgroundColor: 'rgba(255,255,255,0.96)',
+  offerCard: {
+    backgroundColor: 'rgba(255,255,255,0.97)',
     borderRadius: 18,
     padding: 12,
+    borderWidth: 1,
+    borderColor: '#67e8f9',
     gap: 8,
   },
-  search: {
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 10,
-    backgroundColor: '#f0fdf4',
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+  offerTag: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#cffafe',
+    color: '#0e7490',
+    fontWeight: '800',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
   },
-  pickerWrap: {
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 10,
-    backgroundColor: '#f0fdf4',
-    overflow: 'hidden',
+  offerImage: {
+    width: '100%',
+    height: 140,
+    borderRadius: 12,
+    backgroundColor: '#ecfeff',
   },
-  inlineInputs: {
+  offerTitle: {
+    textAlign: 'right',
+    color: theme.colors.text,
+    fontWeight: '900',
+    fontSize: 16,
+  },
+  offerDesc: {
+    textAlign: 'right',
+    color: theme.colors.textMuted,
+  },
+  searchWrap: {
     flexDirection: 'row-reverse',
     gap: 8,
+    alignItems: 'center',
   },
-  numberInput: {
+  searchInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 10,
-    backgroundColor: '#f0fdf4',
-    paddingVertical: 10,
+    borderColor: '#99f6e4',
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.95)',
+    paddingHorizontal: 12,
+    paddingVertical: 11,
   },
-  applyBtn: {
+  searchBtn: {
+    width: 46,
+    height: 46,
+    borderRadius: 12,
     backgroundColor: theme.colors.primary,
-    borderRadius: 10,
     alignItems: 'center',
-    paddingVertical: 10,
-  },
-  applyText: {
-    color: 'white',
-    fontWeight: '800',
+    justifyContent: 'center',
   },
   rowBetween: {
     flexDirection: 'row-reverse',
@@ -192,14 +195,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   countText: {
-    color: '#dcfce7',
+    color: '#0e7490',
     fontWeight: '700',
   },
   toggleBtn: {
     flexDirection: 'row-reverse',
     gap: 6,
     alignItems: 'center',
-    backgroundColor: '#15803d',
+    backgroundColor: '#0d9488',
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
@@ -208,18 +211,5 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '700',
     fontSize: 12,
-  },
-  inlineBanner: {
-    marginTop: 8,
-    padding: 10,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#86efac',
-    backgroundColor: 'rgba(240,253,244,0.95)',
-  },
-  inlineBannerText: {
-    textAlign: 'center',
-    color: '#14532d',
-    fontWeight: '700',
   },
 });

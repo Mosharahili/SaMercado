@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { useAuth } from '@hooks/useAuth';
 import { AuthStack } from './stacks/AuthStack';
 import { CustomerTabs } from './tabs/CustomerTabs';
@@ -11,7 +12,11 @@ export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
 
   if (isLoading) {
-    return null; // Or loading screen
+    return (
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
   }
 
   return (
@@ -32,3 +37,11 @@ export const RootNavigator = () => {
     </NavigationContainer>
   );
 };
+
+const styles = StyleSheet.create({
+  loadingContainer: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

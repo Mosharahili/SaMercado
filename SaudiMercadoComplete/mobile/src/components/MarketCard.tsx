@@ -1,25 +1,22 @@
 import React from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Market } from '@app-types/models';
+import { api } from '@api/client';
 import { theme } from '@theme/theme';
 
-export const MarketCard = ({ market, onBrowse }: { market: Market; onBrowse?: () => void }) => {
+export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }) => {
+  const image = api.resolveAssetUrl(market.imageUrl);
+
   return (
     <View style={styles.card}>
+      {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.placeholder} />}
       <View style={styles.row}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} />
         <Text style={styles.title}>{market.name}</Text>
       </View>
-      <Text style={styles.meta}>المنطقة: {market.region}</Text>
+      <Text style={styles.meta}>المنطقة: {market.region || 'الرياض'}</Text>
       {market.description ? <Text style={styles.description}>{market.description}</Text> : null}
-      <Text style={styles.meta}>عدد البائعين: {market._count?.vendorLinks ?? 0}</Text>
-      <Text style={styles.meta}>ساعات العمل: {market.operatingHours || 'غير محدد'}</Text>
-      <Text style={styles.meta}>نطاق الأسعار: {market.priceRange || 'غير محدد'}</Text>
-
-      <Pressable style={styles.button} onPress={onBrowse}>
-        <Text style={styles.buttonText}>تصفح السوق</Text>
-      </Pressable>
     </View>
   );
 };
@@ -29,8 +26,20 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.96)',
     borderRadius: theme.radius.lg,
     padding: theme.spacing.md,
-    gap: 6,
+    gap: 10,
     ...theme.shadow.card,
+  },
+  image: {
+    width: '100%',
+    height: 160,
+    borderRadius: 12,
+    backgroundColor: '#ecfeff',
+  },
+  placeholder: {
+    width: '100%',
+    height: 160,
+    borderRadius: 12,
+    backgroundColor: '#cffafe',
   },
   row: {
     flexDirection: 'row-reverse',
@@ -51,18 +60,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     textAlign: 'right',
-    color: '#166534',
-    fontSize: 12,
-  },
-  button: {
-    marginTop: 8,
-    backgroundColor: '#dcfce7',
-    borderRadius: theme.radius.md,
-    paddingVertical: 10,
-    alignItems: 'center',
-  },
-  buttonText: {
-    color: theme.colors.primary,
-    fontWeight: '700',
+    color: '#155e75',
+    fontSize: 13,
   },
 });
