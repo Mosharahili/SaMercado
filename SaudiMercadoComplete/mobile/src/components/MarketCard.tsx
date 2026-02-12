@@ -10,13 +10,12 @@ export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }
 
   return (
     <View style={styles.card}>
-      {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.placeholder} />}
+      {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
       <View style={styles.row}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} />
         <Text style={styles.title}>{market.name}</Text>
       </View>
-      <Text style={styles.meta}>المنطقة: {market.region || 'الرياض'}</Text>
-      {market.description ? <Text style={styles.description}>{market.description}</Text> : null}
+      <Text style={styles.description}>{market.description || 'سوق موثوق بمنتجات طازجة وجودة يومية.'}</Text>
     </View>
   );
 };
@@ -58,11 +57,6 @@ const styles = StyleSheet.create({
   description: {
     textAlign: 'right',
     color: theme.colors.textMuted,
-    fontSize: 13,
-  },
-  meta: {
-    textAlign: 'right',
-    color: '#166534',
     fontSize: 13,
   },
 });

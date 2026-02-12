@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import { Router } from 'express';
 import { z } from 'zod';
 import prisma from '../lib/prisma';
@@ -22,8 +23,10 @@ const productSchema = z.object({
 router.get('/', async (req, res) => {
   const query = req.query;
   const search = String(query.search || '').trim();
+  const includeUnavailable = query.includeUnavailable === 'true';
 
   const where: any = {
+    ...(!includeUnavailable ? { isAvailable: true } : {}),
     ...(query.isAvailable === 'true' ? { isAvailable: true } : {}),
     ...(query.isAvailable === 'false' ? { isAvailable: false } : {}),
     ...(query.categoryId ? { categoryId: String(query.categoryId) } : {}),
@@ -206,8 +209,23 @@ router.delete('/:id', authenticate, requirePermission(PERMISSIONS.MANAGE_PRODUCT
     }
   }
 
-  await prisma.product.delete({ where: { id: req.params.id } });
-  return res.json({ message: 'Product deleted' });
+  try {
+    await prisma.product.delete({ where: { id: req.params.id } });
+    return res.json({ message: 'Product deleted' });
+  } catch (error) {
+    // If the product is already referenced by orders, keep data integrity and archive instead.
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      await prisma.product.update({
+        where: { id: req.params.id },
+        data: {
+          isAvailable: false,
+          stockQuantity: 0,
+        },
+      });
+      return res.json({ message: 'Product archived because it is linked to existing orders' });
+    }
+    throw error;
+  }
 });
 
 router.post(

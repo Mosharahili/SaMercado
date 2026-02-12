@@ -24,7 +24,7 @@ export const OwnerProductsScreen = () => {
 
   const load = async () => {
     const [productsRes, categoriesRes] = await Promise.allSettled([
-      api.get<{ products: Product[] }>('/products'),
+      api.get<{ products: Product[] }>('/products?includeUnavailable=true'),
       api.get<{ categories: Category[] }>('/categories'),
     ]);
 
@@ -136,8 +136,8 @@ export const OwnerProductsScreen = () => {
 
   const remove = async (id: string) => {
     try {
-      await api.del(`/products/${id}`);
-      Alert.alert('تم', 'تم حذف المنتج');
+      const response = await api.del<{ message?: string }>(`/products/${id}`);
+      Alert.alert('تم', response.message || 'تم حذف المنتج');
       load();
     } catch (error: any) {
       Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر حذف المنتج');
@@ -178,7 +178,7 @@ export const OwnerProductsScreen = () => {
         {selectedImages.length ? (
           <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.previewList}>
             {selectedImages.map((imageFile, index) => (
-              <Image key={`${imageFile.uri}-${index}`} source={{ uri: imageFile.uri }} style={styles.previewThumb} />
+              <Image key={`${imageFile.uri}-${index}`} source={{ uri: imageFile.uri }} style={styles.previewThumb} resizeMode="cover" />
             ))}
           </ScrollView>
         ) : null}
@@ -190,7 +190,7 @@ export const OwnerProductsScreen = () => {
       {products.map((product) => (
         <View key={product.id} style={styles.item}>
           {product.images?.[0]?.imageUrl ? (
-            <Image source={{ uri: api.resolveAssetUrl(product.images[0].imageUrl) }} style={styles.itemImage} />
+            <Image source={{ uri: api.resolveAssetUrl(product.images[0].imageUrl) }} style={styles.itemImage} resizeMode="cover" />
           ) : null}
           <Text style={styles.itemTitle}>{product.name}</Text>
           <Text style={styles.itemMeta}>السعر: {product.price} ر.س / {product.unit}</Text>

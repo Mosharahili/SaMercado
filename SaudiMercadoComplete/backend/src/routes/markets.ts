@@ -7,6 +7,29 @@ import { PERMISSIONS } from '../constants/permissions';
 
 const router = Router();
 
+const defaultRiyadhMarkets = [
+  {
+    name: 'اسواق عتيقة المركزية للخضار والفواكة',
+    region: 'الرياض',
+    description: 'سوق مركزي يومي بجودة عالية وأسعار منافسة',
+  },
+  {
+    name: 'سوق غرب الرياض للخضار والفاكهة',
+    region: 'الرياض',
+    description: 'منتجات طازجة مباشرة من موردين معتمدين',
+  },
+  {
+    name: 'سوق العزيزية الرياض للخضار والفاكهة',
+    region: 'الرياض',
+    description: 'تشكيلة متنوعة تناسب الطلب اليومي للعائلات',
+  },
+  {
+    name: 'سوق شمال الرياض للخضار والفاكهة',
+    region: 'الرياض',
+    description: 'خيارات موسمية ممتازة وخدمة موثوقة',
+  },
+] as const;
+
 const marketSchema = z.object({
   name: z.string().min(2),
   region: z.string().min(2),
@@ -20,6 +43,17 @@ const marketSchema = z.object({
 
 router.get('/', async (_req, res) => {
   const includeInactive = _req.query.includeInactive === 'true';
+
+  const totalMarkets = await prisma.market.count();
+  if (!totalMarkets) {
+    await prisma.market.createMany({
+      data: defaultRiyadhMarkets.map((market) => ({
+        ...market,
+        isActive: true,
+      })),
+    });
+  }
+
   const markets = await prisma.market.findMany({
     where: includeInactive ? undefined : { isActive: true },
     include: {
@@ -30,7 +64,7 @@ router.get('/', async (_req, res) => {
         },
       },
     },
-    orderBy: { createdAt: 'desc' },
+    orderBy: { createdAt: 'asc' },
   });
 
   return res.json({ markets });

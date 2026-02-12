@@ -38,16 +38,16 @@ export const ProductCard = ({
   return (
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.mediaWrap}>
-        {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.placeholder} />}
+        {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{product.category?.nameAr}</Text>
+          <Text style={styles.badgeText}>{product.category?.nameAr || 'منتج'}</Text>
         </View>
       </View>
       <View style={styles.body}>
         <Text style={styles.name} numberOfLines={2}>
           {product.name}
         </Text>
-        <Text style={styles.meta}>{product.market?.name}</Text>
+        <Text style={styles.meta}>{product.market?.name || 'سوق الرياض'}</Text>
 
         <View style={styles.bottomRow}>
           <View style={styles.priceWrap}>
@@ -77,6 +77,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.97)',
     borderRadius: theme.radius.lg,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: '#dcfce7',
     ...theme.shadow.card,
   },
   mediaWrap: {
@@ -89,7 +91,7 @@ const styles = StyleSheet.create({
   placeholder: {
     width: '100%',
     height: 140,
-    backgroundColor: '#cffafe',
+    backgroundColor: '#dcfce7',
   },
   body: {
     padding: 10,
@@ -104,7 +106,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 8,
     right: 8,
-    backgroundColor: 'rgba(12,74,110,0.82)',
+    backgroundColor: 'rgba(20,83,45,0.88)',
     borderRadius: theme.radius.pill,
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -118,6 +120,7 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
     textAlign: 'right',
     fontSize: 12,
+    marginTop: 2,
   },
   bottomRow: {
     marginTop: 8,
@@ -138,7 +141,7 @@ const styles = StyleSheet.create({
     color: theme.colors.primary,
   },
   unit: {
-    color: '#0e7490',
+    color: '#166534',
     fontSize: 12,
     fontWeight: '700',
   },

@@ -4,21 +4,17 @@ import { Banner } from '@app-types/models';
 import { api } from '@api/client';
 import { theme } from '@theme/theme';
 
-const fallbackImages = [
-  'https://images.unsplash.com/photo-1610832958506-aa56368176cf?auto=format&fit=crop&w=1080&q=80',
-  'https://images.unsplash.com/photo-1518843875459-f738682238a6?auto=format&fit=crop&w=1080&q=80',
-  'https://images.unsplash.com/photo-1619566636858-adf3ef46400b?auto=format&fit=crop&w=1080&q=80',
-];
-
 export const BannerCarousel = ({ banners }: { banners: Banner[] }) => {
-  const source = banners.length
-    ? banners.map((banner) => ({
-        id: banner.id,
-        title: banner.title,
-        description: banner.description,
-        imageUrl: api.resolveAssetUrl(banner.imageUrl),
-      }))
-    : fallbackImages.map((imageUrl, index) => ({ id: `fallback-${index}`, title: 'عرض اليوم', description: 'أجود المنتجات بأسعار خاصة', imageUrl }));
+  const source = banners
+    .map((banner) => ({
+      id: banner.id,
+      title: banner.title,
+      description: banner.description,
+      imageUrl: api.resolveAssetUrl(banner.imageUrl),
+    }))
+    .filter((banner) => Boolean(banner.imageUrl));
+
+  if (!source.length) return null;
 
   return (
     <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.wrap}>

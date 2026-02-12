@@ -37,7 +37,7 @@ export const LoginScreen = ({ navigation }: Props) => {
     <LinearGradient colors={theme.gradients.app} style={styles.container}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
-          <Image source={require('../../../assets/icon.png')} style={styles.logo} />
+          <Image source={require('../../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
           <Text style={styles.title}>سعودي ميركادو</Text>
           <Text style={styles.subtitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
 

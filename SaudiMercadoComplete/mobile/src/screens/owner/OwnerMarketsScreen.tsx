@@ -131,7 +131,7 @@ export const OwnerMarketsScreen = () => {
         <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder="الوصف" textAlign="right" />
 
         <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة السوق'} onPress={pickImage} variant="ghost" />
-        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.preview} /> : null}
+        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.preview} resizeMode="cover" /> : null}
 
         <AppButton label={editingId ? 'حفظ التعديلات' : 'إضافة السوق'} onPress={addOrUpdate} loading={saving} />
         {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
@@ -139,7 +139,9 @@ export const OwnerMarketsScreen = () => {
 
       {markets.map((market) => (
         <View key={market.id} style={styles.item}>
-          {market.imageUrl ? <Image source={{ uri: api.resolveAssetUrl(market.imageUrl) }} style={styles.itemImage} /> : null}
+          {market.imageUrl ? (
+            <Image source={{ uri: api.resolveAssetUrl(market.imageUrl) }} style={styles.itemImage} resizeMode="cover" />
+          ) : null}
           <Text style={styles.itemTitle}>{market.name}</Text>
           <Text style={styles.itemMeta}>{market.region}</Text>
           <Text style={styles.itemMeta}>{market.description || '-'}</Text>

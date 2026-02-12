@@ -101,12 +101,34 @@ router.delete('/items/:itemId', authenticate, async (req, res) => {
   return res.json({ message: 'Item removed' });
 });
 
-router.delete('/clear', authenticate, async (req, res) => {
-  const cart = await prisma.cart.findUnique({ where: { userId: req.user!.id } });
-  if (!cart) return res.json({ message: 'Cart cleared' });
+const clearCurrentUserCart = async (userId: string) => {
+  const cart = await prisma.cart.findUnique({ where: { userId } });
+  if (!cart) return { message: 'Cart cleared' };
 
   await prisma.cartItem.deleteMany({ where: { cartId: cart.id } });
-  return res.json({ message: 'Cart cleared' });
+  return { message: 'Cart cleared' };
+};
+
+router.delete('/clear', authenticate, async (req, res) => {
+  const payload = await clearCurrentUserCart(req.user!.id);
+  return res.json(payload);
+});
+
+// Keep POST compatibility for older mobile builds that may call this as POST.
+router.post('/clear', authenticate, async (req, res) => {
+  const payload = await clearCurrentUserCart(req.user!.id);
+  return res.json(payload);
+});
+
+// Tolerate accidental whitespace in legacy clients.
+router.post('/ clear', authenticate, async (req, res) => {
+  const payload = await clearCurrentUserCart(req.user!.id);
+  return res.json(payload);
+});
+
+router.delete('/ clear', authenticate, async (req, res) => {
+  const payload = await clearCurrentUserCart(req.user!.id);
+  return res.json(payload);
 });
 
 export default router;

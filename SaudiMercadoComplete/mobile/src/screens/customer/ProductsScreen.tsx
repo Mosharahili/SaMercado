@@ -9,7 +9,6 @@ import { BannerCarousel } from '@components/BannerCarousel';
 import { useCart } from '@hooks/useCart';
 import { api } from '@api/client';
 import { Banner, Product } from '@app-types/models';
-import { mockBanners, mockProducts } from '@utils/mockData';
 import { formatSAR } from '@utils/format';
 import { theme } from '@theme/theme';
 
@@ -20,8 +19,8 @@ export const ProductsScreen = () => {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'خضار' | 'فواكه' | 'تمور'>('ALL');
 
-  const [products, setProducts] = useState<Product[]>(mockProducts);
-  const [topBanners, setTopBanners] = useState<Banner[]>(mockBanners);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [topBanners, setTopBanners] = useState<Banner[]>([]);
   const [inlineOffers, setInlineOffers] = useState<Banner[]>([]);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -31,7 +30,7 @@ export const ProductsScreen = () => {
       const response = await api.get<{ products: Product[] }>(`/products?search=${encodeURIComponent(q.trim())}`);
       setProducts(response.products || []);
     } catch (_error) {
-      setProducts(mockProducts);
+      setProducts([]);
     }
   };
 
@@ -44,12 +43,12 @@ export const ProductsScreen = () => {
           api.get<{ banners: Banner[] }>('/banners/active?placement=PRODUCT_INLINE'),
         ]);
 
-        setProducts(productsRes.products?.length ? productsRes.products : mockProducts);
-        setTopBanners(topRes.banners?.length ? topRes.banners : mockBanners);
+        setProducts(productsRes.products || []);
+        setTopBanners(topRes.banners || []);
         setInlineOffers(offerRes.banners || []);
       } catch (_error) {
-        setProducts(mockProducts);
-        setTopBanners(mockBanners);
+        setProducts([]);
+        setTopBanners([]);
       }
     };
 
@@ -61,7 +60,7 @@ export const ProductsScreen = () => {
       const keyword = search.toLowerCase();
       const matchesSearch = !search.trim() || (
         product.name.toLowerCase().includes(keyword) ||
-        product.market.name.toLowerCase().includes(keyword)
+        (product.market?.name || '').toLowerCase().includes(keyword)
       );
 
       const categoryName = product.category?.nameAr || '';
@@ -82,7 +81,7 @@ export const ProductsScreen = () => {
       {topOffer ? (
         <View style={styles.offerCard}>
           <Text style={styles.offerTag}>عرض خاص</Text>
-          {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} /> : null}
+          {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} resizeMode="cover" /> : null}
           <Text style={styles.offerTitle}>{topOffer.title}</Text>
           {!!topOffer.description && <Text style={styles.offerDesc}>{topOffer.description}</Text>}
         </View>
@@ -140,6 +139,8 @@ export const ProductsScreen = () => {
         </Pressable>
       </View>
 
+      {!visibleProducts.length ? <Text style={styles.emptyText}>لا توجد منتجات مطابقة حالياً.</Text> : null}
+
       <FlatList
         data={visibleProducts}
         key={viewMode}
@@ -178,7 +179,7 @@ export const ProductsScreen = () => {
                   ).map((image) => {
                     const src = api.resolveAssetUrl(image.imageUrl);
                     return src ? (
-                      <Image key={image.id} source={{ uri: src }} style={styles.previewImage} />
+                      <Image key={image.id} source={{ uri: src }} style={styles.previewImage} resizeMode="cover" />
                     ) : (
                       <View key={image.id} style={styles.previewImagePlaceholder} />
                     );
@@ -231,7 +232,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: 140,
     borderRadius: 12,
-    backgroundColor: '#ecfeff',
+    backgroundColor: '#ecfdf3',
   },
   offerTitle: {
     textAlign: 'right',
@@ -299,6 +300,11 @@ const styles = StyleSheet.create({
     color: '#166534',
     fontWeight: '700',
   },
+  emptyText: {
+    textAlign: 'right',
+    color: '#4b6a5a',
+    marginBottom: 2,
+  },
   toggleBtn: {
     flexDirection: 'row-reverse',
     gap: 6,
@@ -353,13 +359,13 @@ const styles = StyleSheet.create({
     width: 220,
     height: 150,
     borderRadius: 12,
-    backgroundColor: '#cffafe',
+    backgroundColor: '#dcfce7',
   },
   previewImagePlaceholder: {
     width: 220,
     height: 150,
     borderRadius: 12,
-    backgroundColor: '#cffafe',
+    backgroundColor: '#dcfce7',
   },
   previewName: {
     textAlign: 'right',

@@ -5,7 +5,7 @@ import { theme } from '@theme/theme';
 export const AppHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/icon.png')} style={styles.logo} />
+      <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
       <View style={styles.textWrap}>
         <Text style={styles.title}>{title}</Text>
         {!!subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}

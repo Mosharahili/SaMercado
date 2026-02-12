@@ -6,6 +6,28 @@ import { AppButton } from '@components/AppButton';
 import { api } from '@api/client';
 
 const statusOptions = ['NEW', 'PROCESSING', 'PREPARING', 'READY_FOR_DELIVERY', 'DELIVERED', 'COMPLETED', 'CANCELLED'];
+const statusLabels: Record<string, string> = {
+  NEW: 'جديد',
+  PROCESSING: 'قيد المعالجة',
+  PREPARING: 'جاري التحضير',
+  READY_FOR_DELIVERY: 'جاهز للتوصيل',
+  DELIVERED: 'تم التسليم',
+  COMPLETED: 'مكتمل',
+  CANCELLED: 'ملغي',
+};
+
+const paymentMethodLabels: Record<string, string> = {
+  MADA: 'مدى',
+  APPLE_PAY: 'Apple Pay',
+  CASH_ON_DELIVERY: 'الدفع عند الاستلام',
+};
+
+const paymentStatusLabels: Record<string, string> = {
+  PENDING: 'قيد الانتظار',
+  SUCCEEDED: 'ناجح',
+  FAILED: 'فاشل',
+  REFUNDED: 'مسترد',
+};
 
 export const OwnerOrdersScreen = () => {
   const [orders, setOrders] = useState<any[]>([]);
@@ -71,8 +93,9 @@ export const OwnerOrdersScreen = () => {
           <Text style={styles.title}>#{order.orderNumber}</Text>
           <Text style={styles.meta}>العميل: {order.customer?.name || '-'}</Text>
           <Text style={styles.meta}>السوق: {order.market?.name || '-'}</Text>
-          <Text style={styles.meta}>طريقة الدفع: {order.payment?.method || '-'}</Text>
-          <Text style={styles.meta}>حالة الدفع: {order.payment?.status || '-'}</Text>
+          <Text style={styles.meta}>طريقة الدفع: {paymentMethodLabels[order.payment?.method] || order.payment?.method || '-'}</Text>
+          <Text style={styles.meta}>حالة الدفع: {paymentStatusLabels[order.payment?.status] || order.payment?.status || '-'}</Text>
+          <Text style={styles.meta}>حالة الطلب: {statusLabels[order.status] || order.status}</Text>
           <Text style={styles.meta}>الإجمالي: {order.totalAmount} ر.س</Text>
 
           <View style={styles.itemsWrap}>
@@ -86,7 +109,7 @@ export const OwnerOrdersScreen = () => {
           <View style={styles.pickerWrap}>
             <Picker selectedValue={order.status} onValueChange={(status) => setStatus(order.id, status)}>
               {statusOptions.map((status) => (
-                <Picker.Item key={status} label={status} value={status} />
+                <Picker.Item key={status} label={statusLabels[status]} value={status} />
               ))}
             </Picker>
           </View>

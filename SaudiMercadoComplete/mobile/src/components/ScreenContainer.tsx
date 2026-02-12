@@ -52,10 +52,12 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
+    direction: 'rtl',
   },
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.md,
+    direction: 'rtl',
   },
   ownerBackBtn: {
     alignSelf: 'flex-end',

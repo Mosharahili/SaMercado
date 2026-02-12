@@ -8,11 +8,11 @@ import { api, UploadFile } from '@api/client';
 import { Banner } from '@app-types/models';
 
 const placements = [
-  { label: 'Home Hero 1080x480', value: 'HOME_HERO' },
-  { label: 'Home Mid 1080x300', value: 'HOME_MID' },
-  { label: 'Home Bottom CTA', value: 'HOME_BOTTOM' },
-  { label: 'Product Top', value: 'PRODUCT_TOP' },
-  { label: 'Product Inline 1080x250', value: 'PRODUCT_INLINE' },
+  { label: 'الرئيسية (الهيدر) 1080x480', value: 'HOME_HERO' },
+  { label: 'الرئيسية (منتصف) 1080x300', value: 'HOME_MID' },
+  { label: 'الرئيسية (أسفل الصفحة)', value: 'HOME_BOTTOM' },
+  { label: 'المنتجات (أعلى الصفحة)', value: 'PRODUCT_TOP' },
+  { label: 'المنتجات (داخل القائمة) 1080x250', value: 'PRODUCT_INLINE' },
 ];
 
 const actionTypes = [
@@ -34,6 +34,14 @@ export const BannerManagerScreen = () => {
   const [actionValue, setActionValue] = useState('');
   const [selectedImage, setSelectedImage] = useState<UploadFile | null>(null);
   const [saving, setSaving] = useState(false);
+
+  const placementLabels: Record<string, string> = {
+    HOME_HERO: 'الرئيسية (الهيدر)',
+    HOME_MID: 'الرئيسية (منتصف)',
+    HOME_BOTTOM: 'الرئيسية (أسفل)',
+    PRODUCT_TOP: 'المنتجات (أعلى)',
+    PRODUCT_INLINE: 'المنتجات (داخل القائمة)',
+  };
 
   const load = async () => {
     try {
@@ -167,7 +175,7 @@ export const BannerManagerScreen = () => {
           </Picker>
         </View>
 
-        <TextInput style={styles.input} value={ctaText} onChangeText={setCtaText} placeholder="نص زر CTA" textAlign="right" />
+        <TextInput style={styles.input} value={ctaText} onChangeText={setCtaText} placeholder="نص زر الإجراء" textAlign="right" />
         <View style={styles.pickerWrap}>
           <Picker selectedValue={actionType} onValueChange={setActionType}>
             {actionTypes.map((action) => (
@@ -178,7 +186,7 @@ export const BannerManagerScreen = () => {
         <TextInput style={styles.input} value={actionValue} onChangeText={setActionValue} placeholder="قيمة الإجراء" textAlign="right" />
 
         <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة البوستر'} onPress={pickImage} variant="ghost" />
-        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} /> : null}
+        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} resizeMode="cover" /> : null}
 
         <AppButton label={editingId ? 'حفظ التعديلات' : 'حفظ البوستر'} onPress={save} loading={saving} />
         {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
@@ -186,9 +194,11 @@ export const BannerManagerScreen = () => {
 
       {banners.map((banner) => (
         <View key={banner.id} style={styles.item}>
-          {banner.imageUrl ? <Image source={{ uri: api.resolveAssetUrl(banner.imageUrl) }} style={styles.itemImage} /> : null}
+          {banner.imageUrl ? (
+            <Image source={{ uri: api.resolveAssetUrl(banner.imageUrl) }} style={styles.itemImage} resizeMode="cover" />
+          ) : null}
           <Text style={styles.itemTitle}>{banner.title}</Text>
-          <Text style={styles.itemMeta}>{banner.placement}</Text>
+          <Text style={styles.itemMeta}>{placementLabels[banner.placement] || banner.placement}</Text>
           <Text style={styles.itemMeta}>{banner.description || '-'}</Text>
           <Text style={styles.itemMeta}>الحالة: {banner.isEnabled ? 'مفعل' : 'متوقف'}</Text>
 

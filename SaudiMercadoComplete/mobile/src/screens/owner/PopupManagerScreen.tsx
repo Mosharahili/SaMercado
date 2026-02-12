@@ -152,28 +152,28 @@ export const PopupManagerScreen = () => {
 
         <View style={styles.pickerWrap}>
           <Picker selectedValue={targetType} onValueChange={setTargetType}>
-            <Picker.Item label="All users" value="ALL_USERS" />
-            <Picker.Item label="Only logged-in users" value="LOGGED_IN" />
-            <Picker.Item label="Only new users" value="NEW_USERS" />
-            <Picker.Item label="Specific markets" value="SPECIFIC_MARKETS" />
-            <Picker.Item label="Specific categories" value="SPECIFIC_CATEGORIES" />
+            <Picker.Item label="جميع المستخدمين" value="ALL_USERS" />
+            <Picker.Item label="المستخدمون المسجلون فقط" value="LOGGED_IN" />
+            <Picker.Item label="المستخدمون الجدد فقط" value="NEW_USERS" />
+            <Picker.Item label="أسواق محددة" value="SPECIFIC_MARKETS" />
+            <Picker.Item label="تصنيفات محددة" value="SPECIFIC_CATEGORIES" />
           </Picker>
         </View>
 
         <View style={styles.pickerWrap}>
           <Picker selectedValue={trigger} onValueChange={setTrigger}>
-            <Picker.Item label="App open" value="APP_OPEN" />
-            <Picker.Item label="Page open" value="PAGE_OPEN" />
+            <Picker.Item label="عند فتح التطبيق" value="APP_OPEN" />
+            <Picker.Item label="عند فتح صفحة" value="PAGE_OPEN" />
           </Picker>
         </View>
 
-        <TextInput style={styles.input} value={primaryCtaText} onChangeText={setPrimaryCtaText} placeholder="Primary CTA" textAlign="right" />
-        <TextInput style={styles.input} value={secondaryCtaText} onChangeText={setSecondaryCtaText} placeholder="Secondary CTA" textAlign="right" />
+        <TextInput style={styles.input} value={primaryCtaText} onChangeText={setPrimaryCtaText} placeholder="نص الزر الأساسي" textAlign="right" />
+        <TextInput style={styles.input} value={secondaryCtaText} onChangeText={setSecondaryCtaText} placeholder="نص الزر الثانوي" textAlign="right" />
         <DatePickerField label="تاريخ البداية" value={startsAt || undefined} placeholder="اختر تاريخ البداية (اختياري)" onChange={(value) => setStartsAt(value || '')} />
         <DatePickerField label="تاريخ النهاية" value={endsAt || undefined} placeholder="اختر تاريخ النهاية (اختياري)" onChange={(value) => setEndsAt(value || '')} />
 
         <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة النافذة'} onPress={pickImage} variant="ghost" />
-        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} /> : null}
+        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} resizeMode="cover" /> : null}
 
         <AppButton label={editingId ? 'حفظ التعديلات' : 'حفظ النافذة'} onPress={save} loading={saving} />
         {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
@@ -181,7 +181,9 @@ export const PopupManagerScreen = () => {
 
       {popups.map((popup) => (
         <View key={popup.id} style={styles.item}>
-          {popup.imageUrl ? <Image source={{ uri: api.resolveAssetUrl(popup.imageUrl) }} style={styles.itemImage} /> : null}
+          {popup.imageUrl ? (
+            <Image source={{ uri: api.resolveAssetUrl(popup.imageUrl) }} style={styles.itemImage} resizeMode="cover" />
+          ) : null}
           <Text style={styles.itemTitle}>{popup.title}</Text>
           <Text style={styles.itemMeta}>{popup.message || '-'}</Text>
           <Text style={styles.itemMeta}>التاريخ: {popup.startsAt ? new Date(popup.startsAt).toLocaleDateString('ar-SA') : '-'} → {popup.endsAt ? new Date(popup.endsAt).toLocaleDateString('ar-SA') : '-'}</Text>
