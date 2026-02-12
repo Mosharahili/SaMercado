@@ -83,7 +83,7 @@ export const OwnerProductsScreen = () => {
   };
 
   const save = async () => {
-    if (!name.trim() || !price.trim() || !marketId || !vendorId || !categoryId) {
+    if (!name.trim() || !price.trim() || !vendorId || !categoryId) {
       Alert.alert('تنبيه', 'يرجى تعبئة جميع الحقول الأساسية');
       return;
     }
@@ -96,6 +96,7 @@ export const OwnerProductsScreen = () => {
 
     setSaving(true);
     try {
+      const effectiveMarketId = marketId || markets.find((market) => market.isActive !== false)?.id;
       let id = editingId;
       if (editingId) {
         await api.put(`/products/${editingId}`, {
@@ -103,7 +104,7 @@ export const OwnerProductsScreen = () => {
           description,
           unit,
           price: priceValue,
-          marketId,
+          ...(effectiveMarketId ? { marketId: effectiveMarketId } : {}),
           vendorId,
           categoryId,
         });
@@ -113,7 +114,7 @@ export const OwnerProductsScreen = () => {
           description,
           unit,
           price: priceValue,
-          marketId,
+          ...(effectiveMarketId ? { marketId: effectiveMarketId } : {}),
           vendorId,
           categoryId,
         });
@@ -156,8 +157,6 @@ export const OwnerProductsScreen = () => {
     }
   };
 
-  const marketOptions = markets.filter((m) => m.isActive !== false);
-
   return (
     <ScreenContainer>
       <View style={styles.card}>
@@ -170,14 +169,6 @@ export const OwnerProductsScreen = () => {
           <Picker selectedValue={unit} onValueChange={setUnit}>
             {unitOptions.map((option) => (
               <Picker.Item key={option} label={option} value={option} />
-            ))}
-          </Picker>
-        </View>
-
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={marketId} onValueChange={setMarketId}>
-            {marketOptions.map((market) => (
-              <Picker.Item key={market.id} label={market.name} value={market.id} />
             ))}
           </Picker>
         </View>
@@ -211,7 +202,6 @@ export const OwnerProductsScreen = () => {
             <Image source={{ uri: api.resolveAssetUrl(product.images[0].imageUrl) }} style={styles.itemImage} />
           ) : null}
           <Text style={styles.itemTitle}>{product.name}</Text>
-          <Text style={styles.itemMeta}>السوق: {product.market?.name}</Text>
           <Text style={styles.itemMeta}>البائع: {product.vendor?.businessName}</Text>
           <Text style={styles.itemMeta}>السعر: {product.price} ر.س / {product.unit}</Text>
 

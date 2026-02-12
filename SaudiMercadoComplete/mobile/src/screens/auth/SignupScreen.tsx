@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { Picker } from '@react-native-picker/picker';
 import { AuthStackParamList } from '@navigation/types';
 import { useAuth } from '@hooks/useAuth';
 import { AppButton } from '@components/AppButton';
@@ -16,7 +15,6 @@ export const SignupScreen = ({ navigation }: Props) => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<'CUSTOMER' | 'VENDOR'>('CUSTOMER');
   const [loading, setLoading] = useState(false);
 
   const onSignup = async () => {
@@ -25,9 +23,14 @@ export const SignupScreen = ({ navigation }: Props) => {
       return;
     }
 
+    if (password.length < 6) {
+      Alert.alert('تنبيه', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      return;
+    }
+
     setLoading(true);
     try {
-      await signup({ name: name.trim(), email: email.trim(), password, role });
+      await signup({ name: name.trim(), email: email.trim(), password });
     } catch (error) {
       const err = error as ApiError;
       Alert.alert('خطأ', err.response?.data?.error || err.message || 'فشل إنشاء الحساب');
@@ -51,14 +54,7 @@ export const SignupScreen = ({ navigation }: Props) => {
 
             <Text style={styles.label}>كلمة المرور</Text>
             <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
-
-            <Text style={styles.label}>نوع الحساب</Text>
-            <View style={styles.pickerWrap}>
-              <Picker selectedValue={role} onValueChange={(value) => setRole(value)}>
-                <Picker.Item label="عميل" value="CUSTOMER" />
-                <Picker.Item label="بائع" value="VENDOR" />
-              </Picker>
-            </View>
+            <Text style={styles.hint}>سيتم إنشاء الحساب كعميل. حسابات البائعين والإدارة تُنشأ من لوحة التحكم.</Text>
 
             <AppButton label="إنشاء الحساب" onPress={onSignup} loading={loading} />
 
@@ -107,12 +103,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     textAlign: 'right',
   },
-  pickerWrap: {
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    borderRadius: 12,
-    overflow: 'hidden',
-    backgroundColor: '#f0fdf4',
+  hint: {
+    textAlign: 'right',
+    color: '#4a6572',
+    fontSize: 12,
+    marginBottom: 2,
   },
   linkWrap: { marginTop: 8 },
   link: {

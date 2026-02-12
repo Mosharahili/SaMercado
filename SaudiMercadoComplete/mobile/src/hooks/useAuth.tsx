@@ -7,7 +7,7 @@ type AuthContextValue = {
   user: User | null;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  signup: (input: { name: string; email: string; password: string; role?: 'CUSTOMER' | 'VENDOR' }) => Promise<void>;
+  signup: (input: { name: string; email: string; password: string }) => Promise<void>;
   logout: () => Promise<void>;
   hasPermission: (code: string) => boolean;
 };
@@ -55,7 +55,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(response.user);
   };
 
-  const signup = async (input: { name: string; email: string; password: string; role?: 'CUSTOMER' | 'VENDOR' }) => {
+  const signup = async (input: { name: string; email: string; password: string }) => {
     const response = await api.post<{ token: string; user: User }>('/auth/register', input);
     await SecureStore.setItemAsync(TOKEN_KEY, response.token);
     await SecureStore.setItemAsync(USER_KEY, JSON.stringify(response.user));

@@ -26,7 +26,10 @@
       "expo-notifications"
     ],
     "extra": {
-      "apiBaseUrl": "https://samercado.onrender.com/api"
+      "apiBaseUrl": "https://samercado.onrender.com/api",
+      "eas": {
+        "projectId": "b47a4cb6-30e2-4a38-b0e7-382d6fe0b735"
+      }
     }
   }
 }

@@ -13,8 +13,6 @@ const registerSchema = z.object({
   password: z.string().min(6),
   name: z.string().min(2),
   phone: z.string().optional(),
-  role: z.enum(['CUSTOMER', 'VENDOR']).optional().default('CUSTOMER'),
-  businessName: z.string().optional(),
 });
 
 const loginSchema = z.object({
@@ -38,17 +36,7 @@ router.post('/register', async (req, res) => {
       passwordHash: hashed,
       name: body.name,
       phone: body.phone,
-      role: body.role,
-      vendorProfile:
-        body.role === 'VENDOR'
-          ? {
-              create: {
-                businessName: body.businessName || body.name,
-                businessPhone: body.phone,
-                isApproved: false,
-              },
-            }
-          : undefined,
+      role: 'CUSTOMER',
     },
     include: {
       permissions: { include: { permission: true } },

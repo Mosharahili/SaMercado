@@ -124,4 +124,4 @@ export interface Order {
   createdAt: string;
 }
 
-export type PaymentMethod = 'STC_PAY' | 'MADA' | 'APPLE_PAY' | 'CASH_ON_DELIVERY';
+export type PaymentMethod = 'MADA' | 'APPLE_PAY' | 'CASH_ON_DELIVERY';

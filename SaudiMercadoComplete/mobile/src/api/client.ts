@@ -28,6 +28,15 @@ export type ApiError = Error & {
   };
 };
 
+const safeParseResponse = (text: string) => {
+  if (!text) return {};
+  try {
+    return JSON.parse(text);
+  } catch {
+    return { message: text };
+  }
+};
+
 const request = async <T = any>(path: string, options: RequestOptions = {}): Promise<T> => {
   const token = await SecureStore.getItemAsync('auth_token');
   const timeoutMs = options.timeoutMs ?? 30000;
@@ -46,7 +55,7 @@ const request = async <T = any>(path: string, options: RequestOptions = {}): Pro
     });
 
     const text = await response.text();
-    const data = text ? JSON.parse(text) : {};
+    const data = safeParseResponse(text);
 
     if (!response.ok) {
       const error = new Error(data?.error || data?.message || 'Request failed') as ApiError;
@@ -113,7 +122,7 @@ const upload = async <T = any>(
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : {};
+  const data = safeParseResponse(text);
 
   if (!response.ok) {
     const error = new Error(data?.error || data?.message || 'Upload failed') as ApiError;

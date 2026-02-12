@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
@@ -10,11 +10,15 @@ const statusOptions = ['NEW', 'PROCESSING', 'PREPARING', 'READY_FOR_DELIVERY', '
 export const OwnerOrdersScreen = () => {
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [orderSearch, setOrderSearch] = useState('');
 
-  const load = async () => {
+  const load = async (searchTerm?: string) => {
     setLoading(true);
     try {
-      const response = await api.get<{ orders: any[] }>('/orders');
+      const query = (searchTerm ?? orderSearch).trim();
+      const response = await api.get<{ orders: any[] }>(
+        `/orders${query ? `?orderNumber=${encodeURIComponent(query)}` : ''}`
+      );
       setOrders(response.orders || []);
     } catch (error: any) {
       setOrders([]);
@@ -39,7 +43,21 @@ export const OwnerOrdersScreen = () => {
 
   return (
     <ScreenContainer>
-      <AppButton label={loading ? 'جارِ التحديث...' : 'تحديث الطلبات'} onPress={load} variant="ghost" />
+      <View style={styles.searchRow}>
+        <Pressable style={styles.searchBtn} onPress={() => load(orderSearch)}>
+          <Text style={styles.searchBtnText}>بحث</Text>
+        </Pressable>
+        <TextInput
+          style={styles.searchInput}
+          value={orderSearch}
+          onChangeText={setOrderSearch}
+          placeholder="ابحث برقم الطلب"
+          placeholderTextColor="#64748b"
+          textAlign="right"
+          onSubmitEditing={() => load(orderSearch)}
+        />
+      </View>
+      <AppButton label={loading ? 'جارِ التحديث...' : 'تحديث الطلبات'} onPress={() => load()} variant="ghost" />
 
       {!orders.length ? (
         <View style={styles.emptyCard}>
@@ -73,7 +91,7 @@ export const OwnerOrdersScreen = () => {
             </Picker>
           </View>
 
-          <Pressable onPress={load} style={styles.refreshBtn}>
+          <Pressable onPress={() => load()} style={styles.refreshBtn}>
             <Text style={styles.refreshText}>حفظ الحالة</Text>
           </Pressable>
         </View>
@@ -83,6 +101,30 @@ export const OwnerOrdersScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  searchRow: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+    alignItems: 'center',
+  },
+  searchInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: '#99f6e4',
+    borderRadius: 10,
+    backgroundColor: '#f0fdfa',
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  searchBtn: {
+    backgroundColor: '#0d9488',
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  searchBtnText: {
+    color: 'white',
+    fontWeight: '700',
+  },
   emptyCard: {
     backgroundColor: 'rgba(255,255,255,0.96)',
     borderRadius: 14,

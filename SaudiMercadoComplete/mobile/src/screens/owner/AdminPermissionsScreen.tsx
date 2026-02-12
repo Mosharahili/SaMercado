@@ -23,6 +23,11 @@ export const AdminPermissionsScreen = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [vendorName, setVendorName] = useState('');
+  const [vendorEmail, setVendorEmail] = useState('');
+  const [vendorPassword, setVendorPassword] = useState('');
+  const [vendorBusinessName, setVendorBusinessName] = useState('');
+  const [vendorPhone, setVendorPhone] = useState('');
 
   const load = async () => {
     try {
@@ -61,6 +66,35 @@ export const AdminPermissionsScreen = () => {
     }
   };
 
+  const createVendor = async () => {
+    if (!vendorName.trim() || !vendorEmail.trim() || !vendorPassword.trim() || !vendorBusinessName.trim()) {
+      Alert.alert('تنبيه', 'يرجى تعبئة بيانات البائع');
+      return;
+    }
+
+    try {
+      await api.post('/admin/vendors', {
+        name: vendorName.trim(),
+        email: vendorEmail.trim(),
+        password: vendorPassword,
+        businessName: vendorBusinessName.trim(),
+        phone: vendorPhone.trim() || undefined,
+        businessPhone: vendorPhone.trim() || undefined,
+        isApproved: true,
+      });
+
+      Alert.alert('تم', 'تم إنشاء حساب البائع بنجاح');
+      setVendorName('');
+      setVendorEmail('');
+      setVendorPassword('');
+      setVendorBusinessName('');
+      setVendorPhone('');
+      load();
+    } catch (error: any) {
+      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر إنشاء البائع');
+    }
+  };
+
   return (
     <ScreenContainer>
       <View style={styles.card}>
@@ -84,6 +118,16 @@ export const AdminPermissionsScreen = () => {
         <AppButton label="إنشاء الأدمن" onPress={createAdmin} />
       </View>
 
+      <View style={styles.card}>
+        <Text style={styles.title}>إضافة بائع جديد</Text>
+        <TextInput style={styles.input} value={vendorName} onChangeText={setVendorName} placeholder="اسم المسؤول" textAlign="right" />
+        <TextInput style={styles.input} value={vendorBusinessName} onChangeText={setVendorBusinessName} placeholder="اسم النشاط التجاري" textAlign="right" />
+        <TextInput style={styles.input} value={vendorEmail} onChangeText={setVendorEmail} placeholder="البريد الإلكتروني" textAlign="right" />
+        <TextInput style={styles.input} value={vendorPhone} onChangeText={setVendorPhone} placeholder="رقم الجوال (اختياري)" textAlign="right" />
+        <TextInput style={styles.input} value={vendorPassword} onChangeText={setVendorPassword} placeholder="كلمة المرور" secureTextEntry textAlign="right" />
+        <AppButton label="إنشاء البائع" onPress={createVendor} />
+      </View>
+
       {users
         .filter((u) => u.role === 'ADMIN')
         .map((user) => (
@@ -91,6 +135,16 @@ export const AdminPermissionsScreen = () => {
             <Text style={styles.itemTitle}>{user.name}</Text>
             <Text style={styles.itemMeta}>{user.email}</Text>
             <Text style={styles.itemMeta}>الصلاحيات: {(user.permissions || []).map((p: any) => p.permission?.code).join(', ')}</Text>
+          </View>
+        ))}
+
+      {users
+        .filter((u) => u.role === 'VENDOR')
+        .map((user) => (
+          <View key={user.id} style={styles.item}>
+            <Text style={styles.itemTitle}>{user.vendorProfile?.businessName || user.name}</Text>
+            <Text style={styles.itemMeta}>{user.email}</Text>
+            <Text style={styles.itemMeta}>الحالة: {user.vendorProfile?.isApproved ? 'معتمد' : 'قيد المراجعة'}</Text>
           </View>
         ))}
     </ScreenContainer>

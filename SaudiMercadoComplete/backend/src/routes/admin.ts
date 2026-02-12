@@ -14,6 +14,16 @@ const createAdminSchema = z.object({
   permissions: z.array(z.string()).default([]),
 });
 
+const createVendorSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(6),
+  phone: z.string().optional(),
+  businessName: z.string().min(2),
+  businessPhone: z.string().optional(),
+  isApproved: z.boolean().optional().default(true),
+});
+
 router.use(authenticate, requireRole('OWNER'));
 
 router.get('/permissions', async (_req, res) => {
@@ -83,6 +93,42 @@ router.post('/admins', async (req, res) => {
   });
 
   return res.status(201).json({ admin });
+});
+
+router.post('/vendors', async (req, res) => {
+  const body = createVendorSchema.parse(req.body);
+  const existing = await prisma.user.findUnique({ where: { email: body.email } });
+  if (existing) {
+    return res.status(400).json({ error: 'Email already exists' });
+  }
+
+  const passwordHash = await bcrypt.hash(body.password, 10);
+
+  const vendor = await prisma.$transaction(async (tx) => {
+    const user = await tx.user.create({
+      data: {
+        name: body.name,
+        email: body.email,
+        passwordHash,
+        phone: body.phone,
+        role: 'VENDOR',
+      },
+    });
+
+    return tx.vendor.create({
+      data: {
+        userId: user.id,
+        businessName: body.businessName,
+        businessPhone: body.businessPhone || body.phone,
+        isApproved: body.isApproved,
+      },
+      include: {
+        user: true,
+      },
+    });
+  });
+
+  return res.status(201).json({ vendor });
 });
 
 router.patch('/users/:id/permissions', async (req, res) => {

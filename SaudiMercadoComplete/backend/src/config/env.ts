@@ -17,4 +17,8 @@ export const env = {
   jwtSecret: requireEnv('JWT_SECRET', 'change-me-in-production'),
   clientOrigin: process.env.CLIENT_ORIGIN || '*',
   uploadsDir: process.env.UPLOADS_DIR || 'uploads',
+  madaPaymentInitUrl: process.env.MADA_PAYMENT_INIT_URL || '',
+  madaPaymentApiKey: process.env.MADA_PAYMENT_API_KEY || '',
+  applePayInitUrl: process.env.APPLE_PAY_INIT_URL || '',
+  applePayApiKey: process.env.APPLE_PAY_API_KEY || '',
 };

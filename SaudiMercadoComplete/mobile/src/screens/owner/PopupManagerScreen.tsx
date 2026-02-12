@@ -4,6 +4,7 @@ import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
+import { DatePickerField } from '@components/DatePickerField';
 import { api, UploadFile } from '@api/client';
 import { Popup } from '@app-types/models';
 
@@ -145,7 +146,7 @@ export const PopupManagerScreen = () => {
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>{editingId ? 'تعديل Popup' : 'Popup Manager'}</Text>
+        <Text style={styles.title}>{editingId ? 'تعديل النافذة المنبثقة' : 'مدير النوافذ المنبثقة'}</Text>
         <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="العنوان" textAlign="right" />
         <TextInput style={styles.input} value={message} onChangeText={setMessage} placeholder="الرسالة" textAlign="right" />
 
@@ -168,8 +169,8 @@ export const PopupManagerScreen = () => {
 
         <TextInput style={styles.input} value={primaryCtaText} onChangeText={setPrimaryCtaText} placeholder="Primary CTA" textAlign="right" />
         <TextInput style={styles.input} value={secondaryCtaText} onChangeText={setSecondaryCtaText} placeholder="Secondary CTA" textAlign="right" />
-        <TextInput style={styles.input} value={startsAt} onChangeText={setStartsAt} placeholder="Start date ISO (اختياري)" textAlign="right" />
-        <TextInput style={styles.input} value={endsAt} onChangeText={setEndsAt} placeholder="End date ISO (اختياري)" textAlign="right" />
+        <DatePickerField label="تاريخ البداية" value={startsAt || undefined} placeholder="اختر تاريخ البداية (اختياري)" onChange={(value) => setStartsAt(value || '')} />
+        <DatePickerField label="تاريخ النهاية" value={endsAt || undefined} placeholder="اختر تاريخ النهاية (اختياري)" onChange={(value) => setEndsAt(value || '')} />
 
         <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة النافذة'} onPress={pickImage} variant="ghost" />
         {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} /> : null}

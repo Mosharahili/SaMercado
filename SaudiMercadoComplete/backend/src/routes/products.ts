@@ -14,7 +14,7 @@ const productSchema = z.object({
   price: z.number().positive(),
   isAvailable: z.boolean().optional(),
   stockQuantity: z.number().int().optional(),
-  marketId: z.string().min(1),
+  marketId: z.string().min(1).optional(),
   vendorId: z.string().min(1),
   categoryId: z.string().min(1),
 });
@@ -81,6 +81,17 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_PRODUCTS), async (req, res) => {
   const data = productSchema.parse(req.body);
+  const fallbackMarket = !data.marketId
+    ? await prisma.market.findFirst({
+        where: { isActive: true },
+        orderBy: { createdAt: 'asc' },
+      })
+    : null;
+
+  const resolvedMarketId = data.marketId || fallbackMarket?.id;
+  if (!resolvedMarketId) {
+    return res.status(400).json({ error: 'No active market available. Please add a market first.' });
+  }
 
   if (req.user!.role === 'VENDOR') {
     const vendor = await prisma.vendor.findFirst({ where: { userId: req.user!.id } });
@@ -89,7 +100,12 @@ router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_PRODUCTS), a
     }
   }
 
-  const product = await prisma.product.create({ data });
+  const product = await prisma.product.create({
+    data: {
+      ...data,
+      marketId: resolvedMarketId,
+    },
+  });
   return res.status(201).json({ product });
 });
 

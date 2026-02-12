@@ -6,11 +6,13 @@ import { authenticate, requirePermission } from '../middleware/auth';
 import { PERMISSIONS } from '../constants/permissions';
 import { generateOrderNumber } from '../utils/order';
 import { emitOrderUpdate } from '../realtime/socket';
+import { initiatePayment } from '../services/paymentProviders';
 
 const router = Router();
 
 const checkoutSchema = z.object({
-  paymentMethod: z.enum(['STC_PAY', 'MADA', 'APPLE_PAY', 'CASH_ON_DELIVERY']),
+  paymentMethod: z.enum(['MADA', 'APPLE_PAY', 'CASH_ON_DELIVERY']),
+  contactPhone: z.string().regex(/^05\d{8}$/),
   deliveryFee: z.number().nonnegative().default(15),
   taxRate: z.number().nonnegative().default(0.15),
   notes: z.string().optional(),
@@ -22,6 +24,14 @@ const statusSchema = z.object({
 
 router.post('/checkout', authenticate, async (req, res) => {
   const body = checkoutSchema.parse(req.body);
+  const customer = await prisma.user.findUnique({
+    where: { id: req.user!.id },
+    select: { id: true, email: true, phone: true },
+  });
+
+  if (!customer) {
+    return res.status(404).json({ error: 'Customer not found' });
+  }
 
   const cart = await prisma.cart.findUnique({
     where: { userId: req.user!.id },
@@ -62,10 +72,18 @@ router.post('/checkout', authenticate, async (req, res) => {
       totalAmount: Prisma.Decimal;
     }> = [];
 
+    await tx.user.update({
+      where: { id: req.user!.id },
+      data: { phone: body.contactPhone },
+    });
+
     for (const [marketId, marketItems] of groupedByMarket.entries()) {
       const subtotal = marketItems.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0);
       const taxAmount = subtotal * body.taxRate;
       const totalAmount = subtotal + body.deliveryFee + taxAmount;
+      const orderNotes = body.notes?.trim()
+        ? `${body.notes.trim()} | هاتف التواصل: ${body.contactPhone}`
+        : `هاتف التواصل: ${body.contactPhone}`;
 
       const created = await tx.order.create({
         data: {
@@ -76,7 +94,7 @@ router.post('/checkout', authenticate, async (req, res) => {
           deliveryFee: body.deliveryFee,
           taxAmount,
           totalAmount,
-          notes: body.notes,
+          notes: orderNotes,
           items: {
             create: marketItems.map((item) => ({
               productId: item.productId,
@@ -93,7 +111,7 @@ router.post('/checkout', authenticate, async (req, res) => {
         data: {
           orderId: created.id,
           method: body.paymentMethod as PaymentMethod,
-          status: body.paymentMethod === 'CASH_ON_DELIVERY' ? PaymentStatus.PENDING : PaymentStatus.PENDING,
+          status: PaymentStatus.PENDING,
           amount: created.totalAmount,
         },
       });
@@ -104,6 +122,64 @@ router.post('/checkout', authenticate, async (req, res) => {
     await tx.cartItem.deleteMany({ where: { cartId: cart.id } });
     return createdOrders;
   });
+
+  const paymentResults: Array<{
+    orderId: string;
+    orderNumber: string;
+    status: 'PENDING' | 'SUCCEEDED' | 'FAILED';
+    redirectUrl?: string;
+    transactionId?: string;
+    failureReason?: string;
+    message?: string;
+  }> = [];
+
+  if (body.paymentMethod !== 'CASH_ON_DELIVERY') {
+    for (const order of orders) {
+      const payment = await initiatePayment({
+        method: body.paymentMethod,
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        amount: Number(order.totalAmount),
+        customer: {
+          id: customer.id,
+          email: customer.email,
+          phone: body.contactPhone || customer.phone,
+        },
+      });
+
+      await prisma.payment.update({
+        where: { orderId: order.id },
+        data: {
+          status: payment.status === 'SUCCEEDED' ? PaymentStatus.SUCCEEDED : payment.status === 'FAILED' ? PaymentStatus.FAILED : PaymentStatus.PENDING,
+          transactionId: payment.transactionId,
+          failureReason: payment.failureReason,
+          providerPayload:
+            payment.providerPayload === undefined
+              ? undefined
+              : payment.providerPayload === null
+                ? Prisma.JsonNull
+                : (payment.providerPayload as Prisma.InputJsonValue),
+        },
+      });
+
+      if (payment.status === 'SUCCEEDED') {
+        await prisma.order.update({
+          where: { id: order.id },
+          data: { status: 'PROCESSING' },
+        });
+      }
+
+      paymentResults.push({
+        orderId: order.id,
+        orderNumber: order.orderNumber,
+        status: payment.status,
+        redirectUrl: payment.redirectUrl,
+        transactionId: payment.transactionId,
+        failureReason: payment.failureReason,
+        message: payment.message,
+      });
+    }
+  }
 
   for (const order of orders) {
     emitOrderUpdate(order.id, {
@@ -116,11 +192,12 @@ router.post('/checkout', authenticate, async (req, res) => {
   return res.status(201).json({
     order: orders[0],
     orders,
+    paymentResults,
   });
 });
 
 router.get('/', authenticate, async (req, res) => {
-  const { status, vendorId, marketId, dateFrom, dateTo } = req.query;
+  const { status, vendorId, marketId, dateFrom, dateTo, orderNumber } = req.query;
 
   let where: any = {};
 
@@ -140,6 +217,9 @@ router.get('/', authenticate, async (req, res) => {
 
   if (status) where.status = String(status);
   if (marketId) where.marketId = String(marketId);
+  if (orderNumber) {
+    where.orderNumber = { contains: String(orderNumber), mode: 'insensitive' };
+  }
   if (vendorId) {
     where.items = {
       some: {

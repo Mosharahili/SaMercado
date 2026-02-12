@@ -18,6 +18,7 @@ const features = [
 
 export const HomeScreen = () => {
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [bottomBanners, setBottomBanners] = useState<Banner[]>([]);
   const [markets, setMarkets] = useState<Market[]>([]);
   const [popup, setPopup] = useState<Popup | null>(null);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -25,13 +26,15 @@ export const HomeScreen = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [bannerRes, marketRes, popupRes] = await Promise.all([
+        const [bannerRes, bottomBannerRes, marketRes, popupRes] = await Promise.all([
           api.get<{ banners: Banner[] }>('/banners/active?placement=HOME_HERO'),
+          api.get<{ banners: Banner[] }>('/banners/active?placement=HOME_BOTTOM'),
           api.get<{ markets: Market[] }>('/markets'),
           api.get<{ popups: Popup[] }>('/popups/active?pageKey=home&isLoggedIn=true'),
         ]);
 
         setBanners(bannerRes.banners || []);
+        setBottomBanners(bottomBannerRes.banners || []);
         setMarkets((marketRes.markets || []).slice(0, 4));
 
         if (popupRes.popups?.length) {
@@ -40,6 +43,7 @@ export const HomeScreen = () => {
         }
       } catch (_error) {
         setBanners(mockBanners);
+        setBottomBanners([]);
         setMarkets(mockMarkets);
       }
     };
@@ -49,6 +53,8 @@ export const HomeScreen = () => {
 
   const marketCards = useMemo(() => (markets.length ? markets : mockMarkets), [markets]);
   const popupImage = api.resolveAssetUrl(popup?.imageUrl);
+  const bottomBanner = bottomBanners[0];
+  const bottomImage = api.resolveAssetUrl(bottomBanner?.imageUrl);
 
   return (
     <ScreenContainer>
@@ -75,10 +81,13 @@ export const HomeScreen = () => {
         <MarketCard key={market.id} market={market} />
       ))}
 
-      <View style={styles.bottomBanner}>
-        <Text style={styles.bottomTitle}>عرض نهاية الأسبوع</Text>
-        <Text style={styles.bottomDesc}>شحن أسرع وأسعار يومية محدثة مباشرة من السوق</Text>
-      </View>
+      {bottomBanner ? (
+        <View style={styles.bottomBanner}>
+          {bottomImage ? <Image source={{ uri: bottomImage }} style={styles.bottomImage} /> : null}
+          <Text style={styles.bottomTitle}>{bottomBanner.title}</Text>
+          <Text style={styles.bottomDesc}>{bottomBanner.description || 'عرض ترويجي خاص من لوحة الإدارة'}</Text>
+        </View>
+      ) : null}
 
       <Modal visible={popupVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
@@ -145,6 +154,13 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     backgroundColor: 'rgba(34,211,238,0.18)',
+  },
+  bottomImage: {
+    width: '100%',
+    height: 120,
+    borderRadius: 12,
+    marginBottom: 8,
+    backgroundColor: '#ecfeff',
   },
   bottomTitle: {
     color: '#0e7490',
