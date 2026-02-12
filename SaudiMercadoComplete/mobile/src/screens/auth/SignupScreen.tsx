@@ -54,7 +54,6 @@ export const SignupScreen = ({ navigation }: Props) => {
 
             <Text style={styles.label}>كلمة المرور</Text>
             <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
-            <Text style={styles.hint}>سيتم إنشاء الحساب كعميل. حسابات البائعين والإدارة تُنشأ من لوحة التحكم.</Text>
 
             <AppButton label="إنشاء الحساب" onPress={onSignup} loading={loading} />
 
@@ -102,12 +101,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 10,
     textAlign: 'right',
-  },
-  hint: {
-    textAlign: 'right',
-    color: '#4a6572',
-    fontSize: 12,
-    marginBottom: 2,
   },
   linkWrap: { marginTop: 8 },
   link: {

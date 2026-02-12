@@ -5,7 +5,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
 import { api, UploadFile } from '@api/client';
-import { Category, Market, Product } from '@app-types/models';
+import { Category, Product } from '@app-types/models';
 
 type VendorOption = { id: string; businessName: string; user?: { name?: string } };
 
@@ -13,7 +13,6 @@ const unitOptions = ['كيلو', 'ربطة', 'صندوق'];
 
 export const OwnerProductsScreen = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [markets, setMarkets] = useState<Market[]>([]);
   const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -22,31 +21,26 @@ export const OwnerProductsScreen = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('كيلو');
-  const [marketId, setMarketId] = useState('');
   const [vendorId, setVendorId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [selectedImage, setSelectedImage] = useState<UploadFile | null>(null);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const [productsRes, marketsRes, vendorsRes, categoriesRes] = await Promise.allSettled([
+    const [productsRes, vendorsRes, categoriesRes] = await Promise.allSettled([
       api.get<{ products: Product[] }>('/products'),
-      api.get<{ markets: Market[] }>('/markets?includeInactive=true'),
       api.get<{ vendors: VendorOption[] }>('/vendors'),
       api.get<{ categories: Category[] }>('/categories'),
     ]);
 
     const productsData = productsRes.status === 'fulfilled' ? productsRes.value.products || [] : [];
-    const marketsData = marketsRes.status === 'fulfilled' ? marketsRes.value.markets || [] : [];
     const vendorsData = vendorsRes.status === 'fulfilled' ? vendorsRes.value.vendors || [] : [];
     const categoriesData = categoriesRes.status === 'fulfilled' ? categoriesRes.value.categories || [] : [];
 
     setProducts(productsData);
-    setMarkets(marketsData);
     setVendors(vendorsData);
     setCategories(categoriesData);
 
-    if (!marketId && marketsData.length) setMarketId(marketsData[0].id);
     if (!vendorId && vendorsData.length) setVendorId(vendorsData[0].id);
     if (!categoryId && categoriesData.length) setCategoryId(categoriesData[0].id);
   };
@@ -83,8 +77,8 @@ export const OwnerProductsScreen = () => {
   };
 
   const save = async () => {
-    if (!name.trim() || !price.trim() || !vendorId || !categoryId) {
-      Alert.alert('تنبيه', 'يرجى تعبئة جميع الحقول الأساسية');
+    if (!name.trim() || !price.trim()) {
+      Alert.alert('تنبيه', 'يرجى تعبئة اسم المنتج والسعر');
       return;
     }
 
@@ -96,7 +90,8 @@ export const OwnerProductsScreen = () => {
 
     setSaving(true);
     try {
-      const effectiveMarketId = marketId || markets.find((market) => market.isActive !== false)?.id;
+      const effectiveVendorId = vendorId || vendors[0]?.id;
+      const effectiveCategoryId = categoryId || categories[0]?.id;
       let id = editingId;
       if (editingId) {
         await api.put(`/products/${editingId}`, {
@@ -104,9 +99,8 @@ export const OwnerProductsScreen = () => {
           description,
           unit,
           price: priceValue,
-          ...(effectiveMarketId ? { marketId: effectiveMarketId } : {}),
-          vendorId,
-          categoryId,
+          ...(effectiveVendorId ? { vendorId: effectiveVendorId } : {}),
+          ...(effectiveCategoryId ? { categoryId: effectiveCategoryId } : {}),
         });
       } else {
         const created = await api.post<{ product: Product }>('/products', {
@@ -114,9 +108,8 @@ export const OwnerProductsScreen = () => {
           description,
           unit,
           price: priceValue,
-          ...(effectiveMarketId ? { marketId: effectiveMarketId } : {}),
-          vendorId,
-          categoryId,
+          ...(effectiveVendorId ? { vendorId: effectiveVendorId } : {}),
+          ...(effectiveCategoryId ? { categoryId: effectiveCategoryId } : {}),
         });
         id = created.product.id;
       }
@@ -141,7 +134,6 @@ export const OwnerProductsScreen = () => {
     setDescription(product.description || '');
     setPrice(String(product.price || ''));
     setUnit(product.unit || 'كيلو');
-    setMarketId(product.marketId || product.market?.id || '');
     setVendorId(product.vendorId || product.vendor?.id || '');
     setCategoryId(product.categoryId || product.category?.id || '');
     setSelectedImage(null);
@@ -173,21 +165,25 @@ export const OwnerProductsScreen = () => {
           </Picker>
         </View>
 
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={vendorId} onValueChange={setVendorId}>
-            {vendors.map((vendor) => (
-              <Picker.Item key={vendor.id} label={vendor.businessName} value={vendor.id} />
-            ))}
-          </Picker>
-        </View>
+        {vendors.length > 0 ? (
+          <View style={styles.pickerWrap}>
+            <Picker selectedValue={vendorId || vendors[0].id} onValueChange={setVendorId}>
+              {vendors.map((vendor) => (
+                <Picker.Item key={vendor.id} label={vendor.businessName} value={vendor.id} />
+              ))}
+            </Picker>
+          </View>
+        ) : null}
 
-        <View style={styles.pickerWrap}>
-          <Picker selectedValue={categoryId} onValueChange={setCategoryId}>
-            {categories.map((category) => (
-              <Picker.Item key={category.id} label={category.nameAr} value={category.id} />
-            ))}
-          </Picker>
-        </View>
+        {categories.length > 0 ? (
+          <View style={styles.pickerWrap}>
+            <Picker selectedValue={categoryId || categories[0].id} onValueChange={setCategoryId}>
+              {categories.map((category) => (
+                <Picker.Item key={category.id} label={category.nameAr} value={category.id} />
+              ))}
+            </Picker>
+          </View>
+        ) : null}
 
         <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة المنتج'} onPress={pickImage} variant="ghost" />
         {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.preview} /> : null}

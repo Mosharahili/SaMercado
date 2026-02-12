@@ -17,9 +17,7 @@ export const CartScreen = () => {
   const [contactPhone, setContactPhone] = useState('');
   const [placing, setPlacing] = useState(false);
 
-  const delivery = subtotal > 0 ? 15 : 0;
-  const tax = subtotal * 0.15;
-  const total = subtotal + delivery + tax;
+  const total = subtotal;
 
   const placeOrder = async () => {
     if (!items.length) {
@@ -53,8 +51,6 @@ export const CartScreen = () => {
       }>('/orders/checkout', {
         paymentMethod,
         contactPhone: normalizedPhone,
-        deliveryFee: delivery,
-        taxRate: 0.15,
       });
 
       clearCart();
@@ -111,8 +107,6 @@ export const CartScreen = () => {
 
       <View style={styles.summaryCard}>
         <Text style={styles.summaryLine}>المجموع الفرعي: {formatSAR(subtotal)}</Text>
-        <Text style={styles.summaryLine}>التوصيل: {formatSAR(delivery)}</Text>
-        <Text style={styles.summaryLine}>الضريبة: {formatSAR(tax)}</Text>
         <Text style={styles.totalLine}>الإجمالي: {formatSAR(total)}</Text>
 
         <Text style={styles.paymentTitle}>رقم الجوال</Text>

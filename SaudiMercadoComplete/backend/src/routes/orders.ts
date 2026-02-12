@@ -13,8 +13,8 @@ const router = Router();
 const checkoutSchema = z.object({
   paymentMethod: z.enum(['MADA', 'APPLE_PAY', 'CASH_ON_DELIVERY']),
   contactPhone: z.string().regex(/^05\d{8}$/),
-  deliveryFee: z.number().nonnegative().default(15),
-  taxRate: z.number().nonnegative().default(0.15),
+  deliveryFee: z.number().nonnegative().default(0),
+  taxRate: z.number().nonnegative().default(0),
   notes: z.string().optional(),
 });
 
@@ -79,8 +79,10 @@ router.post('/checkout', authenticate, async (req, res) => {
 
     for (const [marketId, marketItems] of groupedByMarket.entries()) {
       const subtotal = marketItems.reduce((acc, item) => acc + Number(item.product.price) * item.quantity, 0);
-      const taxAmount = subtotal * body.taxRate;
-      const totalAmount = subtotal + body.deliveryFee + taxAmount;
+      const deliveryFee = Number(body.deliveryFee || 0);
+      const taxRate = Number(body.taxRate || 0);
+      const taxAmount = subtotal * taxRate;
+      const totalAmount = subtotal + deliveryFee + taxAmount;
       const orderNotes = body.notes?.trim()
         ? `${body.notes.trim()} | هاتف التواصل: ${body.contactPhone}`
         : `هاتف التواصل: ${body.contactPhone}`;
@@ -91,7 +93,7 @@ router.post('/checkout', authenticate, async (req, res) => {
           customerId: req.user!.id,
           marketId,
           subtotal,
-          deliveryFee: body.deliveryFee,
+          deliveryFee,
           taxAmount,
           totalAmount,
           notes: orderNotes,

@@ -15,8 +15,8 @@ const productSchema = z.object({
   isAvailable: z.boolean().optional(),
   stockQuantity: z.number().int().optional(),
   marketId: z.string().min(1).optional(),
-  vendorId: z.string().min(1),
-  categoryId: z.string().min(1),
+  vendorId: z.string().min(1).optional(),
+  categoryId: z.string().min(1).optional(),
 });
 
 router.get('/', async (req, res) => {
@@ -81,6 +81,69 @@ router.get('/:id', async (req, res) => {
 
 router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_PRODUCTS), async (req, res) => {
   const data = productSchema.parse(req.body);
+
+  let resolvedVendorId = data.vendorId;
+  if (req.user!.role === 'VENDOR') {
+    const ownVendor = await prisma.vendor.findFirst({ where: { userId: req.user!.id } });
+    if (!ownVendor) {
+      return res.status(400).json({ error: 'Vendor profile not found for current user' });
+    }
+    if (data.vendorId && data.vendorId !== ownVendor.id) {
+      return res.status(403).json({ error: 'Cannot create products for another vendor' });
+    }
+    resolvedVendorId = ownVendor.id;
+  } else if (!resolvedVendorId) {
+    const fallbackVendor = await prisma.vendor.findFirst({
+      orderBy: [{ isApproved: 'desc' }, { createdAt: 'asc' }],
+    });
+    resolvedVendorId = fallbackVendor?.id;
+  }
+
+  if (!resolvedVendorId && (req.user!.role === 'OWNER' || req.user!.role === 'ADMIN')) {
+    const ownVendor = await prisma.vendor.findFirst({ where: { userId: req.user!.id } });
+    if (ownVendor) {
+      resolvedVendorId = ownVendor.id;
+    } else {
+      const creator = await prisma.user.findUnique({
+        where: { id: req.user!.id },
+        select: { name: true, phone: true },
+      });
+      const createdVendor = await prisma.vendor.create({
+        data: {
+          userId: req.user!.id,
+          businessName: `متجر ${creator?.name || 'الإدارة'}`,
+          businessPhone: creator?.phone || undefined,
+          isApproved: true,
+        },
+      });
+      resolvedVendorId = createdVendor.id;
+    }
+  }
+
+  if (!resolvedVendorId) {
+    return res.status(400).json({ error: 'No vendor available. Please create a vendor first.' });
+  }
+
+  let resolvedCategoryId = data.categoryId;
+  if (!resolvedCategoryId) {
+    const fallbackCategory = await prisma.category.findFirst({
+      where: { isActive: true },
+      orderBy: { createdAt: 'asc' },
+    });
+    resolvedCategoryId = fallbackCategory?.id;
+  }
+
+  if (!resolvedCategoryId) {
+    const defaultCategory = await prisma.category.create({
+      data: {
+        nameAr: 'خضار',
+        slug: `vegetables-${Date.now()}`,
+        isActive: true,
+      },
+    });
+    resolvedCategoryId = defaultCategory.id;
+  }
+
   const fallbackMarket = !data.marketId
     ? await prisma.market.findFirst({
         where: { isActive: true },
@@ -93,17 +156,17 @@ router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_PRODUCTS), a
     return res.status(400).json({ error: 'No active market available. Please add a market first.' });
   }
 
-  if (req.user!.role === 'VENDOR') {
-    const vendor = await prisma.vendor.findFirst({ where: { userId: req.user!.id } });
-    if (!vendor || vendor.id !== data.vendorId) {
-      return res.status(403).json({ error: 'Cannot create products for another vendor' });
-    }
-  }
-
   const product = await prisma.product.create({
     data: {
-      ...data,
+      name: data.name,
+      description: data.description,
+      unit: data.unit,
+      price: data.price,
+      isAvailable: data.isAvailable,
+      stockQuantity: data.stockQuantity,
       marketId: resolvedMarketId,
+      vendorId: resolvedVendorId,
+      categoryId: resolvedCategoryId,
     },
   });
   return res.status(201).json({ product });

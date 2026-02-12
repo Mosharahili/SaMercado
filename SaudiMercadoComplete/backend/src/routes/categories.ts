@@ -13,7 +13,19 @@ const categorySchema = z.object({
 });
 
 router.get('/', async (_req, res) => {
-  const categories = await prisma.category.findMany({ orderBy: { nameAr: 'asc' } });
+  let categories = await prisma.category.findMany({ orderBy: { nameAr: 'asc' } });
+  if (!categories.length) {
+    await prisma.category.createMany({
+      data: [
+        { nameAr: 'خضار', slug: 'vegetables', isActive: true },
+        { nameAr: 'فواكه', slug: 'fruits', isActive: true },
+        { nameAr: 'تمور', slug: 'dates', isActive: true },
+      ],
+      skipDuplicates: true,
+    });
+    categories = await prisma.category.findMany({ orderBy: { nameAr: 'asc' } });
+  }
+
   return res.json({ categories });
 });
 

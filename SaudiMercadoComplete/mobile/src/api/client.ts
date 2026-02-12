@@ -85,7 +85,19 @@ const apiOrigin = baseURL.replace(/\/api$/, '');
 
 const resolveAssetUrl = (value?: string | null) => {
   if (!value) return '';
-  if (/^(https?:)?\/\//i.test(value) || value.startsWith('data:') || value.startsWith('file:')) {
+  if (value.startsWith('data:') || value.startsWith('file:')) {
+    return value;
+  }
+
+  if (/^https?:\/\//i.test(value)) {
+    try {
+      const parsed = new URL(value);
+      if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '0.0.0.0') {
+        return `${apiOrigin}${parsed.pathname}${parsed.search || ''}`;
+      }
+    } catch {
+      // Keep the value as-is when URL parsing fails.
+    }
     return value;
   }
 

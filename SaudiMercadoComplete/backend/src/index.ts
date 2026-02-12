@@ -42,7 +42,12 @@ io.on('connection', (socket) => {
   socket.emit('connected', { ok: true, socketId: socket.id });
 });
 
-app.use(helmet());
+app.use(
+  helmet({
+    // Allow uploaded images to be rendered from app origins (web/mobile).
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+  })
+);
 app.use(
   cors({
     origin: env.clientOrigin === '*' ? true : env.clientOrigin,
