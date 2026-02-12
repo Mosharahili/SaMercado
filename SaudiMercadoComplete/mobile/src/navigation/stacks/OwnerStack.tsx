@@ -10,6 +10,7 @@ import { OwnerProductsScreen } from '@screens/owner/OwnerProductsScreen';
 import { OwnerOrdersScreen } from '@screens/owner/OwnerOrdersScreen';
 import { OwnerAnalyticsScreen } from '@screens/owner/OwnerAnalyticsScreen';
 import { OwnerSettingsScreen } from '@screens/owner/OwnerSettingsScreen';
+import { HomeScreen } from '@screens/customer/HomeScreen';
 import { MarketsScreen } from '@screens/customer/MarketsScreen';
 import { ProductsScreen } from '@screens/customer/ProductsScreen';
 import { CartScreen } from '@screens/customer/CartScreen';
@@ -20,6 +21,7 @@ const Stack = createNativeStackNavigator<OwnerStackParamList>();
 export const OwnerStack = () => (
   <Stack.Navigator>
     <Stack.Screen name="OwnerDashboard" component={OwnerDashboardScreen} options={{ title: 'لوحة المالك' }} />
+    <Stack.Screen name="OwnerStoreHome" component={HomeScreen} options={{ title: 'الرئيسية' }} />
     <Stack.Screen name="OwnerStoreMarkets" component={MarketsScreen} options={{ title: 'الأسواق' }} />
     <Stack.Screen name="OwnerStoreProducts" component={ProductsScreen} options={{ title: 'المنتجات' }} />
     <Stack.Screen name="OwnerStoreCart" component={CartScreen} options={{ title: 'السلة' }} />

@@ -1,6 +1,8 @@
 import React from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, ViewStyle } from 'react-native';
+import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, ViewStyle } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { useAuth } from '@hooks/useAuth';
 import { theme } from '@theme/theme';
 
 export const ScreenContainer = ({
@@ -12,10 +14,29 @@ export const ScreenContainer = ({
   scroll?: boolean;
   contentStyle?: ViewStyle;
 }) => {
+  const { user } = useAuth();
+  const route = useRoute();
+  const navigation = useNavigation<any>();
+
+  const isOwnerStoreScreen = typeof route.name === 'string' && route.name.startsWith('OwnerStore');
+  const showOwnerBackToDashboard = user?.role === 'OWNER' && isOwnerStoreScreen;
+
+  const ownerShortcut = showOwnerBackToDashboard ? (
+    <Pressable style={styles.ownerBackBtn} onPress={() => navigation.navigate('OwnerDashboard')}>
+      <Text style={styles.ownerBackText}>العودة للوحة التحكم</Text>
+    </Pressable>
+  ) : null;
+
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, contentStyle]}>{children}</ScrollView>
+    <ScrollView contentContainerStyle={[styles.content, contentStyle]}>
+      {ownerShortcut}
+      {children}
+    </ScrollView>
   ) : (
-    <>{children}</>
+    <>
+      {ownerShortcut}
+      {children}
+    </>
   );
 
   return (
@@ -35,5 +56,16 @@ const styles = StyleSheet.create({
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.md,
+  },
+  ownerBackBtn: {
+    alignSelf: 'flex-end',
+    backgroundColor: '#0d9488',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 10,
+  },
+  ownerBackText: {
+    color: '#ffffff',
+    fontWeight: '800',
   },
 });

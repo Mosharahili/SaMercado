@@ -7,13 +7,10 @@ import { AppButton } from '@components/AppButton';
 import { api, UploadFile } from '@api/client';
 import { Category, Product } from '@app-types/models';
 
-type VendorOption = { id: string; businessName: string; user?: { name?: string } };
-
 const unitOptions = ['كيلو', 'ربطة', 'صندوق'];
 
 export const OwnerProductsScreen = () => {
   const [products, setProducts] = useState<Product[]>([]);
-  const [vendors, setVendors] = useState<VendorOption[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -21,27 +18,22 @@ export const OwnerProductsScreen = () => {
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
   const [unit, setUnit] = useState('كيلو');
-  const [vendorId, setVendorId] = useState('');
   const [categoryId, setCategoryId] = useState('');
   const [selectedImages, setSelectedImages] = useState<UploadFile[]>([]);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
-    const [productsRes, vendorsRes, categoriesRes] = await Promise.allSettled([
+    const [productsRes, categoriesRes] = await Promise.allSettled([
       api.get<{ products: Product[] }>('/products'),
-      api.get<{ vendors: VendorOption[] }>('/vendors'),
       api.get<{ categories: Category[] }>('/categories'),
     ]);
 
     const productsData = productsRes.status === 'fulfilled' ? productsRes.value.products || [] : [];
-    const vendorsData = vendorsRes.status === 'fulfilled' ? vendorsRes.value.vendors || [] : [];
     const categoriesData = categoriesRes.status === 'fulfilled' ? categoriesRes.value.categories || [] : [];
 
     setProducts(productsData);
-    setVendors(vendorsData);
     setCategories(categoriesData);
 
-    if (!vendorId && vendorsData.length) setVendorId(vendorsData[0].id);
     if (!categoryId && categoriesData.length) setCategoryId(categoriesData[0].id);
   };
 
@@ -97,7 +89,6 @@ export const OwnerProductsScreen = () => {
 
     setSaving(true);
     try {
-      const effectiveVendorId = vendorId || vendors[0]?.id;
       const effectiveCategoryId = categoryId || categories[0]?.id;
       let id = editingId;
       if (editingId) {
@@ -106,7 +97,6 @@ export const OwnerProductsScreen = () => {
           description,
           unit,
           price: priceValue,
-          ...(effectiveVendorId ? { vendorId: effectiveVendorId } : {}),
           ...(effectiveCategoryId ? { categoryId: effectiveCategoryId } : {}),
         });
       } else {
@@ -115,7 +105,6 @@ export const OwnerProductsScreen = () => {
           description,
           unit,
           price: priceValue,
-          ...(effectiveVendorId ? { vendorId: effectiveVendorId } : {}),
           ...(effectiveCategoryId ? { categoryId: effectiveCategoryId } : {}),
         });
         id = created.product.id;
@@ -141,7 +130,6 @@ export const OwnerProductsScreen = () => {
     setDescription(product.description || '');
     setPrice(String(product.price || ''));
     setUnit(product.unit || 'كيلو');
-    setVendorId(product.vendorId || product.vendor?.id || '');
     setCategoryId(product.categoryId || product.category?.id || '');
     setSelectedImages([]);
   };
@@ -171,16 +159,6 @@ export const OwnerProductsScreen = () => {
             ))}
           </Picker>
         </View>
-
-        {vendors.length > 0 ? (
-          <View style={styles.pickerWrap}>
-            <Picker selectedValue={vendorId || vendors[0].id} onValueChange={setVendorId}>
-              {vendors.map((vendor) => (
-                <Picker.Item key={vendor.id} label={vendor.businessName} value={vendor.id} />
-              ))}
-            </Picker>
-          </View>
-        ) : null}
 
         {categories.length > 0 ? (
           <View style={styles.pickerWrap}>
@@ -215,7 +193,6 @@ export const OwnerProductsScreen = () => {
             <Image source={{ uri: api.resolveAssetUrl(product.images[0].imageUrl) }} style={styles.itemImage} />
           ) : null}
           <Text style={styles.itemTitle}>{product.name}</Text>
-          <Text style={styles.itemMeta}>البائع: {product.vendor?.businessName}</Text>
           <Text style={styles.itemMeta}>السعر: {product.price} ر.س / {product.unit}</Text>
 
           <View style={styles.actionRow}>

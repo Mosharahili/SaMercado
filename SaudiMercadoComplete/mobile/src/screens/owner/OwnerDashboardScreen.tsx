@@ -8,6 +8,7 @@ import { AppButton } from '@components/AppButton';
 import { useAuth } from '@hooks/useAuth';
 
 const appLinks: Array<{ key: keyof OwnerStackParamList; label: string }> = [
+  { key: 'OwnerStoreHome', label: '🏠 وضع العميل - الرئيسية' },
   { key: 'OwnerStoreMarkets', label: '🏪 عرض الأسواق' },
   { key: 'OwnerStoreProducts', label: '🛍 تصفح المنتجات' },
   { key: 'OwnerStoreCart', label: '🛒 السلة والشراء' },

@@ -48,7 +48,6 @@ export const ProductCard = ({
           {product.name}
         </Text>
         <Text style={styles.meta}>{product.market?.name}</Text>
-        <Text style={styles.meta}>{product.vendor?.businessName}</Text>
 
         <View style={styles.bottomRow}>
           <View style={styles.priceWrap}>

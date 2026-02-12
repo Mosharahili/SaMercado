@@ -62,8 +62,7 @@ export const ProductsScreen = () => {
       const keyword = search.toLowerCase();
       return (
         product.name.toLowerCase().includes(keyword) ||
-        product.market.name.toLowerCase().includes(keyword) ||
-        product.vendor.businessName.toLowerCase().includes(keyword)
+        product.market.name.toLowerCase().includes(keyword)
       );
     });
   }, [products, search]);
@@ -100,7 +99,7 @@ export const ProductsScreen = () => {
           style={styles.searchInput}
           value={searchInput}
           onChangeText={setSearchInput}
-          placeholder="ابحث عن منتج أو سوق أو بائع"
+          placeholder="ابحث عن منتج أو سوق"
           placeholderTextColor="#6b7280"
           textAlign="right"
           onSubmitEditing={() => {
@@ -166,7 +165,6 @@ export const ProductsScreen = () => {
                 <Text style={styles.previewName}>{selectedProduct.name}</Text>
                 <Text style={styles.previewMeta}>التصنيف: {selectedProduct.category?.nameAr || '-'}</Text>
                 <Text style={styles.previewMeta}>السوق: {selectedProduct.market?.name || '-'}</Text>
-                <Text style={styles.previewMeta}>البائع: {selectedProduct.vendor?.businessName || '-'}</Text>
                 <Text style={styles.previewMeta}>{selectedProduct.description || 'منتج طازج بجودة عالية.'}</Text>
                 <Text style={styles.previewPrice}>
                   {formatSAR(Number(selectedProduct.price))} / {selectedProduct.unit}
