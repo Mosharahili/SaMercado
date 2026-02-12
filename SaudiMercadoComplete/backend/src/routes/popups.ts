@@ -5,6 +5,7 @@ import { authenticate, requirePermission } from '../middleware/auth';
 import { PERMISSIONS } from '../constants/permissions';
 import { upload } from '../middleware/upload';
 import { isInSchedule } from '../utils/popup';
+import { saveUploadedImage } from '../services/storage';
 
 const router = Router();
 
@@ -144,10 +145,11 @@ router.post('/', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), asy
 
 router.post('/:id/image', authenticate, requirePermission(PERMISSIONS.MANAGE_POPUPS), upload.single('image'), async (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Image required' });
+  const saved = await saveUploadedImage(req.file, 'popups');
 
   const popup = await prisma.popup.update({
     where: { id: req.params.id },
-    data: { imageUrl: `/uploads/${req.file.filename}` },
+    data: { imageUrl: saved.url },
   });
 
   return res.json({ popup });

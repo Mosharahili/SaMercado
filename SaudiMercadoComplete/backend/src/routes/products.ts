@@ -5,6 +5,7 @@ import prisma from '../lib/prisma';
 import { authenticate, requirePermission } from '../middleware/auth';
 import { PERMISSIONS } from '../constants/permissions';
 import { upload } from '../middleware/upload';
+import { saveUploadedImage } from '../services/storage';
 
 const router = Router();
 
@@ -243,10 +244,12 @@ router.post(
       return res.status(404).json({ error: 'Product not found' });
     }
 
+    const saved = await saveUploadedImage(req.file, 'products');
+
     const image = await prisma.productImage.create({
       data: {
         productId: product.id,
-        imageUrl: `/uploads/${req.file.filename}`,
+        imageUrl: saved.url,
       },
     });
 

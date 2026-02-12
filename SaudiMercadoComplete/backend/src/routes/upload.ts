@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { authenticate } from '../middleware/auth';
 import { upload } from '../middleware/upload';
 import { PERMISSIONS } from '../constants/permissions';
+import { saveUploadedImage } from '../services/storage';
 
 const router = Router();
 
@@ -21,12 +22,15 @@ router.post('/image', authenticate, upload.single('image'), async (req, res) => 
     return res.status(400).json({ error: 'Image file required' });
   }
 
+  const saved = await saveUploadedImage(req.file, 'shared');
+
   return res.status(201).json({
     file: {
-      filename: req.file.filename,
+      filename: saved.filename,
       mimeType: req.file.mimetype,
       size: req.file.size,
-      url: `/uploads/${req.file.filename}`,
+      url: saved.url,
+      provider: saved.provider,
     },
   });
 });
