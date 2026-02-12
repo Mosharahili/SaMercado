@@ -1,14 +1,16 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { FlatList, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, Image, Modal, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
 import { ProductCard } from '@components/ProductCard';
+import { AppButton } from '@components/AppButton';
 import { BannerCarousel } from '@components/BannerCarousel';
 import { useCart } from '@hooks/useCart';
 import { api } from '@api/client';
 import { Banner, Product } from '@app-types/models';
 import { mockBanners, mockProducts } from '@utils/mockData';
+import { formatSAR } from '@utils/format';
 import { theme } from '@theme/theme';
 
 export const ProductsScreen = () => {
@@ -20,6 +22,7 @@ export const ProductsScreen = () => {
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [topBanners, setTopBanners] = useState<Banner[]>(mockBanners);
   const [inlineOffers, setInlineOffers] = useState<Banner[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
   const fetchProducts = async (keyword?: string) => {
     const q = keyword ?? search;
@@ -125,10 +128,62 @@ export const ProductsScreen = () => {
         scrollEnabled={false}
         renderItem={({ item }) => (
           <View style={{ width: viewMode === 'grid' ? '48.7%' : '100%' }}>
-            <ProductCard product={item} onAdd={() => addToCart(item)} />
+            <ProductCard product={item} onAdd={() => addToCart(item)} onPress={() => setSelectedProduct(item)} />
           </View>
         )}
       />
+
+      <Modal visible={!!selectedProduct} transparent animationType="fade" onRequestClose={() => setSelectedProduct(null)}>
+        <View style={styles.previewOverlay}>
+          <View style={styles.previewCard}>
+            <View style={styles.previewHeader}>
+              <Pressable onPress={() => setSelectedProduct(null)} style={styles.previewClose}>
+                <MaterialCommunityIcons name="close" size={20} color="#0f2f3d" />
+              </Pressable>
+              <Text style={styles.previewTitle}>تفاصيل المنتج</Text>
+            </View>
+
+            {selectedProduct ? (
+              <>
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={styles.previewImagesRow}
+                >
+                  {(selectedProduct.images?.length
+                    ? selectedProduct.images
+                    : [{ id: 'placeholder', imageUrl: '' }]
+                  ).map((image) => {
+                    const src = api.resolveAssetUrl(image.imageUrl);
+                    return src ? (
+                      <Image key={image.id} source={{ uri: src }} style={styles.previewImage} />
+                    ) : (
+                      <View key={image.id} style={styles.previewImagePlaceholder} />
+                    );
+                  })}
+                </ScrollView>
+
+                <Text style={styles.previewName}>{selectedProduct.name}</Text>
+                <Text style={styles.previewMeta}>التصنيف: {selectedProduct.category?.nameAr || '-'}</Text>
+                <Text style={styles.previewMeta}>السوق: {selectedProduct.market?.name || '-'}</Text>
+                <Text style={styles.previewMeta}>البائع: {selectedProduct.vendor?.businessName || '-'}</Text>
+                <Text style={styles.previewMeta}>{selectedProduct.description || 'منتج طازج بجودة عالية.'}</Text>
+                <Text style={styles.previewPrice}>
+                  {formatSAR(Number(selectedProduct.price))} / {selectedProduct.unit}
+                </Text>
+
+                <AppButton
+                  label="إضافة إلى السلة"
+                  onPress={() => {
+                    addToCart(selectedProduct);
+                    setSelectedProduct(null);
+                  }}
+                />
+              </>
+            ) : null}
+          </View>
+        </View>
+      </Modal>
     </ScreenContainer>
   );
 };
@@ -211,5 +266,69 @@ const styles = StyleSheet.create({
     color: 'white',
     fontWeight: '700',
     fontSize: 12,
+  },
+  previewOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(5, 15, 25, 0.45)',
+    justifyContent: 'center',
+    padding: 18,
+  },
+  previewCard: {
+    backgroundColor: 'rgba(255,255,255,0.98)',
+    borderRadius: 18,
+    padding: 14,
+    gap: 8,
+    maxHeight: '85%',
+  },
+  previewHeader: {
+    flexDirection: 'row-reverse',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+  previewTitle: {
+    color: '#0f2f3d',
+    fontWeight: '900',
+    fontSize: 17,
+    textAlign: 'right',
+  },
+  previewClose: {
+    width: 34,
+    height: 34,
+    borderRadius: 999,
+    backgroundColor: '#ecfeff',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  previewImagesRow: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+  },
+  previewImage: {
+    width: 220,
+    height: 150,
+    borderRadius: 12,
+    backgroundColor: '#cffafe',
+  },
+  previewImagePlaceholder: {
+    width: 220,
+    height: 150,
+    borderRadius: 12,
+    backgroundColor: '#cffafe',
+  },
+  previewName: {
+    textAlign: 'right',
+    color: '#0f2f3d',
+    fontWeight: '900',
+    fontSize: 18,
+  },
+  previewMeta: {
+    textAlign: 'right',
+    color: '#4a6572',
+  },
+  previewPrice: {
+    textAlign: 'right',
+    color: '#0f766e',
+    fontWeight: '900',
+    fontSize: 16,
   },
 });

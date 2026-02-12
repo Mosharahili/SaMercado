@@ -39,7 +39,12 @@ export const CartScreen = () => {
         return;
       }
 
-      await api.post('/cart/clear');
+      if (paymentMethod !== 'CASH_ON_DELIVERY') {
+        Alert.alert('تنبيه', 'الدفع عند الاستلام هو المتاح حاليًا. سيتم تفعيل Mada وApple Pay قريبًا.');
+        return;
+      }
+
+      await api.del('/cart/clear');
       for (const item of items) {
         await api.post('/cart/items', { productId: item.product.id, quantity: item.quantity });
       }
@@ -124,11 +129,12 @@ export const CartScreen = () => {
         <Text style={styles.paymentTitle}>طريقة الدفع</Text>
         <View style={styles.pickerWrap}>
           <Picker selectedValue={paymentMethod} onValueChange={setPaymentMethod}>
-            <Picker.Item label="Mada" value="MADA" />
-            <Picker.Item label="Apple Pay" value="APPLE_PAY" />
+            <Picker.Item label="Mada (قريبًا)" value="MADA" enabled={false} />
+            <Picker.Item label="Apple Pay (قريبًا)" value="APPLE_PAY" enabled={false} />
             <Picker.Item label="الدفع عند الاستلام" value="CASH_ON_DELIVERY" />
           </Picker>
         </View>
+        <Text style={styles.paymentHint}>المتاح حاليًا: الدفع عند الاستلام فقط</Text>
 
         <AppButton label="تأكيد الطلب" onPress={placeOrder} loading={placing} />
       </View>
@@ -221,5 +227,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#f0fdf4',
+  },
+  paymentHint: {
+    textAlign: 'right',
+    color: '#0f766e',
+    fontSize: 12,
+    marginTop: -2,
   },
 });

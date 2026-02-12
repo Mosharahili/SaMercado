@@ -10,7 +10,7 @@
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
-      "backgroundColor": "#052e16"
+      "backgroundColor": "#ecfeff"
     },
     "ios": {
       "bundleIdentifier": "com.saudimercado.complete",

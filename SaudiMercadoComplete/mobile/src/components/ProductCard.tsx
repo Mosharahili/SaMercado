@@ -1,5 +1,5 @@
-import React from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import React, { useRef } from 'react';
+import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Product } from '@app-types/models';
 import { api } from '@api/client';
@@ -9,14 +9,34 @@ import { formatSAR } from '@utils/format';
 export const ProductCard = ({
   product,
   onAdd,
+  onPress,
 }: {
   product: Product;
   onAdd?: () => void;
+  onPress?: () => void;
 }) => {
   const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
+  const addScale = useRef(new Animated.Value(1)).current;
+
+  const handleAdd = () => {
+    Animated.sequence([
+      Animated.timing(addScale, {
+        toValue: 0.9,
+        duration: 70,
+        useNativeDriver: true,
+      }),
+      Animated.spring(addScale, {
+        toValue: 1,
+        friction: 4,
+        tension: 130,
+        useNativeDriver: true,
+      }),
+    ]).start();
+    onAdd?.();
+  };
 
   return (
-    <View style={styles.card}>
+    <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.mediaWrap}>
         {image ? <Image source={{ uri: image }} style={styles.image} /> : <View style={styles.placeholder} />}
         <View style={styles.badge}>
@@ -35,13 +55,21 @@ export const ProductCard = ({
             <Text style={styles.unit}>/{product.unit}</Text>
             <Text style={styles.price}>{formatSAR(Number(product.price))}</Text>
           </View>
-          <Pressable onPress={onAdd} style={styles.addButton}>
-            <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
-            <Text style={styles.addText}>إضافة</Text>
-          </Pressable>
+          <Animated.View style={{ transform: [{ scale: addScale }] }}>
+            <Pressable
+              onPress={(event) => {
+                event.stopPropagation();
+                handleAdd();
+              }}
+              style={styles.addButton}
+            >
+              <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
+              <Text style={styles.addText}>إضافة</Text>
+            </Pressable>
+          </Animated.View>
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 };
 

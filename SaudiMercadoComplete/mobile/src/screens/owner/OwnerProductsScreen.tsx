@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, Image, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Image, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import * as ImagePicker from 'expo-image-picker';
 import { ScreenContainer } from '@components/ScreenContainer';
@@ -23,7 +23,7 @@ export const OwnerProductsScreen = () => {
   const [unit, setUnit] = useState('كيلو');
   const [vendorId, setVendorId] = useState('');
   const [categoryId, setCategoryId] = useState('');
-  const [selectedImage, setSelectedImage] = useState<UploadFile | null>(null);
+  const [selectedImages, setSelectedImages] = useState<UploadFile[]>([]);
   const [saving, setSaving] = useState(false);
 
   const load = async () => {
@@ -55,22 +55,29 @@ export const OwnerProductsScreen = () => {
     setDescription('');
     setPrice('');
     setUnit('كيلو');
-    setSelectedImage(null);
+    setSelectedImages([]);
   };
 
   const pickImage = async () => {
     try {
-      const result = await ImagePicker.launchImageLibraryAsync({ allowsEditing: false, quality: 0.9 });
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: false,
+        quality: 0.9,
+        allowsMultipleSelection: true,
+        selectionLimit: 8,
+      });
       if (result.canceled || !result.assets?.length) return;
 
-      const asset = result.assets[0];
-      const rawName = asset.fileName || asset.uri.split('/').pop() || `product-${Date.now()}.jpg`;
-      const safeName = rawName.replace(/\s+/g, '_');
-      setSelectedImage({
-        uri: asset.uri,
-        name: safeName,
-        type: asset.mimeType || 'image/jpeg',
+      const files = result.assets.map((asset, index) => {
+        const rawName = asset.fileName || asset.uri.split('/').pop() || `product-${Date.now()}-${index}.jpg`;
+        const safeName = rawName.replace(/\s+/g, '_');
+        return {
+          uri: asset.uri,
+          name: safeName,
+          type: asset.mimeType || 'image/jpeg',
+        } as UploadFile;
       });
+      setSelectedImages(files);
     } catch (error: any) {
       Alert.alert('خطأ', error?.message || 'تعذر اختيار الصورة');
     }
@@ -114,8 +121,8 @@ export const OwnerProductsScreen = () => {
         id = created.product.id;
       }
 
-      if (id && selectedImage) {
-        await api.upload(`/products/${id}/images`, selectedImage);
+      if (id && selectedImages.length) {
+        await Promise.all(selectedImages.map((imageFile) => api.upload(`/products/${id}/images`, imageFile)));
       }
 
       Alert.alert('تم', editingId ? 'تم تحديث المنتج' : 'تمت إضافة المنتج');
@@ -136,7 +143,7 @@ export const OwnerProductsScreen = () => {
     setUnit(product.unit || 'كيلو');
     setVendorId(product.vendorId || product.vendor?.id || '');
     setCategoryId(product.categoryId || product.category?.id || '');
-    setSelectedImage(null);
+    setSelectedImages([]);
   };
 
   const remove = async (id: string) => {
@@ -185,8 +192,18 @@ export const OwnerProductsScreen = () => {
           </View>
         ) : null}
 
-        <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة المنتج'} onPress={pickImage} variant="ghost" />
-        {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.preview} /> : null}
+        <AppButton
+          label={selectedImages.length ? `تم اختيار ${selectedImages.length} صور` : 'اختيار صور المنتج'}
+          onPress={pickImage}
+          variant="ghost"
+        />
+        {selectedImages.length ? (
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.previewList}>
+            {selectedImages.map((imageFile, index) => (
+              <Image key={`${imageFile.uri}-${index}`} source={{ uri: imageFile.uri }} style={styles.previewThumb} />
+            ))}
+          </ScrollView>
+        ) : null}
 
         <AppButton label={editingId ? 'حفظ التعديلات' : 'إضافة المنتج'} onPress={save} loading={saving} />
         {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
@@ -233,9 +250,13 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     backgroundColor: '#f0fdfa',
   },
-  preview: {
-    width: '100%',
-    height: 140,
+  previewList: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+  },
+  previewThumb: {
+    width: 120,
+    height: 120,
     borderRadius: 12,
     backgroundColor: '#cffafe',
   },
