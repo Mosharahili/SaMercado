@@ -18,6 +18,7 @@ export const ProductsScreen = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
+  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'خضار' | 'فواكه' | 'تمور'>('ALL');
 
   const [products, setProducts] = useState<Product[]>(mockProducts);
   const [topBanners, setTopBanners] = useState<Banner[]>(mockBanners);
@@ -56,16 +57,18 @@ export const ProductsScreen = () => {
   }, []);
 
   const visibleProducts = useMemo(() => {
-    if (!search.trim()) return products;
-
     return products.filter((product) => {
       const keyword = search.toLowerCase();
-      return (
+      const matchesSearch = !search.trim() || (
         product.name.toLowerCase().includes(keyword) ||
         product.market.name.toLowerCase().includes(keyword)
       );
+
+      const categoryName = product.category?.nameAr || '';
+      const matchesCategory = categoryFilter === 'ALL' || categoryName === categoryFilter;
+      return matchesSearch && matchesCategory;
     });
-  }, [products, search]);
+  }, [products, search, categoryFilter]);
 
   const topOffer = inlineOffers[0];
   const topOfferImage = api.resolveAssetUrl(topOffer?.imageUrl);
@@ -107,6 +110,26 @@ export const ProductsScreen = () => {
             fetchProducts(searchInput);
           }}
         />
+      </View>
+
+      <View style={styles.filtersRow}>
+        {[
+          { key: 'ALL', label: 'الكل' },
+          { key: 'تمور', label: 'تمور' },
+          { key: 'خضار', label: 'خضار' },
+          { key: 'فواكه', label: 'فواكه' },
+        ].map((item) => {
+          const active = categoryFilter === item.key;
+          return (
+            <Pressable
+              key={item.key}
+              onPress={() => setCategoryFilter(item.key as 'ALL' | 'خضار' | 'فواكه' | 'تمور')}
+              style={[styles.filterChip, active ? styles.filterChipActive : null]}
+            >
+              <Text style={[styles.filterText, active ? styles.filterTextActive : null]}>{item.label}</Text>
+            </Pressable>
+          );
+        })}
       </View>
 
       <View style={styles.rowBetween}>
@@ -192,13 +215,13 @@ const styles = StyleSheet.create({
     borderRadius: 18,
     padding: 12,
     borderWidth: 1,
-    borderColor: '#67e8f9',
+    borderColor: '#bbf7d0',
     gap: 8,
   },
   offerTag: {
     alignSelf: 'flex-end',
-    backgroundColor: '#cffafe',
-    color: '#0e7490',
+    backgroundColor: '#dcfce7',
+    color: '#166534',
     fontWeight: '800',
     paddingHorizontal: 10,
     paddingVertical: 4,
@@ -228,7 +251,7 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     borderWidth: 1,
-    borderColor: '#99f6e4',
+    borderColor: '#bbf7d0',
     borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.95)',
     paddingHorizontal: 12,
@@ -242,20 +265,45 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  filtersRow: {
+    flexDirection: 'row-reverse',
+    gap: 8,
+    flexWrap: 'wrap',
+  },
+  filterChip: {
+    borderWidth: 1,
+    borderColor: '#bbf7d0',
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 7,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+  },
+  filterChipActive: {
+    backgroundColor: '#2f9e44',
+    borderColor: '#2f9e44',
+  },
+  filterText: {
+    color: '#166534',
+    fontWeight: '700',
+    fontSize: 12,
+  },
+  filterTextActive: {
+    color: '#ffffff',
+  },
   rowBetween: {
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
   countText: {
-    color: '#0e7490',
+    color: '#166534',
     fontWeight: '700',
   },
   toggleBtn: {
     flexDirection: 'row-reverse',
     gap: 6,
     alignItems: 'center',
-    backgroundColor: '#0d9488',
+    backgroundColor: '#2f9e44',
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,

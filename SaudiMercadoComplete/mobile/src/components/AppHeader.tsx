@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
     height: 54,
     borderRadius: 14,
     borderWidth: 2,
-    borderColor: '#a5f3fc',
+    borderColor: '#bbf7d0',
   },
   textWrap: {
     flex: 1,

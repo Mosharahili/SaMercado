@@ -27,19 +27,21 @@ const styles = StyleSheet.create({
     borderRadius: theme.radius.lg,
     padding: theme.spacing.md,
     gap: 10,
+    borderWidth: 1,
+    borderColor: '#dcfce7',
     ...theme.shadow.card,
   },
   image: {
     width: '100%',
     height: 160,
     borderRadius: 12,
-    backgroundColor: '#ecfeff',
+    backgroundColor: '#ecfdf3',
   },
   placeholder: {
     width: '100%',
     height: 160,
     borderRadius: 12,
-    backgroundColor: '#cffafe',
+    backgroundColor: '#dcfce7',
   },
   row: {
     flexDirection: 'row-reverse',
@@ -60,7 +62,7 @@ const styles = StyleSheet.create({
   },
   meta: {
     textAlign: 'right',
-    color: '#155e75',
+    color: '#166534',
     fontSize: 13,
   },
 });
