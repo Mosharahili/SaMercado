@@ -100,9 +100,14 @@ export const saveUploadedImage = async (
   folder = 'general'
 ): Promise<SaveImageResult> => {
   if (!hasSupabaseStorageConfig()) {
+    if (env.nodeEnv === 'production') {
+      throw new Error(
+        'Supabase storage is not configured in production. Set SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and SUPABASE_STORAGE_BUCKET.'
+      );
+    }
+
     return saveLocally(file);
   }
 
   return saveToSupabaseStorage(file, folder);
 };
-
