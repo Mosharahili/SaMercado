@@ -19,7 +19,12 @@ import { AccountScreen } from '@screens/customer/AccountScreen';
 const Stack = createNativeStackNavigator<OwnerStackParamList>();
 
 export const OwnerStack = () => (
-  <Stack.Navigator>
+  <Stack.Navigator
+    screenOptions={{
+      headerTitleAlign: 'left',
+      contentStyle: { direction: 'rtl' },
+    }}
+  >
     <Stack.Screen name="OwnerDashboard" component={OwnerDashboardScreen} options={{ title: 'لوحة المالك' }} />
     <Stack.Screen name="OwnerStoreHome" component={HomeScreen} options={{ title: 'الرئيسية' }} />
     <Stack.Screen name="OwnerStoreMarkets" component={MarketsScreen} options={{ title: 'الأسواق' }} />

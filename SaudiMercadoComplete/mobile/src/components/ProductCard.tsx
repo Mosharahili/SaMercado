@@ -127,12 +127,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 10,
+    gap: 8,
   },
   priceWrap: {
     flexDirection: 'row-reverse',
     alignItems: 'baseline',
     gap: 4,
+    flexShrink: 1,
   },
   price: {
     textAlign: 'right',
@@ -148,8 +149,9 @@ const styles = StyleSheet.create({
   addButton: {
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.md,
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    minHeight: 36,
+    paddingVertical: 8,
+    paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
     flexDirection: 'row-reverse',
@@ -158,6 +160,6 @@ const styles = StyleSheet.create({
   addText: {
     color: 'white',
     fontWeight: '700',
-    fontSize: 12,
+    fontSize: 11,
   },
 });

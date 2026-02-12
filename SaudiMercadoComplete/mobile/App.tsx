@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { I18nManager } from 'react-native';
+import { I18nManager, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@hooks/useAuth';
 import { CartProvider } from '@hooks/useCart';
@@ -14,7 +14,11 @@ I18nManager.swapLeftAndRightInRTL(true);
 
 const AppInner = () => {
   useRegisterPushToken();
-  return <RootNavigator />;
+  return (
+    <View style={styles.rtlRoot}>
+      <RootNavigator />
+    </View>
+  );
 };
 
 export default function App() {
@@ -27,3 +31,10 @@ export default function App() {
     </AuthProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  rtlRoot: {
+    flex: 1,
+    direction: 'rtl',
+  },
+});

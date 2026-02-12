@@ -146,11 +146,11 @@ export const ProductsScreen = () => {
         key={viewMode}
         numColumns={viewMode === 'grid' ? 2 : 1}
         keyExtractor={(item) => item.id}
-        columnWrapperStyle={viewMode === 'grid' ? { justifyContent: 'space-between' } : undefined}
+        columnWrapperStyle={viewMode === 'grid' ? { justifyContent: 'space-between', gap: 8 } : undefined}
         contentContainerStyle={{ gap: 12, paddingBottom: 24 }}
         scrollEnabled={false}
         renderItem={({ item }) => (
-          <View style={{ width: viewMode === 'grid' ? '48.7%' : '100%' }}>
+          <View style={{ width: viewMode === 'grid' ? '49%' : '100%' }}>
             <ProductCard product={item} onAdd={() => addToCart(item)} onPress={() => setSelectedProduct(item)} />
           </View>
         )}

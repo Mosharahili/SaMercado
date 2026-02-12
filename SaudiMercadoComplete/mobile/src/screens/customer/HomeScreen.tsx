@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Image, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Image, ImageBackground, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { ScreenContainer } from '@components/ScreenContainer';
@@ -77,17 +77,17 @@ export const HomeScreen = () => {
     <ScreenContainer>
       <AppHeader title="سعودي ميركادو" subtitle="SaudiMercado" />
 
-      <LinearGradient colors={theme.gradients.hero} style={styles.heroCard}>
-        <Text style={styles.heroBrand}>Saudi Mercado</Text>
-        <Text style={styles.heroTitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
-        <Text style={styles.heroHint}>منصة سعودية تربطك بأسواق الخضار والفواكه في الرياض، بتجربة سريعة ومنظمة وجودة يومية.</Text>
-      </LinearGradient>
-
-      <Image
+      <ImageBackground
         source={require('../../../assets/home-hero-preview.png')}
-        style={styles.heroPreview}
-        resizeMode="cover"
-      />
+        style={styles.heroBackground}
+        imageStyle={styles.heroBackgroundImage}
+      >
+        <LinearGradient colors={['rgba(20,83,45,0.72)', 'rgba(22,101,52,0.60)']} style={styles.heroCard}>
+          <Text style={styles.heroBrand}>Saudi Mercado</Text>
+          <Text style={styles.heroTitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
+          <Text style={styles.heroHint}>منصة سعودية تربطك بأسواق الخضار والفواكه في الرياض، بتجربة سريعة ومنظمة وجودة يومية.</Text>
+        </LinearGradient>
+      </ImageBackground>
 
       <View style={styles.featureRow}>
         {featureItems.map((feature) => (
@@ -100,7 +100,7 @@ export const HomeScreen = () => {
 
       {banners.length ? <BannerCarousel banners={banners} /> : null}
 
-      <Text style={styles.sectionTitle}>ALriyadh store</Text>
+      <Text style={styles.sectionTitle}>اسواق الرياض</Text>
       <Text style={styles.sectionHint}>الأسواق المعتمدة التي نعمل معها داخل مدينة الرياض.</Text>
       <View style={styles.marketGrid}>
         {displayMarkets.map((market) => {
@@ -168,9 +168,18 @@ export const HomeScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  heroBackground: {
+    borderRadius: 20,
+    overflow: 'hidden',
+  },
+  heroBackgroundImage: {
+    borderRadius: 20,
+  },
   heroCard: {
     borderRadius: 20,
     padding: 14,
+    minHeight: 182,
+    justifyContent: 'flex-end',
     gap: 5,
   },
   heroBrand: {
@@ -189,14 +198,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     color: '#e8fbe8',
     lineHeight: 20,
-  },
-  heroPreview: {
-    width: '100%',
-    height: 182,
-    borderRadius: 18,
-    borderWidth: 1,
-    borderColor: '#bbf7d0',
-    backgroundColor: '#ecfdf3',
   },
   featureRow: {
     flexDirection: 'row-reverse',

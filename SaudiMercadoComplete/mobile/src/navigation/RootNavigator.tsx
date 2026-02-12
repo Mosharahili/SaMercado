@@ -21,32 +21,39 @@ export const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer
-      theme={{
-        ...DefaultTheme,
-        colors: {
-          ...DefaultTheme.colors,
-          background: theme.colors.bg,
-          primary: theme.colors.primary,
-        },
-      }}
-    >
-      {!user ? (
-        <AuthStack />
-      ) : user.role === 'CUSTOMER' ? (
-        <CustomerTabs />
-      ) : user.role === 'VENDOR' ? (
-        <VendorStack />
-      ) : user.role === 'ADMIN' ? (
-        <AdminStack />
-      ) : (
-        <OwnerStack />
-      )}
-    </NavigationContainer>
+    <View style={styles.rtlRoot}>
+      <NavigationContainer
+        direction="rtl"
+        theme={{
+          ...DefaultTheme,
+          colors: {
+            ...DefaultTheme.colors,
+            background: theme.colors.bg,
+            primary: theme.colors.primary,
+          },
+        }}
+      >
+        {!user ? (
+          <AuthStack />
+        ) : user.role === 'CUSTOMER' ? (
+          <CustomerTabs />
+        ) : user.role === 'VENDOR' ? (
+          <VendorStack />
+        ) : user.role === 'ADMIN' ? (
+          <AdminStack />
+        ) : (
+          <OwnerStack />
+        )}
+      </NavigationContainer>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  rtlRoot: {
+    flex: 1,
+    direction: 'rtl',
+  },
   loading: {
     flex: 1,
     backgroundColor: theme.colors.bg,

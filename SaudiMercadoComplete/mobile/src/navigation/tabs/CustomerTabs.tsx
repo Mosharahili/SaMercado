@@ -38,6 +38,10 @@ export const CustomerTabs = () => (
         paddingBottom: 8,
         paddingTop: 8,
         backgroundColor: '#ffffff',
+        direction: 'rtl',
+      },
+      sceneStyle: {
+        direction: 'rtl',
       },
       tabBarLabelStyle: {
         fontSize: 11,

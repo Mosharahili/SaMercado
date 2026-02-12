@@ -7,7 +7,12 @@ import { SignupScreen } from '@screens/auth/SignupScreen';
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthStack = () => (
-  <Stack.Navigator screenOptions={{ headerShown: false }}>
+  <Stack.Navigator
+    screenOptions={{
+      headerShown: false,
+      contentStyle: { direction: 'rtl' },
+    }}
+  >
     <Stack.Screen name="Login" component={LoginScreen} />
     <Stack.Screen name="Signup" component={SignupScreen} />
   </Stack.Navigator>

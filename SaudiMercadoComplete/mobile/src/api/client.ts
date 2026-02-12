@@ -83,25 +83,62 @@ const request = async <T = any>(path: string, options: RequestOptions = {}): Pro
 
 const apiOrigin = baseURL.replace(/\/api$/, '');
 
+const normalizeAssetPath = (pathValue: string) =>
+  pathValue
+    .replace(/\\/g, '/')
+    .replace(/^\/api\/uploads\//i, '/uploads/')
+    .replace(/^api\/uploads\//i, 'uploads/');
+
+const encodePathname = (pathname: string) =>
+  pathname
+    .split('/')
+    .map((segment, index) => {
+      if (index === 0 && segment === '') return '';
+      try {
+        return encodeURIComponent(decodeURIComponent(segment));
+      } catch {
+        return encodeURIComponent(segment);
+      }
+    })
+    .join('/');
+
 const resolveAssetUrl = (value?: string | null) => {
   if (!value) return '';
-  if (value.startsWith('data:') || value.startsWith('file:')) {
-    return value;
+  const rawValue = String(value).trim();
+  if (!rawValue) return '';
+
+  if (rawValue.startsWith('data:') || rawValue.startsWith('file:')) {
+    return rawValue;
   }
 
-  if (/^https?:\/\//i.test(value)) {
+  if (rawValue.startsWith('blob:')) {
+    return rawValue;
+  }
+
+  if (/^https?:\/\//i.test(rawValue)) {
     try {
-      const parsed = new URL(value);
+      const parsed = new URL(rawValue);
+      parsed.pathname = encodePathname(normalizeAssetPath(parsed.pathname));
+
       if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1' || parsed.hostname === '0.0.0.0') {
         return `${apiOrigin}${parsed.pathname}${parsed.search || ''}`;
       }
+
+      // Prevent mixed-content image issues for legacy http on render-hosted URLs.
+      if (parsed.protocol === 'http:' && parsed.hostname.endsWith('.onrender.com')) {
+        parsed.protocol = 'https:';
+      }
+
+      return parsed.toString();
     } catch {
       // Keep the value as-is when URL parsing fails.
+      return encodeURI(rawValue);
     }
-    return value;
   }
 
-  return `${apiOrigin}${value.startsWith('/') ? value : `/${value}`}`;
+  const normalized = normalizeAssetPath(rawValue);
+  const path = normalized.startsWith('/') ? normalized : `/${normalized}`;
+  return `${apiOrigin}${encodePathname(path)}`;
 };
 
 const upload = async <T = any>(

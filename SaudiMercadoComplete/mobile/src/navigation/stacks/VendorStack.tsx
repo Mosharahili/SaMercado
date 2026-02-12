@@ -10,7 +10,12 @@ import { VendorSupportScreen } from '@screens/vendor/VendorSupportScreen';
 const Stack = createNativeStackNavigator<VendorStackParamList>();
 
 export const VendorStack = () => (
-  <Stack.Navigator>
+  <Stack.Navigator
+    screenOptions={{
+      headerTitleAlign: 'left',
+      contentStyle: { direction: 'rtl' },
+    }}
+  >
     <Stack.Screen name="VendorDashboard" component={VendorDashboardScreen} options={{ title: 'بوابة البائع' }} />
     <Stack.Screen name="VendorProducts" component={VendorProductsScreen} options={{ title: 'منتجاتي' }} />
     <Stack.Screen name="VendorOrders" component={VendorOrdersScreen} options={{ title: 'طلباتي' }} />

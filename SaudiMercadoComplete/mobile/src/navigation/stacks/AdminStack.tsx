@@ -14,7 +14,12 @@ import { AccountScreen } from '@screens/customer/AccountScreen';
 const Stack = createNativeStackNavigator<AdminStackParamList>();
 
 export const AdminStack = () => (
-  <Stack.Navigator>
+  <Stack.Navigator
+    screenOptions={{
+      headerTitleAlign: 'left',
+      contentStyle: { direction: 'rtl' },
+    }}
+  >
     <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ title: 'لوحة الأدمن' }} />
     <Stack.Screen name="AdminStoreMarkets" component={MarketsScreen} options={{ title: 'الأسواق' }} />
     <Stack.Screen name="AdminStoreProducts" component={ProductsScreen} options={{ title: 'المنتجات' }} />
