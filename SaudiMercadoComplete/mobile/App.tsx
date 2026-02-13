@@ -27,7 +27,7 @@ const StartupSplash = () => {
 
 const AppInner = () => {
   useRegisterPushToken();
-  const { isLoading } = useLanguage();
+  const { isLoading, isRTL } = useLanguage();
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ const AppInner = () => {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <RootNavigator />
     </View>
   );

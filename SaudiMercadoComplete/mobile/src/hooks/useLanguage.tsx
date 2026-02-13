@@ -1,11 +1,23 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { I18nManager, Platform } from 'react-native';
-import { reloadAppAsync } from 'expo';
 
 export type AppLanguage = 'ar' | 'en';
 
 const LANGUAGE_KEY = 'app_language';
+
+/** Sync native I18nManager.forceRTL with language. Requires app restart to take effect. */
+const applyRTLAndReloadIfNeeded = (wantsRTL: boolean): boolean => {
+  if (Platform.OS === 'web') return false;
+  if (I18nManager.isRTL === wantsRTL) return false;
+  I18nManager.forceRTL(wantsRTL);
+  try {
+    require('react-native-restart').default.restart();
+  } catch {
+    // Native module not available (e.g. Expo Go)
+  }
+  return true;
+};
 
 const ar = {
   'language.switch': 'English',
@@ -104,25 +116,14 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
 
-const applyLanguageDirection = async (language: AppLanguage) => {
-  const shouldUseRTL = language === 'ar';
-
-  I18nManager.allowRTL(true);
-  I18nManager.swapLeftAndRightInRTL(true);
-
-  if (Platform.OS === 'web') {
-    return;
-  }
-
-  if (I18nManager.isRTL !== shouldUseRTL) {
-    I18nManager.forceRTL(shouldUseRTL);
-    await reloadAppAsync();
-  }
-};
-
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguageState] = useState<AppLanguage>('ar');
   const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    I18nManager.allowRTL(true);
+    I18nManager.swapLeftAndRightInRTL(true);
+  }, []);
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -132,8 +133,11 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
         if (stored === 'ar' || stored === 'en') {
           initialLanguage = stored;
         }
+        const wantsRTL = initialLanguage === 'ar';
+        if (applyRTLAndReloadIfNeeded(wantsRTL)) {
+          return; // App is restarting
+        }
         setLanguageState(initialLanguage);
-        await applyLanguageDirection(initialLanguage);
       } finally {
         setIsLoading(false);
       }
@@ -144,9 +148,12 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setLanguage = async (next: AppLanguage) => {
     if (next === language) return;
-    setLanguageState(next);
+    const wantsRTL = next === 'ar';
     await AsyncStorage.setItem(LANGUAGE_KEY, next);
-    await applyLanguageDirection(next);
+    if (applyRTLAndReloadIfNeeded(wantsRTL)) {
+      return; // App is restarting
+    }
+    setLanguageState(next);
   };
 
   const toggleLanguage = async () => {

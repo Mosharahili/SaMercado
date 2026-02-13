@@ -18,7 +18,7 @@
     },
     "ios": {
       "bundleIdentifier": "com.saudimercado.complete",
-      "newArchEnabled": false,
+      "newArchEnabled": true,
       "supportsTablet": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "ar",
@@ -30,7 +30,7 @@
     },
     "android": {
       "package": "com.saudimercado.complete",
-      "newArchEnabled": false,
+      "newArchEnabled": true,
       "supportsRTL": true
     },
     "plugins": [
