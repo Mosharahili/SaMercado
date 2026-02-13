@@ -46,6 +46,7 @@ export const CustomerTabs = () => (
       tabBarLabelStyle: {
         fontSize: 11,
         fontWeight: '700',
+        writingDirection: 'rtl',
       },
       tabBarIcon: ({ color, size }) => (
         <MaterialCommunityIcons name={iconMap[route.name as keyof CustomerTabParamList]} color={color} size={size} />

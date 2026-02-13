@@ -16,6 +16,7 @@ export const AuthStack: React.FC = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        contentStyle: { direction: "rtl" },
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />
@@ -23,4 +24,3 @@ export const AuthStack: React.FC = () => {
     </Stack.Navigator>
   );
 };
-

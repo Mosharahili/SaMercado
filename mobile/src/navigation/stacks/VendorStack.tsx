@@ -19,7 +19,12 @@ const Stack = createNativeStackNavigator<VendorStackParamList>();
 
 export const VendorStack: React.FC = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: "center",
+        contentStyle: { direction: "rtl" },
+      }}
+    >
       <Stack.Screen
         name="VendorDashboard"
         component={VendorDashboardScreen}
@@ -48,4 +53,3 @@ export const VendorStack: React.FC = () => {
     </Stack.Navigator>
   );
 };
-

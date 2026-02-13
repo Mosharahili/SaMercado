@@ -12,7 +12,7 @@ const Stack = createNativeStackNavigator<VendorStackParamList>();
 export const VendorStack = () => (
   <Stack.Navigator
     screenOptions={{
-      headerTitleAlign: 'left',
+      headerTitleAlign: 'center',
       contentStyle: { direction: 'rtl' },
     }}
   >

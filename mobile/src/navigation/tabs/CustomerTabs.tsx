@@ -28,6 +28,10 @@ export const CustomerTabs: React.FC = () => {
         tabBarInactiveTintColor: theme.colors.muted,
         tabBarStyle: {
           backgroundColor: "#ffffff",
+          direction: "rtl",
+        },
+        sceneStyle: {
+          direction: "rtl",
         },
         tabBarIcon: ({ color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = "home";
@@ -40,6 +44,7 @@ export const CustomerTabs: React.FC = () => {
         },
         tabBarLabelStyle: {
           fontSize: 12,
+          writingDirection: "rtl",
         },
       })}
     >
@@ -51,4 +56,3 @@ export const CustomerTabs: React.FC = () => {
     </Tab.Navigator>
   );
 };
-

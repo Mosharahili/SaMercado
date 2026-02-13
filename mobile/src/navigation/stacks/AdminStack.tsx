@@ -29,7 +29,12 @@ const Stack = createNativeStackNavigator<AdminStackParamList>();
 
 export const AdminStack: React.FC = () => {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: "center",
+        contentStyle: { direction: "rtl" },
+      }}
+    >
       <Stack.Screen
         name="OwnerDashboard"
         component={OwnerDashboardScreen}
@@ -47,4 +52,3 @@ export const AdminStack: React.FC = () => {
     </Stack.Navigator>
   );
 };
-

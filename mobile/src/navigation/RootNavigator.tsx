@@ -26,7 +26,13 @@ export const RootNavigator: React.FC = () => {
   const initialRouteName: keyof RootStackParamList = user ? "Customer" : "Auth";
 
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }} initialRouteName={initialRouteName}>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        contentStyle: { direction: "rtl" },
+      }}
+      initialRouteName={initialRouteName}
+    >
       {!user && <Stack.Screen name="Auth" component={AuthStack} />}
       {user && <Stack.Screen name="Customer" component={CustomerTabs} />}
       {user && (user.role === "ADMIN" || user.role === "OWNER") && (
@@ -38,4 +44,3 @@ export const RootNavigator: React.FC = () => {
     </Stack.Navigator>
   );
 };
-

@@ -1,49 +1,46 @@
 import 'react-native-gesture-handler';
-import React, { useEffect, useState } from 'react';
-import { DevSettings, I18nManager, StyleSheet, View } from 'react-native';
+import React from 'react';
+import { I18nManager, StyleSheet, Text, TextInput, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@hooks/useAuth';
 import { CartProvider } from '@hooks/useCart';
 import { RootNavigator } from '@navigation/RootNavigator';
 import { useRegisterPushToken } from '@hooks/useRegisterPushToken';
 
-// The app language is Arabic-first; force RTL to keep layout consistent across Android devices.
-I18nManager.allowRTL(true);
-I18nManager.forceRTL(true);
-I18nManager.swapLeftAndRightInRTL(true);
+const applyGlobalRtlTextDefaults = () => {
+  const rtlTextStyle = { writingDirection: 'rtl' as const, textAlign: 'right' as const };
+  const rtlInputStyle = { writingDirection: 'rtl' as const, textAlign: 'right' as const };
+
+  const textDefaults = (Text as unknown as { defaultProps?: { style?: unknown } }).defaultProps || {};
+  const textStyle = textDefaults.style;
+  (Text as unknown as { defaultProps: { style: unknown } }).defaultProps = {
+    ...textDefaults,
+    style: textStyle ? [rtlTextStyle, textStyle] : rtlTextStyle,
+  };
+
+  const inputDefaults = (TextInput as unknown as { defaultProps?: { style?: unknown } }).defaultProps || {};
+  const inputStyle = inputDefaults.style;
+  (TextInput as unknown as { defaultProps: { style: unknown } }).defaultProps = {
+    ...inputDefaults,
+    style: inputStyle ? [rtlInputStyle, inputStyle] : rtlInputStyle,
+  };
+};
+
+const ensureRtlEnabled = () => {
+  I18nManager.allowRTL(true);
+  I18nManager.swapLeftAndRightInRTL(true);
+  I18nManager.forceRTL(true);
+  if (__DEV__ && !I18nManager.isRTL) {
+    // forceRTL is applied on the next app start.
+    console.log('RTL mode enabled. Restart the app once if layout is still LTR.');
+  }
+};
+
+ensureRtlEnabled();
+applyGlobalRtlTextDefaults();
 
 const AppInner = () => {
   useRegisterPushToken();
-  const [rtlReady, setRtlReady] = useState(I18nManager.isRTL);
-
-  useEffect(() => {
-    const ensureRtl = async () => {
-      if (I18nManager.isRTL) {
-        setRtlReady(true);
-        return;
-      }
-
-      I18nManager.allowRTL(true);
-      I18nManager.forceRTL(true);
-      I18nManager.swapLeftAndRightInRTL(true);
-
-      try {
-        if (__DEV__) {
-          DevSettings.reload();
-          return;
-        }
-      } catch {
-        // Ignore reload failures and continue with forced direction styles.
-      }
-
-      setRtlReady(true);
-    };
-
-    ensureRtl();
-  }, []);
-
-  if (!rtlReady) return null;
-
   return (
     <View style={styles.rtlRoot}>
       <RootNavigator />

@@ -14,11 +14,19 @@
     },
     "ios": {
       "bundleIdentifier": "com.saudimercado.app",
-      "newArchEnabled": false
+      "newArchEnabled": false,
+      "infoPlist": {
+        "CFBundleDevelopmentRegion": "ar",
+        "CFBundleLocalizations": [
+          "ar",
+          "en"
+        ]
+      }
     },
     "android": {
       "package": "com.saudimercado.app",
-      "newArchEnabled": false
+      "newArchEnabled": false,
+      "supportsRTL": true
     },
     "extra": {
       "eas": {
