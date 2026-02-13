@@ -1,27 +1,46 @@
 import 'react-native-gesture-handler';
-import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Image, StyleSheet, Text, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
+import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider } from '@hooks/useAuth';
 import { CartProvider } from '@hooks/useCart';
 import { LanguageProvider, useLanguage } from '@hooks/useLanguage';
 import { RootNavigator } from '@navigation/RootNavigator';
 import { useRegisterPushToken } from '@hooks/useRegisterPushToken';
 
+const STARTUP_SPLASH_DELAY_MS = 3000;
+
+const StartupSplash = () => {
+  const { t } = useLanguage();
+
+  return (
+    <LinearGradient colors={['#ecfdf3', '#d9fbe8', '#b7f2cb']} style={styles.splashWrap}>
+      <View style={styles.splashCard}>
+        <Image source={require('./assets/icon.png')} style={styles.splashLogo} resizeMode="cover" />
+        <Text style={styles.splashTitle}>{t('auth.appName')}</Text>
+        <Text style={styles.splashSubtitle}>SaudiMercado</Text>
+      </View>
+    </LinearGradient>
+  );
+};
+
 const AppInner = () => {
   useRegisterPushToken();
-  const { isRTL, isLoading } = useLanguage();
+  const { isLoading } = useLanguage();
+  const [showStartupSplash, setShowStartupSplash] = useState(true);
 
-  if (isLoading) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#2f9e44" />
-      </View>
-    );
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStartupSplash(false), STARTUP_SPLASH_DELAY_MS);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading || showStartupSplash) {
+    return <StartupSplash />;
   }
 
   return (
-    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <View style={styles.root}>
       <RootNavigator />
     </View>
   );
@@ -44,10 +63,36 @@ const styles = StyleSheet.create({
   root: {
     flex: 1,
   },
-  loading: {
+  splashWrap: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#f2fbf4',
+    paddingHorizontal: 24,
+  },
+  splashCard: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+  },
+  splashLogo: {
+    width: 162,
+    height: 162,
+    borderRadius: 36,
+    borderWidth: 3,
+    borderColor: '#86efac',
+    backgroundColor: '#ffffff',
+  },
+  splashTitle: {
+    marginTop: 8,
+    color: '#14532d',
+    fontSize: 34,
+    fontWeight: '900',
+    textAlign: 'center',
+  },
+  splashSubtitle: {
+    color: '#166534',
+    fontSize: 18,
+    fontWeight: '700',
+    textAlign: 'center',
   },
 });

@@ -19,7 +19,7 @@ export const BannerCarousel = ({ banners }: { banners: Banner[] }) => {
   if (!source.length) return null;
 
   return (
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={[styles.wrap, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.wrap}>
       {source.map((banner) => (
         <ImageBackground key={banner.id} source={{ uri: banner.imageUrl }} style={styles.slide} imageStyle={styles.image}>
           <View style={styles.overlay}>

@@ -1,5 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { I18nManager, Platform } from 'react-native';
+import { reloadAppAsync } from 'expo';
 
 export type AppLanguage = 'ar' | 'en';
 
@@ -102,17 +104,36 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
 
+const applyLanguageDirection = async (language: AppLanguage) => {
+  const shouldUseRTL = language === 'ar';
+
+  I18nManager.allowRTL(true);
+  I18nManager.swapLeftAndRightInRTL(true);
+
+  if (Platform.OS === 'web') {
+    return;
+  }
+
+  if (I18nManager.isRTL !== shouldUseRTL) {
+    I18nManager.forceRTL(shouldUseRTL);
+    await reloadAppAsync();
+  }
+};
+
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguageState] = useState<AppLanguage>('ar');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const bootstrap = async () => {
+      let initialLanguage: AppLanguage = 'ar';
       try {
         const stored = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (stored === 'ar' || stored === 'en') {
-          setLanguageState(stored);
+          initialLanguage = stored;
         }
+        setLanguageState(initialLanguage);
+        await applyLanguageDirection(initialLanguage);
       } finally {
         setIsLoading(false);
       }
@@ -122,8 +143,10 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   }, []);
 
   const setLanguage = async (next: AppLanguage) => {
+    if (next === language) return;
     setLanguageState(next);
     await AsyncStorage.setItem(LANGUAGE_KEY, next);
+    await applyLanguageDirection(next);
   };
 
   const toggleLanguage = async () => {

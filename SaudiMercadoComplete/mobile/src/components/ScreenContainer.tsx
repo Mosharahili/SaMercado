@@ -30,7 +30,7 @@ export const ScreenContainer = ({
   ) : null;
 
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, { direction: isRTL ? 'rtl' : 'ltr' }, contentStyle]}>
+    <ScrollView contentContainerStyle={[styles.content, contentStyle]}>
       {ownerShortcut}
       {children}
     </ScrollView>
@@ -43,7 +43,7 @@ export const ScreenContainer = ({
 
   return (
     <LinearGradient colors={theme.gradients.app} style={styles.gradient}>
-      <SafeAreaView style={[styles.safeArea, { direction: isRTL ? 'rtl' : 'ltr' }]}>{content}</SafeAreaView>
+      <SafeAreaView style={styles.safeArea}>{content}</SafeAreaView>
     </LinearGradient>
   );
 };
