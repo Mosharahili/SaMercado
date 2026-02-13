@@ -6,41 +6,43 @@ import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
 import { api, UploadFile } from '@api/client';
 import { Banner } from '@app-types/models';
-
-const placements = [
-  { label: 'الرئيسية (الهيدر) 1080x480', value: 'HOME_HERO' },
-  { label: 'الرئيسية (منتصف) 1080x300', value: 'HOME_MID' },
-  { label: 'الرئيسية (أسفل الصفحة)', value: 'HOME_BOTTOM' },
-  { label: 'المنتجات (أعلى الصفحة)', value: 'PRODUCT_TOP' },
-  { label: 'المنتجات (داخل القائمة) 1080x250', value: 'PRODUCT_INLINE' },
-];
-
-const actionTypes = [
-  { label: 'بدون إجراء', value: 'NONE' },
-  { label: 'فتح منتج', value: 'PRODUCT' },
-  { label: 'فتح سوق', value: 'MARKET' },
-  { label: 'فتح تصنيف', value: 'CATEGORY' },
-  { label: 'رابط خارجي', value: 'EXTERNAL_LINK' },
-];
+import { useLanguage } from '@hooks/useLanguage';
 
 export const BannerManagerScreen = () => {
+  const { isRTL, tr } = useLanguage();
+  const defaultCtaText = tr('تسوق الآن', 'Shop Now');
   const [banners, setBanners] = useState<Banner[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [placement, setPlacement] = useState('HOME_HERO');
-  const [ctaText, setCtaText] = useState('تسوق الآن');
+  const [ctaText, setCtaText] = useState(defaultCtaText);
   const [actionType, setActionType] = useState('NONE');
   const [actionValue, setActionValue] = useState('');
   const [selectedImage, setSelectedImage] = useState<UploadFile | null>(null);
   const [saving, setSaving] = useState(false);
+  const placements = [
+    { label: tr('الرئيسية (الهيدر) 1080x480', 'Home (Hero) 1080x480'), value: 'HOME_HERO' },
+    { label: tr('الرئيسية (منتصف) 1080x300', 'Home (Middle) 1080x300'), value: 'HOME_MID' },
+    { label: tr('الرئيسية (أسفل الصفحة)', 'Home (Bottom)'), value: 'HOME_BOTTOM' },
+    { label: tr('المنتجات (أعلى الصفحة)', 'Products (Top)'), value: 'PRODUCT_TOP' },
+    { label: tr('المنتجات (داخل القائمة) 1080x250', 'Products (Inline) 1080x250'), value: 'PRODUCT_INLINE' },
+  ];
+
+  const actionTypes = [
+    { label: tr('بدون إجراء', 'No Action'), value: 'NONE' },
+    { label: tr('فتح منتج', 'Open Product'), value: 'PRODUCT' },
+    { label: tr('فتح سوق', 'Open Market'), value: 'MARKET' },
+    { label: tr('فتح تصنيف', 'Open Category'), value: 'CATEGORY' },
+    { label: tr('رابط خارجي', 'External Link'), value: 'EXTERNAL_LINK' },
+  ];
 
   const placementLabels: Record<string, string> = {
-    HOME_HERO: 'الرئيسية (الهيدر)',
-    HOME_MID: 'الرئيسية (منتصف)',
-    HOME_BOTTOM: 'الرئيسية (أسفل)',
-    PRODUCT_TOP: 'المنتجات (أعلى)',
-    PRODUCT_INLINE: 'المنتجات (داخل القائمة)',
+    HOME_HERO: tr('الرئيسية (الهيدر)', 'Home (Hero)'),
+    HOME_MID: tr('الرئيسية (منتصف)', 'Home (Middle)'),
+    HOME_BOTTOM: tr('الرئيسية (أسفل)', 'Home (Bottom)'),
+    PRODUCT_TOP: tr('المنتجات (أعلى)', 'Products (Top)'),
+    PRODUCT_INLINE: tr('المنتجات (داخل القائمة)', 'Products (Inline)'),
   };
 
   const load = async () => {
@@ -61,7 +63,7 @@ export const BannerManagerScreen = () => {
     setTitle('');
     setDescription('');
     setPlacement('HOME_HERO');
-    setCtaText('تسوق الآن');
+    setCtaText(defaultCtaText);
     setActionType('NONE');
     setActionValue('');
     setSelectedImage(null);
@@ -77,18 +79,18 @@ export const BannerManagerScreen = () => {
       const name = rawName.replace(/\s+/g, '_');
       setSelectedImage({ uri: asset.uri, name, type: asset.mimeType || 'image/jpeg' });
     } catch (error: any) {
-      Alert.alert('خطأ', error?.message || 'تعذر اختيار الصورة');
+      Alert.alert(tr('خطأ', 'Error'), error?.message || tr('تعذر اختيار الصورة', 'Unable to pick image'));
     }
   };
 
   const save = async () => {
     if (!title.trim()) {
-      Alert.alert('تنبيه', 'يرجى إدخال عنوان البوستر');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى إدخال عنوان البوستر', 'Please enter banner title'));
       return;
     }
 
     if (!editingId && !selectedImage) {
-      Alert.alert('تنبيه', 'يرجى اختيار صورة البوستر');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى اختيار صورة البوستر', 'Please select banner image'));
       return;
     }
 
@@ -120,11 +122,11 @@ export const BannerManagerScreen = () => {
         await api.upload(`/banners/${id}/image`, selectedImage);
       }
 
-      Alert.alert('تم', editingId ? 'تم تحديث البوستر' : 'تم إنشاء البوستر');
+      Alert.alert(tr('تم', 'Done'), editingId ? tr('تم تحديث البوستر', 'Banner updated') : tr('تم إنشاء البوستر', 'Banner created'));
       resetForm();
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'فشل الحفظ');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('فشل الحفظ', 'Save failed'));
     } finally {
       setSaving(false);
     }
@@ -135,7 +137,7 @@ export const BannerManagerScreen = () => {
     setTitle(banner.title || '');
     setDescription(banner.description || '');
     setPlacement(banner.placement || 'HOME_HERO');
-    setCtaText(banner.ctaText || 'تسوق الآن');
+    setCtaText(banner.ctaText || defaultCtaText);
     setActionType(banner.actionType || 'NONE');
     setActionValue(banner.actionValue || '');
     setSelectedImage(null);
@@ -144,10 +146,10 @@ export const BannerManagerScreen = () => {
   const remove = async (id: string) => {
     try {
       await api.del(`/banners/${id}`);
-      Alert.alert('تم', 'تم حذف البوستر');
+      Alert.alert(tr('تم', 'Done'), tr('تم حذف البوستر', 'Banner deleted'));
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر الحذف');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر الحذف', 'Unable to delete'));
     }
   };
 
@@ -156,16 +158,16 @@ export const BannerManagerScreen = () => {
       await api.put(`/banners/${banner.id}`, { isEnabled: !banner.isEnabled });
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر تحديث الحالة');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر تحديث الحالة', 'Unable to update status'));
     }
   };
 
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>{editingId ? 'تعديل بوستر' : 'إضافة بوستر جديد'}</Text>
-        <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="العنوان" textAlign="right" />
-        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder="الوصف" textAlign="right" />
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل بوستر', 'Edit Banner') : tr('إضافة بوستر جديد', 'Add New Banner')}</Text>
+        <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder={tr('العنوان', 'Title')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder={tr('الوصف', 'Description')} textAlign={isRTL ? 'right' : 'left'} />
 
         <View style={styles.pickerWrap}>
           <Picker selectedValue={placement} onValueChange={setPlacement}>
@@ -175,7 +177,7 @@ export const BannerManagerScreen = () => {
           </Picker>
         </View>
 
-        <TextInput style={styles.input} value={ctaText} onChangeText={setCtaText} placeholder="نص زر الإجراء" textAlign="right" />
+        <TextInput style={styles.input} value={ctaText} onChangeText={setCtaText} placeholder={tr('نص زر الإجراء', 'CTA button text')} textAlign={isRTL ? 'right' : 'left'} />
         <View style={styles.pickerWrap}>
           <Picker selectedValue={actionType} onValueChange={setActionType}>
             {actionTypes.map((action) => (
@@ -183,13 +185,13 @@ export const BannerManagerScreen = () => {
             ))}
           </Picker>
         </View>
-        <TextInput style={styles.input} value={actionValue} onChangeText={setActionValue} placeholder="قيمة الإجراء" textAlign="right" />
+        <TextInput style={styles.input} value={actionValue} onChangeText={setActionValue} placeholder={tr('قيمة الإجراء', 'Action value')} textAlign={isRTL ? 'right' : 'left'} />
 
-        <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة البوستر'} onPress={pickImage} variant="ghost" />
+        <AppButton label={selectedImage ? tr(`الصورة: ${selectedImage.name}`, `Image: ${selectedImage.name}`) : tr('اختيار صورة البوستر', 'Choose banner image')} onPress={pickImage} variant="ghost" />
         {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} resizeMode="cover" /> : null}
 
-        <AppButton label={editingId ? 'حفظ التعديلات' : 'حفظ البوستر'} onPress={save} loading={saving} />
-        {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
+        <AppButton label={editingId ? tr('حفظ التعديلات', 'Save Changes') : tr('حفظ البوستر', 'Save Banner')} onPress={save} loading={saving} />
+        {editingId ? <AppButton label={tr('إلغاء التعديل', 'Cancel Editing')} onPress={resetForm} variant="ghost" /> : null}
       </View>
 
       {banners.map((banner) => (
@@ -197,20 +199,20 @@ export const BannerManagerScreen = () => {
           {banner.imageUrl ? (
             <Image source={{ uri: api.resolveAssetUrl(banner.imageUrl) }} style={styles.itemImage} resizeMode="cover" />
           ) : null}
-          <Text style={styles.itemTitle}>{banner.title}</Text>
-          <Text style={styles.itemMeta}>{placementLabels[banner.placement] || banner.placement}</Text>
-          <Text style={styles.itemMeta}>{banner.description || '-'}</Text>
-          <Text style={styles.itemMeta}>الحالة: {banner.isEnabled ? 'مفعل' : 'متوقف'}</Text>
+          <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{banner.title}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{placementLabels[banner.placement] || banner.placement}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{banner.description || '-'}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {banner.isEnabled ? tr('مفعل', 'Active') : tr('متوقف', 'Disabled')}</Text>
 
-          <View style={styles.actionRow}>
+          <View style={[styles.actionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Pressable onPress={() => startEdit(banner)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>تعديل</Text>
+              <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
             <Pressable onPress={() => toggleEnabled(banner)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>{banner.isEnabled ? 'إيقاف' : 'تفعيل'}</Text>
+              <Text style={styles.actionText}>{banner.isEnabled ? tr('إيقاف', 'Disable') : tr('تفعيل', 'Enable')}</Text>
             </Pressable>
             <Pressable onPress={() => remove(banner.id)} style={styles.actionDanger}>
-              <Text style={styles.actionDangerText}>حذف</Text>
+              <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
         </View>
@@ -226,7 +228,7 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 8,
   },
-  title: { textAlign: 'right', fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
+  title: { fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
   input: {
     borderWidth: 1,
     borderColor: '#99f6e4',
@@ -261,11 +263,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#cffafe',
   },
-  itemTitle: { textAlign: 'right', fontWeight: '800', color: '#0f2f3d' },
-  itemMeta: { textAlign: 'right', color: '#4a6572' },
+  itemTitle: { fontWeight: '800', color: '#0f2f3d' },
+  itemMeta: { color: '#4a6572' },
   actionRow: {
     marginTop: 6,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
   },
   actionBtn: {

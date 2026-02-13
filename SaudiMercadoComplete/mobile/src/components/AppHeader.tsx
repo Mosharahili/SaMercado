@@ -1,14 +1,17 @@
 import React from 'react';
 import { Image, StyleSheet, Text, View } from 'react-native';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 
 export const AppHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => {
+  const { isRTL } = useLanguage();
+
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
       <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
       <View style={styles.textWrap}>
-        <Text style={styles.title}>{title}</Text>
-        {!!subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{title}</Text>
+        {!!subtitle && <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'left' }]}>{subtitle}</Text>}
       </View>
     </View>
   );
@@ -16,7 +19,6 @@ export const AppHeader = ({ title, subtitle }: { title: string; subtitle?: strin
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: theme.spacing.md,
   },
@@ -34,12 +36,10 @@ const styles = StyleSheet.create({
     color: '#0f2f3d',
     fontSize: 20,
     fontWeight: '800',
-    textAlign: 'right',
   },
   subtitle: {
     color: '#4a6572',
     fontSize: 13,
-    textAlign: 'right',
     marginTop: 2,
   },
 });

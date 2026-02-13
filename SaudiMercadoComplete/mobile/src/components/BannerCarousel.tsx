@@ -2,9 +2,11 @@ import React from 'react';
 import { ImageBackground, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Banner } from '@app-types/models';
 import { api } from '@api/client';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 
 export const BannerCarousel = ({ banners }: { banners: Banner[] }) => {
+  const { isRTL } = useLanguage();
   const source = banners
     .map((banner) => ({
       id: banner.id,
@@ -17,12 +19,12 @@ export const BannerCarousel = ({ banners }: { banners: Banner[] }) => {
   if (!source.length) return null;
 
   return (
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.wrap}>
+    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={[styles.wrap, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       {source.map((banner) => (
         <ImageBackground key={banner.id} source={{ uri: banner.imageUrl }} style={styles.slide} imageStyle={styles.image}>
           <View style={styles.overlay}>
-            <Text style={styles.title}>{banner.title}</Text>
-            {!!banner.description && <Text style={styles.desc}>{banner.description}</Text>}
+            <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{banner.title}</Text>
+            {!!banner.description && <Text style={[styles.desc, { textAlign: isRTL ? 'right' : 'left' }]}>{banner.description}</Text>}
           </View>
         </ImageBackground>
       ))}
@@ -55,11 +57,9 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 17,
     fontWeight: '800',
-    textAlign: 'right',
   },
   desc: {
     color: '#dcfce7',
-    textAlign: 'right',
     marginTop: 4,
     fontSize: 12,
   },

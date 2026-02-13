@@ -1,48 +1,27 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import { I18nManager, StyleSheet, Text, TextInput, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from '@hooks/useAuth';
 import { CartProvider } from '@hooks/useCart';
+import { LanguageProvider, useLanguage } from '@hooks/useLanguage';
 import { RootNavigator } from '@navigation/RootNavigator';
 import { useRegisterPushToken } from '@hooks/useRegisterPushToken';
 
-const applyGlobalRtlTextDefaults = () => {
-  const rtlTextStyle = { writingDirection: 'rtl' as const, textAlign: 'right' as const };
-  const rtlInputStyle = { writingDirection: 'rtl' as const, textAlign: 'right' as const };
-
-  const textDefaults = (Text as unknown as { defaultProps?: { style?: unknown } }).defaultProps || {};
-  const textStyle = textDefaults.style;
-  (Text as unknown as { defaultProps: { style: unknown } }).defaultProps = {
-    ...textDefaults,
-    style: textStyle ? [rtlTextStyle, textStyle] : rtlTextStyle,
-  };
-
-  const inputDefaults = (TextInput as unknown as { defaultProps?: { style?: unknown } }).defaultProps || {};
-  const inputStyle = inputDefaults.style;
-  (TextInput as unknown as { defaultProps: { style: unknown } }).defaultProps = {
-    ...inputDefaults,
-    style: inputStyle ? [rtlInputStyle, inputStyle] : rtlInputStyle,
-  };
-};
-
-const ensureRtlEnabled = () => {
-  I18nManager.allowRTL(true);
-  I18nManager.swapLeftAndRightInRTL(true);
-  I18nManager.forceRTL(true);
-  if (__DEV__ && !I18nManager.isRTL) {
-    // forceRTL is applied on the next app start.
-    console.log('RTL mode enabled. Restart the app once if layout is still LTR.');
-  }
-};
-
-ensureRtlEnabled();
-applyGlobalRtlTextDefaults();
-
 const AppInner = () => {
   useRegisterPushToken();
+  const { isRTL, isLoading } = useLanguage();
+
+  if (isLoading) {
+    return (
+      <View style={styles.loading}>
+        <ActivityIndicator size="large" color="#2f9e44" />
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.rtlRoot}>
+    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <RootNavigator />
     </View>
   );
@@ -50,18 +29,25 @@ const AppInner = () => {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <CartProvider>
-        <AppInner />
-        <StatusBar style="light" />
-      </CartProvider>
-    </AuthProvider>
+    <LanguageProvider>
+      <AuthProvider>
+        <CartProvider>
+          <AppInner />
+          <StatusBar style="light" />
+        </CartProvider>
+      </AuthProvider>
+    </LanguageProvider>
   );
 }
 
 const styles = StyleSheet.create({
-  rtlRoot: {
+  root: {
     flex: 1,
-    direction: 'rtl',
+  },
+  loading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f2fbf4',
   },
 });

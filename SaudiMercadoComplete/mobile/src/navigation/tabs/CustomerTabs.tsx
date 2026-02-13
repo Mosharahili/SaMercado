@@ -1,6 +1,7 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { useLanguage } from '@hooks/useLanguage';
 import { CustomerTabParamList } from '../types';
 import { HomeScreen } from '@screens/customer/HomeScreen';
 import { MarketsScreen } from '@screens/customer/MarketsScreen';
@@ -19,45 +20,48 @@ const iconMap: Record<keyof CustomerTabParamList, keyof typeof MaterialCommunity
   Account: 'account-outline',
 };
 
-const labelMap: Record<keyof CustomerTabParamList, string> = {
-  Home: 'الرئيسية',
-  Markets: 'الأسواق',
-  Products: 'المنتجات',
-  Cart: 'السلة',
-  Account: 'الحساب',
-};
+export const CustomerTabs = () => {
+  const { isRTL, t } = useLanguage();
+  const labelMap: Record<keyof CustomerTabParamList, string> = {
+    Home: t('tabs.home'),
+    Markets: t('tabs.markets'),
+    Products: t('tabs.products'),
+    Cart: t('tabs.cart'),
+    Account: t('tabs.account'),
+  };
 
-export const CustomerTabs = () => (
-  <Tab.Navigator
-    screenOptions={({ route }) => ({
-      headerShown: false,
-      tabBarActiveTintColor: theme.colors.primary,
-      tabBarInactiveTintColor: '#64748b',
-      tabBarStyle: {
-        height: 66,
-        paddingBottom: 8,
-        paddingTop: 8,
-        backgroundColor: '#ffffff',
-        direction: 'rtl',
-      },
-      sceneStyle: {
-        direction: 'rtl',
-      },
-      tabBarLabelStyle: {
-        fontSize: 11,
-        fontWeight: '700',
-        writingDirection: 'rtl',
-      },
-      tabBarIcon: ({ color, size }) => (
-        <MaterialCommunityIcons name={iconMap[route.name as keyof CustomerTabParamList]} color={color} size={size} />
-      ),
-      tabBarLabel: labelMap[route.name as keyof CustomerTabParamList],
-    })}
-  >
-    <Tab.Screen name="Home" component={HomeScreen} />
-    <Tab.Screen name="Markets" component={MarketsScreen} />
-    <Tab.Screen name="Products" component={ProductsScreen} />
-    <Tab.Screen name="Cart" component={CartScreen} />
-    <Tab.Screen name="Account" component={AccountScreen} />
-  </Tab.Navigator>
-);
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: theme.colors.primary,
+        tabBarInactiveTintColor: '#64748b',
+        tabBarStyle: {
+          height: 66,
+          paddingBottom: 8,
+          paddingTop: 8,
+          backgroundColor: '#ffffff',
+          direction: isRTL ? 'rtl' : 'ltr',
+        },
+        sceneStyle: {
+          direction: isRTL ? 'rtl' : 'ltr',
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '700',
+          writingDirection: isRTL ? 'rtl' : 'ltr',
+        },
+        tabBarIcon: ({ color, size }) => (
+          <MaterialCommunityIcons name={iconMap[route.name as keyof CustomerTabParamList]} color={color} size={size} />
+        ),
+        tabBarLabel: labelMap[route.name as keyof CustomerTabParamList],
+      })}
+    >
+      <Tab.Screen name="Home" component={HomeScreen} />
+      <Tab.Screen name="Markets" component={MarketsScreen} />
+      <Tab.Screen name="Products" component={ProductsScreen} />
+      <Tab.Screen name="Cart" component={CartScreen} />
+      <Tab.Screen name="Account" component={AccountScreen} />
+    </Tab.Navigator>
+  );
+};

@@ -4,7 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@navigation/types';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 import { AppButton } from '@components/AppButton';
+import { LanguageSwitcher } from '@components/LanguageSwitcher';
 import { theme } from '@theme/theme';
 import { ApiError } from '@api/client';
 
@@ -12,13 +14,14 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 export const LoginScreen = ({ navigation }: Props) => {
   const { login } = useAuth();
+  const { isRTL, t } = useLanguage();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const onLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('تنبيه', 'يرجى إدخال البريد الإلكتروني وكلمة المرور');
+      Alert.alert(t('alert.notice'), t('auth.fillLogin'));
       return;
     }
 
@@ -27,7 +30,7 @@ export const LoginScreen = ({ navigation }: Props) => {
       await login(email.trim(), password);
     } catch (error) {
       const err = error as ApiError;
-      Alert.alert('خطأ', err.response?.data?.error || err.message || 'فشل تسجيل الدخول');
+      Alert.alert(t('alert.error'), err.response?.data?.error || err.message || t('auth.loginFailed'));
     } finally {
       setLoading(false);
     }
@@ -37,21 +40,28 @@ export const LoginScreen = ({ navigation }: Props) => {
     <LinearGradient colors={theme.gradients.app} style={styles.container}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
+          <LanguageSwitcher />
           <Image source={require('../../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
-          <Text style={styles.title}>سعودي ميركادو</Text>
-          <Text style={styles.subtitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
+          <Text style={styles.title}>{t('auth.appName')}</Text>
+          <Text style={styles.subtitle}>{t('auth.tagline')}</Text>
 
           <View style={styles.card}>
-            <Text style={styles.label}>البريد الإلكتروني</Text>
-            <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
+            <TextInput
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
 
-            <Text style={styles.label}>كلمة المرور</Text>
-            <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
+            <TextInput style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]} value={password} onChangeText={setPassword} secureTextEntry />
 
-            <AppButton label="تسجيل الدخول" onPress={onLogin} loading={loading} />
+            <AppButton label={t('auth.login')} onPress={onLogin} loading={loading} />
 
             <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.linkWrap}>
-              <Text style={styles.link}>ليس لديك حساب؟ أنشئ حساب جديد</Text>
+              <Text style={styles.link}>{t('auth.noAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -93,7 +103,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    textAlign: 'right',
     color: theme.colors.text,
     fontWeight: '700',
   },
@@ -104,7 +113,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    textAlign: 'right',
   },
   linkWrap: { marginTop: 10 },
   link: {

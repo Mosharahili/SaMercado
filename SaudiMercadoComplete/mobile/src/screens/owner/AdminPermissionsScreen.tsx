@@ -3,6 +3,7 @@ import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-nativ
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
 import { api } from '@api/client';
+import { useLanguage } from '@hooks/useLanguage';
 
 const permissionOptions = [
   'manage_banners',
@@ -18,6 +19,7 @@ const permissionOptions = [
 ];
 
 export const AdminPermissionsScreen = () => {
+  const { isRTL, tr } = useLanguage();
   const [users, setUsers] = useState<any[]>([]);
   const [selectedPermissions, setSelectedPermissions] = useState<string[]>([]);
   const [name, setName] = useState('');
@@ -55,20 +57,20 @@ export const AdminPermissionsScreen = () => {
         permissions: selectedPermissions,
       });
 
-      Alert.alert('تم', 'تم إنشاء الأدمن بنجاح');
+      Alert.alert(tr('تم', 'Done'), tr('تم إنشاء الأدمن بنجاح', 'Admin created successfully'));
       setName('');
       setEmail('');
       setPassword('');
       setSelectedPermissions([]);
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر إنشاء الأدمن');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('Unable to create admin', 'تعذر إنشاء الأدمن'));
     }
   };
 
   const createVendor = async () => {
     if (!vendorName.trim() || !vendorEmail.trim() || !vendorPassword.trim() || !vendorBusinessName.trim()) {
-      Alert.alert('تنبيه', 'يرجى تعبئة بيانات البائع');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى تعبئة بيانات البائع', 'Please fill in vendor details'));
       return;
     }
 
@@ -83,7 +85,7 @@ export const AdminPermissionsScreen = () => {
         isApproved: true,
       });
 
-      Alert.alert('تم', 'تم إنشاء حساب البائع بنجاح');
+      Alert.alert(tr('تم', 'Done'), tr('تم إنشاء حساب البائع بنجاح', 'Vendor account created successfully'));
       setVendorName('');
       setVendorEmail('');
       setVendorPassword('');
@@ -91,50 +93,73 @@ export const AdminPermissionsScreen = () => {
       setVendorPhone('');
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر إنشاء البائع');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر إنشاء البائع', 'Unable to create vendor'));
     }
+  };
+
+  const permissionLabel = (permission: string) => {
+    const labels: Record<string, [string, string]> = {
+      manage_banners: ['إدارة البوسترات', 'Manage Banners'],
+      manage_popups: ['إدارة النوافذ', 'Manage Popups'],
+      manage_markets: ['إدارة الأسواق', 'Manage Markets'],
+      manage_vendors: ['إدارة البائعين', 'Manage Vendors'],
+      manage_products: ['إدارة المنتجات', 'Manage Products'],
+      view_analytics: ['عرض التحليلات', 'View Analytics'],
+      manage_orders: ['إدارة الطلبات', 'Manage Orders'],
+      manage_users: ['إدارة المستخدمين', 'Manage Users'],
+      manage_payments: ['إدارة المدفوعات', 'Manage Payments'],
+      manage_settings: ['إدارة الإعدادات', 'Manage Settings'],
+    };
+    const label = labels[permission];
+    if (!label) return permission;
+    return tr(label[0], label[1]);
   };
 
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>إضافة Admin جديد</Text>
-        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="الاسم" textAlign="right" />
-        <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder="البريد الإلكتروني" textAlign="right" />
-        <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder="كلمة المرور" secureTextEntry textAlign="right" />
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('إضافة Admin جديد', 'Add New Admin')}</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('الاسم', 'Name')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={email} onChangeText={setEmail} placeholder={tr('البريد الإلكتروني', 'Email')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder={tr('كلمة المرور', 'Password')} secureTextEntry textAlign={isRTL ? 'right' : 'left'} />
 
-        <Text style={styles.subTitle}>الصلاحيات</Text>
-        <View style={styles.permissionsWrap}>
+        <Text style={[styles.subTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الصلاحيات', 'Permissions')}</Text>
+        <View style={[styles.permissionsWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           {permissionOptions.map((perm) => {
             const active = selectedPermissions.includes(perm);
             return (
               <Pressable key={perm} onPress={() => togglePermission(perm)} style={[styles.permissionPill, active && styles.permissionActive]}>
-                <Text style={[styles.permissionText, active && styles.permissionTextActive]}>{perm}</Text>
+                <Text style={[styles.permissionText, active && styles.permissionTextActive]}>{permissionLabel(perm)}</Text>
               </Pressable>
             );
           })}
         </View>
 
-        <AppButton label="إنشاء الأدمن" onPress={createAdmin} />
+        <AppButton label={tr('إنشاء الأدمن', 'Create Admin')} onPress={createAdmin} />
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.title}>إضافة بائع جديد</Text>
-        <TextInput style={styles.input} value={vendorName} onChangeText={setVendorName} placeholder="اسم المسؤول" textAlign="right" />
-        <TextInput style={styles.input} value={vendorBusinessName} onChangeText={setVendorBusinessName} placeholder="اسم النشاط التجاري" textAlign="right" />
-        <TextInput style={styles.input} value={vendorEmail} onChangeText={setVendorEmail} placeholder="البريد الإلكتروني" textAlign="right" />
-        <TextInput style={styles.input} value={vendorPhone} onChangeText={setVendorPhone} placeholder="رقم الجوال (اختياري)" textAlign="right" />
-        <TextInput style={styles.input} value={vendorPassword} onChangeText={setVendorPassword} placeholder="كلمة المرور" secureTextEntry textAlign="right" />
-        <AppButton label="إنشاء البائع" onPress={createVendor} />
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('إضافة بائع جديد', 'Add New Vendor')}</Text>
+        <TextInput style={styles.input} value={vendorName} onChangeText={setVendorName} placeholder={tr('اسم المسؤول', 'Owner name')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={vendorBusinessName} onChangeText={setVendorBusinessName} placeholder={tr('اسم النشاط التجاري', 'Business name')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={vendorEmail} onChangeText={setVendorEmail} placeholder={tr('البريد الإلكتروني', 'Email')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={vendorPhone} onChangeText={setVendorPhone} placeholder={tr('رقم الجوال (اختياري)', 'Phone number (optional)')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={vendorPassword} onChangeText={setVendorPassword} placeholder={tr('كلمة المرور', 'Password')} secureTextEntry textAlign={isRTL ? 'right' : 'left'} />
+        <AppButton label={tr('إنشاء البائع', 'Create Vendor')} onPress={createVendor} />
       </View>
 
       {users
         .filter((u) => u.role === 'ADMIN')
         .map((user) => (
           <View key={user.id} style={styles.item}>
-            <Text style={styles.itemTitle}>{user.name}</Text>
-            <Text style={styles.itemMeta}>{user.email}</Text>
-            <Text style={styles.itemMeta}>الصلاحيات: {(user.permissions || []).map((p: any) => p.permission?.code).join(', ')}</Text>
+            <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{user.name}</Text>
+            <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{user.email}</Text>
+            <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>
+              {tr('الصلاحيات', 'Permissions')}:{' '}
+              {(user.permissions || [])
+                .map((p: any) => permissionLabel(p.permission?.code))
+                .join(', ')}
+            </Text>
           </View>
         ))}
 
@@ -142,9 +167,9 @@ export const AdminPermissionsScreen = () => {
         .filter((u) => u.role === 'VENDOR')
         .map((user) => (
           <View key={user.id} style={styles.item}>
-            <Text style={styles.itemTitle}>{user.vendorProfile?.businessName || user.name}</Text>
-            <Text style={styles.itemMeta}>{user.email}</Text>
-            <Text style={styles.itemMeta}>الحالة: {user.vendorProfile?.isApproved ? 'معتمد' : 'قيد المراجعة'}</Text>
+            <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{user.vendorProfile?.businessName || user.name}</Text>
+            <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{user.email}</Text>
+            <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {user.vendorProfile?.isApproved ? tr('معتمد', 'Approved') : tr('قيد المراجعة', 'Pending review')}</Text>
           </View>
         ))}
     </ScreenContainer>
@@ -158,8 +183,8 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 8,
   },
-  title: { textAlign: 'right', fontWeight: '900', color: '#14532d', fontSize: 18 },
-  subTitle: { textAlign: 'right', fontWeight: '700', color: '#166534' },
+  title: { fontWeight: '900', color: '#14532d', fontSize: 18 },
+  subTitle: { fontWeight: '700', color: '#166534' },
   input: {
     borderWidth: 1,
     borderColor: '#bbf7d0',
@@ -169,7 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   permissionsWrap: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
   },
@@ -197,6 +222,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
   },
-  itemTitle: { textAlign: 'right', fontWeight: '800', color: '#14532d' },
-  itemMeta: { textAlign: 'right', color: '#4b5563' },
+  itemTitle: { fontWeight: '800', color: '#14532d' },
+  itemMeta: { color: '#4b5563' },
 });

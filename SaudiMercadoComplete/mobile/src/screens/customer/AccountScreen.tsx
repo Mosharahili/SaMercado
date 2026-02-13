@@ -3,12 +3,15 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
 import { AppButton } from '@components/AppButton';
+import { LanguageSwitcher } from '@components/LanguageSwitcher';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 import { api } from '@api/client';
 import { Order } from '@app-types/models';
 
 export const AccountScreen = () => {
   const { user, logout } = useAuth();
+  const { isRTL, t } = useLanguage();
   const [orders, setOrders] = useState<Order[]>([]);
 
   const loadOrders = async () => {
@@ -27,42 +30,51 @@ export const AccountScreen = () => {
 
   return (
     <ScreenContainer>
-      <AppHeader title="الحساب" subtitle="إدارة الملف الشخصي" />
+      <AppHeader title={t('account.title')} subtitle={t('account.subtitle')} />
 
       <View style={styles.card}>
-        <Text style={styles.label}>الاسم</Text>
-        <Text style={styles.value}>{user?.name || '-'}</Text>
-
-        <Text style={styles.label}>البريد الإلكتروني</Text>
-        <Text style={styles.value}>{user?.email || '-'}</Text>
+        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.language')}</Text>
+        <LanguageSwitcher />
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.label}>إشعارات الحساب</Text>
+        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.name')}</Text>
+        <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{user?.name || '-'}</Text>
+
+        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.email')}</Text>
+        <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{user?.email || '-'}</Text>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.notifications')}</Text>
         <Pressable style={styles.noticeItem}>
-          <Text style={styles.noticeText}>تحديث حالة الطلبات - مفعل</Text>
+          <Text style={[styles.noticeText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.orderUpdates')}</Text>
         </Pressable>
         <Pressable style={styles.noticeItem}>
-          <Text style={styles.noticeText}>العروض الترويجية - مفعل</Text>
+          <Text style={[styles.noticeText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.promotions')}</Text>
         </Pressable>
       </View>
 
       {user?.role === 'CUSTOMER' ? (
         <View style={styles.card}>
-          <Text style={styles.label}>طلباتي</Text>
-          {!orders.length ? <Text style={styles.value}>لا توجد طلبات بعد</Text> : null}
+          <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.myOrders')}</Text>
+          {!orders.length ? <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.noOrders')}</Text> : null}
           {orders.slice(0, 8).map((order) => (
             <View key={order.id} style={styles.orderItem}>
-              <Text style={styles.orderLine}>#{order.orderNumber}</Text>
-              <Text style={styles.orderLine}>الحالة: {order.status}</Text>
-              <Text style={styles.orderLine}>الإجمالي: {order.totalAmount} ر.س</Text>
+              <Text style={[styles.orderLine, { textAlign: isRTL ? 'right' : 'left' }]}>#{order.orderNumber}</Text>
+              <Text style={[styles.orderLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+                {t('account.status')}: {order.status}
+              </Text>
+              <Text style={[styles.orderLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+                {t('account.total')}: {order.totalAmount} ر.س
+              </Text>
             </View>
           ))}
-          <AppButton label="تحديث الطلبات" onPress={loadOrders} variant="ghost" />
+          <AppButton label={t('account.refreshOrders')} onPress={loadOrders} variant="ghost" />
         </View>
       ) : null}
 
-      <AppButton label="تسجيل الخروج" onPress={logout} />
+      <AppButton label={t('account.logout')} onPress={logout} />
     </ScreenContainer>
   );
 };
@@ -75,12 +87,10 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
-    textAlign: 'right',
     color: '#166534',
     fontWeight: '700',
   },
   value: {
-    textAlign: 'right',
     color: '#052e16',
     fontSize: 16,
   },
@@ -90,7 +100,6 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   noticeText: {
-    textAlign: 'right',
     color: '#14532d',
   },
   orderItem: {
@@ -102,7 +111,6 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   orderLine: {
-    textAlign: 'right',
     color: '#14532d',
     fontWeight: '600',
   },

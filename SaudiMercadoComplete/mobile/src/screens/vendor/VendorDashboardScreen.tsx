@@ -5,18 +5,21 @@ import { VendorStackParamList } from '@navigation/types';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
 import { AppButton } from '@components/AppButton';
+import { useLanguage } from '@hooks/useLanguage';
 
 type Props = NativeStackScreenProps<VendorStackParamList, 'VendorDashboard'>;
 
 export const VendorDashboardScreen = ({ navigation }: Props) => {
+  const { tr } = useLanguage();
+
   return (
     <ScreenContainer>
-      <AppHeader title="بوابة البائع" subtitle="إدارة المنتجات والطلبات والتحليلات" />
+      <AppHeader title={tr('بوابة البائع', 'Vendor Portal')} subtitle={tr('إدارة المنتجات والطلبات والتحليلات', 'Manage products, orders, and analytics')} />
       <View style={styles.list}>
-        <AppButton label="إدارة المنتجات" onPress={() => navigation.navigate('VendorProducts')} />
-        <AppButton label="إدارة الطلبات" onPress={() => navigation.navigate('VendorOrders')} />
-        <AppButton label="تحليلات البائع" onPress={() => navigation.navigate('VendorAnalytics')} />
-        <AppButton label="الدعم والمراسلة" onPress={() => navigation.navigate('VendorSupport')} />
+        <AppButton label={tr('إدارة المنتجات', 'Manage Products')} onPress={() => navigation.navigate('VendorProducts')} />
+        <AppButton label={tr('إدارة الطلبات', 'Manage Orders')} onPress={() => navigation.navigate('VendorOrders')} />
+        <AppButton label={tr('تحليلات البائع', 'Vendor Analytics')} onPress={() => navigation.navigate('VendorAnalytics')} />
+        <AppButton label={tr('الدعم والمراسلة', 'Support & Messaging')} onPress={() => navigation.navigate('VendorSupport')} />
       </View>
     </ScreenContainer>
   );

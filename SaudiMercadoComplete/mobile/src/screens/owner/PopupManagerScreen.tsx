@@ -7,8 +7,12 @@ import { AppButton } from '@components/AppButton';
 import { DatePickerField } from '@components/DatePickerField';
 import { api, UploadFile } from '@api/client';
 import { Popup } from '@app-types/models';
+import { useLanguage } from '@hooks/useLanguage';
 
 export const PopupManagerScreen = () => {
+  const { isRTL, tr, locale } = useLanguage();
+  const defaultPrimaryCta = tr('تصفح المنتج', 'Browse Product');
+  const defaultSecondaryCta = tr('لاحقًا', 'Later');
   const [popups, setPopups] = useState<Popup[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
 
@@ -16,8 +20,8 @@ export const PopupManagerScreen = () => {
   const [message, setMessage] = useState('');
   const [targetType, setTargetType] = useState('ALL_USERS');
   const [trigger, setTrigger] = useState('APP_OPEN');
-  const [primaryCtaText, setPrimaryCtaText] = useState('تصفح المنتج');
-  const [secondaryCtaText, setSecondaryCtaText] = useState('لاحقًا');
+  const [primaryCtaText, setPrimaryCtaText] = useState(defaultPrimaryCta);
+  const [secondaryCtaText, setSecondaryCtaText] = useState(defaultSecondaryCta);
   const [startsAt, setStartsAt] = useState('');
   const [endsAt, setEndsAt] = useState('');
 
@@ -34,7 +38,7 @@ export const PopupManagerScreen = () => {
       const name = rawName.replace(/\s+/g, '_');
       setSelectedImage({ uri: asset.uri, name, type: asset.mimeType || 'image/jpeg' });
     } catch (error: any) {
-      Alert.alert('خطأ', error?.message || 'تعذر اختيار الصورة');
+      Alert.alert(tr('خطأ', 'Error'), error?.message || tr('تعذر اختيار الصورة', 'Unable to pick image'));
     }
   };
 
@@ -57,8 +61,8 @@ export const PopupManagerScreen = () => {
     setMessage('');
     setTargetType('ALL_USERS');
     setTrigger('APP_OPEN');
-    setPrimaryCtaText('تصفح المنتج');
-    setSecondaryCtaText('لاحقًا');
+    setPrimaryCtaText(defaultPrimaryCta);
+    setSecondaryCtaText(defaultSecondaryCta);
     setStartsAt('');
     setEndsAt('');
     setSelectedImage(null);
@@ -66,12 +70,12 @@ export const PopupManagerScreen = () => {
 
   const save = async () => {
     if (!title.trim()) {
-      Alert.alert('تنبيه', 'يرجى إدخال عنوان النافذة');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى إدخال عنوان النافذة', 'Please enter popup title'));
       return;
     }
 
     if (!editingId && !selectedImage) {
-      Alert.alert('تنبيه', 'يرجى اختيار صورة للنافذة المنبثقة');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى اختيار صورة للنافذة المنبثقة', 'Please choose popup image'));
       return;
     }
 
@@ -101,11 +105,11 @@ export const PopupManagerScreen = () => {
         await api.upload(`/popups/${id}/image`, selectedImage);
       }
 
-      Alert.alert('تم', editingId ? 'تم تحديث النافذة المنبثقة' : 'تم إنشاء النافذة المنبثقة');
+      Alert.alert(tr('تم', 'Done'), editingId ? tr('تم تحديث النافذة المنبثقة', 'Popup updated') : tr('تم إنشاء النافذة المنبثقة', 'Popup created'));
       resetForm();
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'فشل إنشاء النافذة');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('فشل إنشاء النافذة', 'Failed to save popup'));
     } finally {
       setSaving(false);
     }
@@ -117,8 +121,8 @@ export const PopupManagerScreen = () => {
     setMessage(popup.message || '');
     setTargetType(popup.targetType || 'ALL_USERS');
     setTrigger(popup.trigger || 'APP_OPEN');
-    setPrimaryCtaText(popup.primaryCtaText || 'تصفح المنتج');
-    setSecondaryCtaText(popup.secondaryCtaText || 'لاحقًا');
+    setPrimaryCtaText(popup.primaryCtaText || defaultPrimaryCta);
+    setSecondaryCtaText(popup.secondaryCtaText || defaultSecondaryCta);
     setStartsAt(popup.startsAt ? new Date(popup.startsAt).toISOString() : '');
     setEndsAt(popup.endsAt ? new Date(popup.endsAt).toISOString() : '');
     setSelectedImage(null);
@@ -127,10 +131,10 @@ export const PopupManagerScreen = () => {
   const remove = async (id: string) => {
     try {
       await api.del(`/popups/${id}`);
-      Alert.alert('تم', 'تم حذف النافذة');
+      Alert.alert(tr('تم', 'Done'), tr('تم حذف النافذة', 'Popup deleted'));
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر الحذف');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر الحذف', 'Unable to delete'));
     }
   };
 
@@ -139,44 +143,44 @@ export const PopupManagerScreen = () => {
       await api.put(`/popups/${popup.id}`, { isEnabled: !popup.isEnabled });
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر تحديث الحالة');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر تحديث الحالة', 'Unable to update status'));
     }
   };
 
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>{editingId ? 'تعديل النافذة المنبثقة' : 'مدير النوافذ المنبثقة'}</Text>
-        <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder="العنوان" textAlign="right" />
-        <TextInput style={styles.input} value={message} onChangeText={setMessage} placeholder="الرسالة" textAlign="right" />
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل النافذة المنبثقة', 'Edit Popup') : tr('مدير النوافذ المنبثقة', 'Popup Manager')}</Text>
+        <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder={tr('العنوان', 'Title')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={message} onChangeText={setMessage} placeholder={tr('الرسالة', 'Message')} textAlign={isRTL ? 'right' : 'left'} />
 
         <View style={styles.pickerWrap}>
           <Picker selectedValue={targetType} onValueChange={setTargetType}>
-            <Picker.Item label="جميع المستخدمين" value="ALL_USERS" />
-            <Picker.Item label="المستخدمون المسجلون فقط" value="LOGGED_IN" />
-            <Picker.Item label="المستخدمون الجدد فقط" value="NEW_USERS" />
-            <Picker.Item label="أسواق محددة" value="SPECIFIC_MARKETS" />
-            <Picker.Item label="تصنيفات محددة" value="SPECIFIC_CATEGORIES" />
+            <Picker.Item label={tr('جميع المستخدمين', 'All users')} value="ALL_USERS" />
+            <Picker.Item label={tr('المستخدمون المسجلون فقط', 'Logged-in users only')} value="LOGGED_IN" />
+            <Picker.Item label={tr('المستخدمون الجدد فقط', 'New users only')} value="NEW_USERS" />
+            <Picker.Item label={tr('أسواق محددة', 'Specific markets')} value="SPECIFIC_MARKETS" />
+            <Picker.Item label={tr('تصنيفات محددة', 'Specific categories')} value="SPECIFIC_CATEGORIES" />
           </Picker>
         </View>
 
         <View style={styles.pickerWrap}>
           <Picker selectedValue={trigger} onValueChange={setTrigger}>
-            <Picker.Item label="عند فتح التطبيق" value="APP_OPEN" />
-            <Picker.Item label="عند فتح صفحة" value="PAGE_OPEN" />
+            <Picker.Item label={tr('عند فتح التطبيق', 'On app open')} value="APP_OPEN" />
+            <Picker.Item label={tr('عند فتح صفحة', 'On page open')} value="PAGE_OPEN" />
           </Picker>
         </View>
 
-        <TextInput style={styles.input} value={primaryCtaText} onChangeText={setPrimaryCtaText} placeholder="نص الزر الأساسي" textAlign="right" />
-        <TextInput style={styles.input} value={secondaryCtaText} onChangeText={setSecondaryCtaText} placeholder="نص الزر الثانوي" textAlign="right" />
-        <DatePickerField label="تاريخ البداية" value={startsAt || undefined} placeholder="اختر تاريخ البداية (اختياري)" onChange={(value) => setStartsAt(value || '')} />
-        <DatePickerField label="تاريخ النهاية" value={endsAt || undefined} placeholder="اختر تاريخ النهاية (اختياري)" onChange={(value) => setEndsAt(value || '')} />
+        <TextInput style={styles.input} value={primaryCtaText} onChangeText={setPrimaryCtaText} placeholder={tr('نص الزر الأساسي', 'Primary button text')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={secondaryCtaText} onChangeText={setSecondaryCtaText} placeholder={tr('نص الزر الثانوي', 'Secondary button text')} textAlign={isRTL ? 'right' : 'left'} />
+        <DatePickerField label={tr('تاريخ البداية', 'Start date')} value={startsAt || undefined} placeholder={tr('اختر تاريخ البداية (اختياري)', 'Select start date (optional)')} onChange={(value) => setStartsAt(value || '')} />
+        <DatePickerField label={tr('تاريخ النهاية', 'End date')} value={endsAt || undefined} placeholder={tr('اختر تاريخ النهاية (اختياري)', 'Select end date (optional)')} onChange={(value) => setEndsAt(value || '')} />
 
-        <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة النافذة'} onPress={pickImage} variant="ghost" />
+        <AppButton label={selectedImage ? tr(`الصورة: ${selectedImage.name}`, `Image: ${selectedImage.name}`) : tr('اختيار صورة النافذة', 'Choose popup image')} onPress={pickImage} variant="ghost" />
         {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.selectedPreview} resizeMode="cover" /> : null}
 
-        <AppButton label={editingId ? 'حفظ التعديلات' : 'حفظ النافذة'} onPress={save} loading={saving} />
-        {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
+        <AppButton label={editingId ? tr('حفظ التعديلات', 'Save Changes') : tr('حفظ النافذة', 'Save Popup')} onPress={save} loading={saving} />
+        {editingId ? <AppButton label={tr('إلغاء التعديل', 'Cancel Editing')} onPress={resetForm} variant="ghost" /> : null}
       </View>
 
       {popups.map((popup) => (
@@ -184,20 +188,24 @@ export const PopupManagerScreen = () => {
           {popup.imageUrl ? (
             <Image source={{ uri: api.resolveAssetUrl(popup.imageUrl) }} style={styles.itemImage} resizeMode="cover" />
           ) : null}
-          <Text style={styles.itemTitle}>{popup.title}</Text>
-          <Text style={styles.itemMeta}>{popup.message || '-'}</Text>
-          <Text style={styles.itemMeta}>التاريخ: {popup.startsAt ? new Date(popup.startsAt).toLocaleDateString('ar-SA') : '-'} → {popup.endsAt ? new Date(popup.endsAt).toLocaleDateString('ar-SA') : '-'}</Text>
-          <Text style={styles.itemMeta}>الحالة: {popup.isEnabled ? 'مفعل' : 'متوقف'}</Text>
+          <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{popup.title}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{popup.message || '-'}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {tr('التاريخ', 'Date')}:{' '}
+            {popup.startsAt ? new Date(popup.startsAt).toLocaleDateString(locale) : '-'} →{' '}
+            {popup.endsAt ? new Date(popup.endsAt).toLocaleDateString(locale) : '-'}
+          </Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {popup.isEnabled ? tr('مفعل', 'Active') : tr('متوقف', 'Disabled')}</Text>
 
-          <View style={styles.actionRow}>
+          <View style={[styles.actionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Pressable onPress={() => startEdit(popup)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>تعديل</Text>
+              <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
             <Pressable onPress={() => toggleEnabled(popup)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>{popup.isEnabled ? 'إيقاف' : 'تفعيل'}</Text>
+              <Text style={styles.actionText}>{popup.isEnabled ? tr('إيقاف', 'Disable') : tr('تفعيل', 'Enable')}</Text>
             </Pressable>
             <Pressable onPress={() => remove(popup.id)} style={styles.actionDanger}>
-              <Text style={styles.actionDangerText}>حذف</Text>
+              <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
         </View>
@@ -213,7 +221,7 @@ const styles = StyleSheet.create({
     padding: 14,
     gap: 8,
   },
-  title: { textAlign: 'right', fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
+  title: { fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
   input: {
     borderWidth: 1,
     borderColor: '#99f6e4',
@@ -248,11 +256,11 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#cffafe',
   },
-  itemTitle: { textAlign: 'right', fontWeight: '800', color: '#0f2f3d' },
-  itemMeta: { textAlign: 'right', color: '#4a6572' },
+  itemTitle: { fontWeight: '800', color: '#0f2f3d' },
+  itemMeta: { color: '#4a6572' },
   actionRow: {
     marginTop: 6,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
   },
   actionBtn: {

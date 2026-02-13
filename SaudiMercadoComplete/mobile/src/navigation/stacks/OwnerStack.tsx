@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useLanguage } from '@hooks/useLanguage';
 import { OwnerStackParamList } from '../types';
 import { OwnerDashboardScreen } from '@screens/owner/OwnerDashboardScreen';
 import { BannerManagerScreen } from '@screens/owner/BannerManagerScreen';
@@ -18,26 +19,30 @@ import { AccountScreen } from '@screens/customer/AccountScreen';
 
 const Stack = createNativeStackNavigator<OwnerStackParamList>();
 
-export const OwnerStack = () => (
-  <Stack.Navigator
-    screenOptions={{
-      headerTitleAlign: 'center',
-      contentStyle: { direction: 'rtl' },
-    }}
-  >
-    <Stack.Screen name="OwnerDashboard" component={OwnerDashboardScreen} options={{ title: 'لوحة المالك' }} />
-    <Stack.Screen name="OwnerStoreHome" component={HomeScreen} options={{ title: 'الرئيسية' }} />
-    <Stack.Screen name="OwnerStoreMarkets" component={MarketsScreen} options={{ title: 'الأسواق' }} />
-    <Stack.Screen name="OwnerStoreProducts" component={ProductsScreen} options={{ title: 'المنتجات' }} />
-    <Stack.Screen name="OwnerStoreCart" component={CartScreen} options={{ title: 'السلة' }} />
-    <Stack.Screen name="OwnerStoreAccount" component={AccountScreen} options={{ title: 'الحساب' }} />
-    <Stack.Screen name="OwnerBanners" component={BannerManagerScreen} options={{ title: 'إدارة البوسترات' }} />
-    <Stack.Screen name="OwnerPopups" component={PopupManagerScreen} options={{ title: 'إدارة النوافذ المنبثقة' }} />
-    <Stack.Screen name="OwnerAdmins" component={AdminPermissionsScreen} options={{ title: 'إدارة الأدمن والصلاحيات' }} />
-    <Stack.Screen name="OwnerMarkets" component={OwnerMarketsScreen} options={{ title: 'إدارة الأسواق' }} />
-    <Stack.Screen name="OwnerProducts" component={OwnerProductsScreen} options={{ title: 'إدارة المنتجات' }} />
-    <Stack.Screen name="OwnerOrders" component={OwnerOrdersScreen} options={{ title: 'إدارة الطلبات' }} />
-    <Stack.Screen name="OwnerAnalytics" component={OwnerAnalyticsScreen} options={{ title: 'التحليلات' }} />
-    <Stack.Screen name="OwnerSettings" component={OwnerSettingsScreen} options={{ title: 'الإعدادات' }} />
-  </Stack.Navigator>
-);
+export const OwnerStack = () => {
+  const { isRTL, tr } = useLanguage();
+
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerTitleAlign: 'center',
+        contentStyle: { direction: isRTL ? 'rtl' : 'ltr' },
+      }}
+    >
+      <Stack.Screen name="OwnerDashboard" component={OwnerDashboardScreen} options={{ title: tr('لوحة المالك', 'Owner Dashboard') }} />
+      <Stack.Screen name="OwnerStoreHome" component={HomeScreen} options={{ title: tr('الرئيسية', 'Home') }} />
+      <Stack.Screen name="OwnerStoreMarkets" component={MarketsScreen} options={{ title: tr('الأسواق', 'Markets') }} />
+      <Stack.Screen name="OwnerStoreProducts" component={ProductsScreen} options={{ title: tr('المنتجات', 'Products') }} />
+      <Stack.Screen name="OwnerStoreCart" component={CartScreen} options={{ title: tr('السلة', 'Cart') }} />
+      <Stack.Screen name="OwnerStoreAccount" component={AccountScreen} options={{ title: tr('الحساب', 'Account') }} />
+      <Stack.Screen name="OwnerBanners" component={BannerManagerScreen} options={{ title: tr('إدارة البوسترات', 'Banner Manager') }} />
+      <Stack.Screen name="OwnerPopups" component={PopupManagerScreen} options={{ title: tr('إدارة النوافذ المنبثقة', 'Popup Manager') }} />
+      <Stack.Screen name="OwnerAdmins" component={AdminPermissionsScreen} options={{ title: tr('إدارة الأدمن والصلاحيات', 'Admins & Permissions') }} />
+      <Stack.Screen name="OwnerMarkets" component={OwnerMarketsScreen} options={{ title: tr('إدارة الأسواق', 'Manage Markets') }} />
+      <Stack.Screen name="OwnerProducts" component={OwnerProductsScreen} options={{ title: tr('إدارة المنتجات', 'Manage Products') }} />
+      <Stack.Screen name="OwnerOrders" component={OwnerOrdersScreen} options={{ title: tr('إدارة الطلبات', 'Manage Orders') }} />
+      <Stack.Screen name="OwnerAnalytics" component={OwnerAnalyticsScreen} options={{ title: tr('التحليلات', 'Analytics') }} />
+      <Stack.Screen name="OwnerSettings" component={OwnerSettingsScreen} options={{ title: tr('الإعدادات', 'Settings') }} />
+    </Stack.Navigator>
+  );
+};

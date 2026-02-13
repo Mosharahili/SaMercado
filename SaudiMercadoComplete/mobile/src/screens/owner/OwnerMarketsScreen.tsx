@@ -5,8 +5,10 @@ import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
 import { api, UploadFile } from '@api/client';
 import { Market } from '@app-types/models';
+import { useLanguage } from '@hooks/useLanguage';
 
 export const OwnerMarketsScreen = () => {
+  const { isRTL, tr } = useLanguage();
   const [markets, setMarkets] = useState<Market[]>([]);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [name, setName] = useState('');
@@ -50,13 +52,13 @@ export const OwnerMarketsScreen = () => {
         type: asset.mimeType || 'image/jpeg',
       });
     } catch (error: any) {
-      Alert.alert('خطأ', error?.message || 'تعذر اختيار الصورة');
+      Alert.alert(tr('خطأ', 'Error'), error?.message || tr('تعذر اختيار الصورة', 'Unable to pick image'));
     }
   };
 
   const addOrUpdate = async () => {
     if (!name.trim()) {
-      Alert.alert('تنبيه', 'يرجى إدخال اسم السوق');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى إدخال اسم السوق', 'Please enter market name'));
       return;
     }
 
@@ -75,7 +77,7 @@ export const OwnerMarketsScreen = () => {
           description,
           ...(imageUrl ? { imageUrl } : {}),
         });
-        Alert.alert('تم', 'تم تحديث السوق');
+        Alert.alert(tr('تم', 'Done'), tr('تم تحديث السوق', 'Market updated'));
       } else {
         await api.post('/markets', {
           name,
@@ -83,13 +85,13 @@ export const OwnerMarketsScreen = () => {
           description,
           ...(imageUrl ? { imageUrl } : {}),
         });
-        Alert.alert('تم', 'تمت إضافة السوق');
+        Alert.alert(tr('تم', 'Done'), tr('تمت إضافة السوق', 'Market added'));
       }
 
       resetForm();
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'فشل الحفظ');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('فشل الحفظ', 'Save failed'));
     } finally {
       setSaving(false);
     }
@@ -106,10 +108,10 @@ export const OwnerMarketsScreen = () => {
   const remove = async (id: string) => {
     try {
       const res = await api.del<{ message: string }>(`/markets/${id}`);
-      Alert.alert('تم', res.message || 'تم حذف/أرشفة السوق');
+      Alert.alert(tr('تم', 'Done'), res.message || tr('تم حذف/أرشفة السوق', 'Market deleted/archived'));
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر الحذف');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر الحذف', 'Unable to delete'));
     }
   };
 
@@ -118,23 +120,23 @@ export const OwnerMarketsScreen = () => {
       await api.put(`/markets/${market.id}`, { isActive: !market.isActive });
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر تحديث الحالة');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر تحديث الحالة', 'Unable to update status'));
     }
   };
 
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>{editingId ? 'تعديل سوق' : 'إضافة سوق'}</Text>
-        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="اسم السوق" textAlign="right" />
-        <TextInput style={styles.input} value={region} onChangeText={setRegion} placeholder="المنطقة" textAlign="right" />
-        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder="الوصف" textAlign="right" />
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل سوق', 'Edit Market') : tr('إضافة سوق', 'Add Market')}</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('اسم السوق', 'Market name')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={region} onChangeText={setRegion} placeholder={tr('المنطقة', 'Region')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder={tr('الوصف', 'Description')} textAlign={isRTL ? 'right' : 'left'} />
 
-        <AppButton label={selectedImage ? `الصورة: ${selectedImage.name}` : 'اختيار صورة السوق'} onPress={pickImage} variant="ghost" />
+        <AppButton label={selectedImage ? tr(`الصورة: ${selectedImage.name}`, `Image: ${selectedImage.name}`) : tr('اختيار صورة السوق', 'Choose market image')} onPress={pickImage} variant="ghost" />
         {selectedImage ? <Image source={{ uri: selectedImage.uri }} style={styles.preview} resizeMode="cover" /> : null}
 
-        <AppButton label={editingId ? 'حفظ التعديلات' : 'إضافة السوق'} onPress={addOrUpdate} loading={saving} />
-        {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
+        <AppButton label={editingId ? tr('حفظ التعديلات', 'Save Changes') : tr('إضافة السوق', 'Add Market')} onPress={addOrUpdate} loading={saving} />
+        {editingId ? <AppButton label={tr('إلغاء التعديل', 'Cancel Editing')} onPress={resetForm} variant="ghost" /> : null}
       </View>
 
       {markets.map((market) => (
@@ -142,20 +144,20 @@ export const OwnerMarketsScreen = () => {
           {market.imageUrl ? (
             <Image source={{ uri: api.resolveAssetUrl(market.imageUrl) }} style={styles.itemImage} resizeMode="cover" />
           ) : null}
-          <Text style={styles.itemTitle}>{market.name}</Text>
-          <Text style={styles.itemMeta}>{market.region}</Text>
-          <Text style={styles.itemMeta}>{market.description || '-'}</Text>
-          <Text style={styles.itemMeta}>الحالة: {market.isActive ? 'مفعل' : 'مؤرشف'}</Text>
+          <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{market.name}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{market.region}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{market.description || '-'}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {market.isActive ? tr('مفعل', 'Active') : tr('مؤرشف', 'Archived')}</Text>
 
-          <View style={styles.actionRow}>
+          <View style={[styles.actionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Pressable onPress={() => startEdit(market)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>تعديل</Text>
+              <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
             <Pressable onPress={() => toggleActive(market)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>{market.isActive ? 'أرشفة' : 'تفعيل'}</Text>
+              <Text style={styles.actionText}>{market.isActive ? tr('أرشفة', 'Archive') : tr('تفعيل', 'Activate')}</Text>
             </Pressable>
             <Pressable onPress={() => remove(market.id)} style={styles.actionDanger}>
-              <Text style={styles.actionDangerText}>حذف</Text>
+              <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
         </View>
@@ -166,7 +168,7 @@ export const OwnerMarketsScreen = () => {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: 16, padding: 14, gap: 8 },
-  title: { textAlign: 'right', fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
+  title: { fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
   input: {
     borderWidth: 1,
     borderColor: '#99f6e4',
@@ -189,11 +191,11 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     backgroundColor: '#cffafe',
   },
-  itemTitle: { textAlign: 'right', fontWeight: '800', color: '#0f2f3d' },
-  itemMeta: { textAlign: 'right', color: '#4a6572' },
+  itemTitle: { fontWeight: '800', color: '#0f2f3d' },
+  itemMeta: { color: '#4a6572' },
   actionRow: {
     marginTop: 6,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
   },
   actionBtn: {

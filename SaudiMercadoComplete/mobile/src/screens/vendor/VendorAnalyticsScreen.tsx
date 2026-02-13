@@ -3,20 +3,22 @@ import { StyleSheet, View } from 'react-native';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { StatCard } from '@components/StatCard';
 import { useDashboardData } from '@hooks/useDashboardData';
+import { useLanguage } from '@hooks/useLanguage';
 
 export const VendorAnalyticsScreen = () => {
   const { data } = useDashboardData();
+  const { isRTL, tr } = useLanguage();
   const metrics = data?.metrics || {};
 
   return (
     <ScreenContainer>
-      <View style={styles.row}>
-        <StatCard label="إجمالي المبيعات" value={`${Number(metrics.totalRevenue || 0).toFixed(0)} ر.س`} />
-        <StatCard label="إجمالي الطلبات" value={String(metrics.totalOrders || 0)} />
+      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <StatCard label={tr('إجمالي المبيعات', 'Total Sales')} value={`${Number(metrics.totalRevenue || 0).toFixed(0)} ر.س`} />
+        <StatCard label={tr('إجمالي الطلبات', 'Total Orders')} value={String(metrics.totalOrders || 0)} />
       </View>
-      <View style={styles.row}>
-        <StatCard label="أفضل المنتجات" value={String((data?.topProducts || []).length)} />
-        <StatCard label="النشاط الأسبوعي" value="متوسط" />
+      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <StatCard label={tr('أفضل المنتجات', 'Top Products')} value={String((data?.topProducts || []).length)} />
+        <StatCard label={tr('النشاط الأسبوعي', 'Weekly Activity')} value={tr('متوسط', 'Average')} />
       </View>
     </ScreenContainer>
   );
@@ -24,7 +26,7 @@ export const VendorAnalyticsScreen = () => {
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 10,
   },
 });

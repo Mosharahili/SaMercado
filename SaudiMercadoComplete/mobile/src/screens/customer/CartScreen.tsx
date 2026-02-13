@@ -6,6 +6,7 @@ import { AppHeader } from '@components/AppHeader';
 import { AppButton } from '@components/AppButton';
 import { useCart } from '@hooks/useCart';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 import { api } from '@api/client';
 import { PaymentMethod } from '@app-types/models';
 import { formatSAR } from '@utils/format';
@@ -13,6 +14,7 @@ import { formatSAR } from '@utils/format';
 export const CartScreen = () => {
   const { items, updateQuantity, removeItem, clearCart, subtotal } = useCart();
   const { user } = useAuth();
+  const { isRTL, tr } = useLanguage();
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
   const [contactPhone, setContactPhone] = useState('');
   const [placing, setPlacing] = useState(false);
@@ -21,7 +23,7 @@ export const CartScreen = () => {
 
   const placeOrder = async () => {
     if (!items.length) {
-      Alert.alert('تنبيه', 'السلة فارغة');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('السلة فارغة', 'Your cart is empty'));
       return;
     }
 
@@ -29,18 +31,18 @@ export const CartScreen = () => {
       setPlacing(true);
 
       if (!user) {
-        Alert.alert('تسجيل الدخول مطلوب', 'يرجى تسجيل الدخول قبل تأكيد الطلب');
+        Alert.alert(tr('تسجيل الدخول مطلوب', 'Sign in required'), tr('يرجى تسجيل الدخول قبل تأكيد الطلب', 'Please sign in before confirming the order'));
         return;
       }
 
       const normalizedPhone = contactPhone.replace(/[^\d]/g, '');
       if (!/^05\d{8}$/.test(normalizedPhone)) {
-        Alert.alert('تنبيه', 'رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05');
+        Alert.alert(tr('تنبيه', 'Notice'), tr('رقم الجوال يجب أن يكون 10 أرقام ويبدأ بـ 05', 'Phone number must be 10 digits and start with 05'));
         return;
       }
 
       if (paymentMethod !== 'CASH_ON_DELIVERY') {
-        Alert.alert('تنبيه', 'الدفع عند الاستلام هو المتاح حاليًا. سيتم تفعيل Mada وApple Pay قريبًا.');
+        Alert.alert(tr('تنبيه', 'Notice'), tr('الدفع عند الاستلام هو المتاح حاليًا. سيتم تفعيل Mada وApple Pay قريبًا.', 'Cash on delivery is currently available. Mada and Apple Pay will be enabled soon.'));
         return;
       }
 
@@ -63,24 +65,24 @@ export const CartScreen = () => {
       const paymentResult = response.paymentResults?.[0];
 
       if (orderNumbers.length > 1) {
-        Alert.alert('تم تأكيد الطلب', `تم إنشاء ${orderNumbers.length} طلبات: ${orderNumbers.join(' - ')}`);
+        Alert.alert(tr('تم تأكيد الطلب', 'Order confirmed'), tr(`تم إنشاء ${orderNumbers.length} طلبات: ${orderNumbers.join(' - ')}`, `${orderNumbers.length} orders were created: ${orderNumbers.join(' - ')}`));
       } else if (response.order?.orderNumber) {
-        Alert.alert('تم تأكيد الطلب', `رقم الطلب: ${response.order.orderNumber}`);
+        Alert.alert(tr('تم تأكيد الطلب', 'Order confirmed'), tr(`رقم الطلب: ${response.order.orderNumber}`, `Order number: ${response.order.orderNumber}`));
       } else {
-        Alert.alert('تم تأكيد الطلب', 'تم إرسال طلبك بنجاح');
+        Alert.alert(tr('تم تأكيد الطلب', 'Order confirmed'), tr('تم إرسال طلبك بنجاح', 'Your order was sent successfully'));
       }
 
       if (paymentMethod !== 'CASH_ON_DELIVERY') {
         if (paymentResult?.status === 'FAILED') {
-          Alert.alert('تنبيه الدفع', paymentResult.failureReason || 'تعذر بدء عملية الدفع الإلكتروني حالياً');
+          Alert.alert(tr('تنبيه الدفع', 'Payment notice'), paymentResult.failureReason || tr('تعذر بدء عملية الدفع الإلكتروني حالياً', 'Unable to start online payment right now'));
         } else if (paymentResult?.redirectUrl) {
-          Alert.alert('متابعة الدفع', `رابط إكمال الدفع: ${paymentResult.redirectUrl}`);
+          Alert.alert(tr('متابعة الدفع', 'Continue payment'), tr(`رابط إكمال الدفع: ${paymentResult.redirectUrl}`, `Payment completion URL: ${paymentResult.redirectUrl}`));
         } else if (paymentResult?.message) {
-          Alert.alert('تنبيه الدفع', paymentResult.message);
+          Alert.alert(tr('تنبيه الدفع', 'Payment notice'), paymentResult.message);
         }
       }
     } catch (error: any) {
-      Alert.alert('فشل الإتمام', error?.response?.data?.error || error.message || 'تعذر إتمام الطلب');
+      Alert.alert(tr('فشل الإتمام', 'Checkout failed'), error?.response?.data?.error || error.message || tr('تعذر إتمام الطلب', 'Unable to complete your order'));
     } finally {
       setPlacing(false);
     }
@@ -88,14 +90,14 @@ export const CartScreen = () => {
 
   return (
     <ScreenContainer>
-      <AppHeader title="السلة" subtitle="إدارة الطلب والدفع" />
+      <AppHeader title={tr('السلة', 'Cart')} subtitle={tr('إدارة الطلب والدفع', 'Order and payment')} />
 
       {items.map((item) => (
         <View key={item.id} style={styles.itemCard}>
-          <Text style={styles.itemName}>{item.product.name}</Text>
-          <Text style={styles.itemMeta}>{formatSAR(Number(item.product.price))} / {item.product.unit}</Text>
+          <Text style={[styles.itemName, { textAlign: isRTL ? 'right' : 'left' }]}>{item.product.name}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{formatSAR(Number(item.product.price))} / {item.product.unit}</Text>
 
-          <View style={styles.qtyRow}>
+          <View style={[styles.qtyRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Pressable onPress={() => updateQuantity(item.id, item.quantity - 1)} style={styles.qtyBtn}>
               <Text style={styles.qtyBtnText}>-</Text>
             </Pressable>
@@ -104,17 +106,17 @@ export const CartScreen = () => {
               <Text style={styles.qtyBtnText}>+</Text>
             </Pressable>
             <Pressable onPress={() => removeItem(item.id)} style={styles.removeBtn}>
-              <Text style={styles.removeText}>حذف</Text>
+              <Text style={styles.removeText}>{tr('حذف', 'Remove')}</Text>
             </Pressable>
           </View>
         </View>
       ))}
 
       <View style={styles.summaryCard}>
-        <Text style={styles.summaryLine}>المجموع الفرعي: {formatSAR(subtotal)}</Text>
-        <Text style={styles.totalLine}>الإجمالي: {formatSAR(total)}</Text>
+        <Text style={[styles.summaryLine, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('المجموع الفرعي', 'Subtotal')}: {formatSAR(subtotal)}</Text>
+        <Text style={[styles.totalLine, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الإجمالي', 'Total')}: {formatSAR(total)}</Text>
 
-        <Text style={styles.paymentTitle}>رقم الجوال</Text>
+        <Text style={[styles.paymentTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('رقم الجوال', 'Phone number')}</Text>
         <TextInput
           style={styles.phoneInput}
           value={contactPhone}
@@ -122,21 +124,21 @@ export const CartScreen = () => {
           keyboardType="phone-pad"
           placeholder="05********"
           placeholderTextColor="#64748b"
-          textAlign="right"
+          textAlign={isRTL ? 'right' : 'left'}
           maxLength={10}
         />
 
-        <Text style={styles.paymentTitle}>طريقة الدفع</Text>
+        <Text style={[styles.paymentTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('طريقة الدفع', 'Payment method')}</Text>
         <View style={styles.pickerWrap}>
           <Picker selectedValue={paymentMethod} onValueChange={setPaymentMethod}>
-            <Picker.Item label="Mada (قريبًا)" value="MADA" enabled={false} />
-            <Picker.Item label="Apple Pay (قريبًا)" value="APPLE_PAY" enabled={false} />
-            <Picker.Item label="الدفع عند الاستلام" value="CASH_ON_DELIVERY" />
+            <Picker.Item label={tr('Mada (قريبًا)', 'Mada (Soon)')} value="MADA" enabled={false} />
+            <Picker.Item label={tr('Apple Pay (قريبًا)', 'Apple Pay (Soon)')} value="APPLE_PAY" enabled={false} />
+            <Picker.Item label={tr('الدفع عند الاستلام', 'Cash on Delivery')} value="CASH_ON_DELIVERY" />
           </Picker>
         </View>
-        <Text style={styles.paymentHint}>المتاح حاليًا: الدفع عند الاستلام فقط</Text>
+        <Text style={[styles.paymentHint, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('المتاح حاليًا: الدفع عند الاستلام فقط', 'Currently available: Cash on Delivery only')}</Text>
 
-        <AppButton label="تأكيد الطلب" onPress={placeOrder} loading={placing} />
+        <AppButton label={tr('تأكيد الطلب', 'Confirm Order')} onPress={placeOrder} loading={placing} />
       </View>
     </ScreenContainer>
   );
@@ -150,16 +152,13 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   itemName: {
-    textAlign: 'right',
     fontWeight: '800',
     color: '#14532d',
   },
   itemMeta: {
-    textAlign: 'right',
     color: '#4b5563',
   },
   qtyRow: {
-    flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 8,
   },
@@ -180,7 +179,7 @@ const styles = StyleSheet.create({
     color: '#14532d',
   },
   removeBtn: {
-    marginRight: 'auto',
+    marginStart: 'auto',
     backgroundColor: '#fee2e2',
     borderRadius: 10,
     paddingHorizontal: 10,
@@ -197,17 +196,14 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   summaryLine: {
-    textAlign: 'right',
     color: '#14532d',
   },
   totalLine: {
-    textAlign: 'right',
     color: '#052e16',
     fontWeight: '900',
     fontSize: 18,
   },
   paymentTitle: {
-    textAlign: 'right',
     marginTop: 6,
     fontWeight: '700',
     color: '#14532d',
@@ -219,7 +215,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    textAlign: 'right',
   },
   pickerWrap: {
     borderWidth: 1,
@@ -229,7 +224,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
   },
   paymentHint: {
-    textAlign: 'right',
     color: '#0f766e',
     fontSize: 12,
     marginTop: -2,

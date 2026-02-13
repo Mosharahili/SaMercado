@@ -1,13 +1,18 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 
-export const StatCard = ({ label, value }: { label: string; value: string }) => (
-  <View style={styles.card}>
-    <Text style={styles.value}>{value}</Text>
-    <Text style={styles.label}>{label}</Text>
-  </View>
-);
+export const StatCard = ({ label, value }: { label: string; value: string }) => {
+  const { isRTL } = useLanguage();
+
+  return (
+    <View style={styles.card}>
+      <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{value}</Text>
+      <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{label}</Text>
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   card: {
@@ -22,11 +27,9 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: '800',
     color: theme.colors.primary,
-    textAlign: 'right',
   },
   label: {
     fontSize: 13,
     color: theme.colors.textMuted,
-    textAlign: 'right',
   },
 });

@@ -12,6 +12,10 @@
       "resizeMode": "contain",
       "backgroundColor": "#e7f8ec"
     },
+    "updates": {
+      "checkAutomatically": "NEVER",
+      "fallbackToCacheTimeout": 0
+    },
     "ios": {
       "bundleIdentifier": "com.saudimercado.complete",
       "newArchEnabled": false,

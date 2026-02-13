@@ -2,6 +2,7 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 import { AuthStack } from './stacks/AuthStack';
 import { CustomerTabs } from './tabs/CustomerTabs';
 import { VendorStack } from './stacks/VendorStack';
@@ -11,6 +12,7 @@ import { theme } from '@theme/theme';
 
 export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
+  const { isRTL } = useLanguage();
 
   if (isLoading) {
     return (
@@ -21,9 +23,9 @@ export const RootNavigator = () => {
   }
 
   return (
-    <View style={styles.rtlRoot}>
+    <View style={styles.root}>
       <NavigationContainer
-        direction="rtl"
+        direction={isRTL ? 'rtl' : 'ltr'}
         theme={{
           ...DefaultTheme,
           colors: {
@@ -50,9 +52,8 @@ export const RootNavigator = () => {
 };
 
 const styles = StyleSheet.create({
-  rtlRoot: {
+  root: {
     flex: 1,
-    direction: 'rtl',
   },
   loading: {
     flex: 1,

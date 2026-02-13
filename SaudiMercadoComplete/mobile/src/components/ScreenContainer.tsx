@@ -3,6 +3,7 @@ import { Pressable, SafeAreaView, ScrollView, StyleSheet, Text, ViewStyle } from
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 
 export const ScreenContainer = ({
@@ -15,6 +16,7 @@ export const ScreenContainer = ({
   contentStyle?: ViewStyle;
 }) => {
   const { user } = useAuth();
+  const { isRTL, t } = useLanguage();
   const route = useRoute();
   const navigation = useNavigation<any>();
 
@@ -22,13 +24,13 @@ export const ScreenContainer = ({
   const showOwnerBackToDashboard = user?.role === 'OWNER' && isOwnerStoreScreen;
 
   const ownerShortcut = showOwnerBackToDashboard ? (
-    <Pressable style={styles.ownerBackBtn} onPress={() => navigation.navigate('OwnerDashboard')}>
-      <Text style={styles.ownerBackText}>العودة للوحة التحكم</Text>
+    <Pressable style={[styles.ownerBackBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('OwnerDashboard')}>
+      <Text style={styles.ownerBackText}>{t('common.backToDashboard')}</Text>
     </Pressable>
   ) : null;
 
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, contentStyle]}>
+    <ScrollView contentContainerStyle={[styles.content, { direction: isRTL ? 'rtl' : 'ltr' }, contentStyle]}>
       {ownerShortcut}
       {children}
     </ScrollView>
@@ -41,7 +43,7 @@ export const ScreenContainer = ({
 
   return (
     <LinearGradient colors={theme.gradients.app} style={styles.gradient}>
-      <SafeAreaView style={styles.safeArea}>{content}</SafeAreaView>
+      <SafeAreaView style={[styles.safeArea, { direction: isRTL ? 'rtl' : 'ltr' }]}>{content}</SafeAreaView>
     </LinearGradient>
   );
 };
@@ -52,15 +54,12 @@ const styles = StyleSheet.create({
   },
   safeArea: {
     flex: 1,
-    direction: 'rtl',
   },
   content: {
     padding: theme.spacing.lg,
     gap: theme.spacing.md,
-    direction: 'rtl',
   },
   ownerBackBtn: {
-    alignSelf: 'flex-end',
     backgroundColor: '#0d9488',
     paddingHorizontal: 12,
     paddingVertical: 8,

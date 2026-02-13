@@ -6,10 +6,16 @@ import { ScreenContainer } from '@components/ScreenContainer';
 import { AppButton } from '@components/AppButton';
 import { api, UploadFile } from '@api/client';
 import { Category, Product } from '@app-types/models';
+import { useLanguage } from '@hooks/useLanguage';
 
-const unitOptions = ['كيلو', 'ربطة', 'صندوق'];
+const unitOptions = [
+  { value: 'كيلو', ar: 'كيلو', en: 'Kg' },
+  { value: 'ربطة', ar: 'ربطة', en: 'Bundle' },
+  { value: 'صندوق', ar: 'صندوق', en: 'Box' },
+];
 
 export const OwnerProductsScreen = () => {
+  const { isRTL, tr } = useLanguage();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
 
@@ -71,19 +77,19 @@ export const OwnerProductsScreen = () => {
       });
       setSelectedImages(files);
     } catch (error: any) {
-      Alert.alert('خطأ', error?.message || 'تعذر اختيار الصورة');
+      Alert.alert(tr('خطأ', 'Error'), error?.message || tr('تعذر اختيار الصورة', 'Unable to pick image'));
     }
   };
 
   const save = async () => {
     if (!name.trim() || !price.trim()) {
-      Alert.alert('تنبيه', 'يرجى تعبئة اسم المنتج والسعر');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى تعبئة اسم المنتج والسعر', 'Please enter product name and price'));
       return;
     }
 
     const priceValue = Number(price);
     if (Number.isNaN(priceValue) || priceValue <= 0) {
-      Alert.alert('تنبيه', 'يرجى إدخال سعر صحيح');
+      Alert.alert(tr('تنبيه', 'Notice'), tr('يرجى إدخال سعر صحيح', 'Please enter a valid price'));
       return;
     }
 
@@ -114,11 +120,11 @@ export const OwnerProductsScreen = () => {
         await Promise.all(selectedImages.map((imageFile) => api.upload(`/products/${id}/images`, imageFile)));
       }
 
-      Alert.alert('تم', editingId ? 'تم تحديث المنتج' : 'تمت إضافة المنتج');
+      Alert.alert(tr('تم', 'Done'), editingId ? tr('تم تحديث المنتج', 'Product updated') : tr('تمت إضافة المنتج', 'Product added'));
       resetForm();
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'فشل حفظ المنتج');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('فشل حفظ المنتج', 'Failed to save product'));
     } finally {
       setSaving(false);
     }
@@ -140,22 +146,22 @@ export const OwnerProductsScreen = () => {
       Alert.alert('تم', response.message || 'تم حذف المنتج');
       load();
     } catch (error: any) {
-      Alert.alert('خطأ', error?.response?.data?.error || error.message || 'تعذر حذف المنتج');
+      Alert.alert(tr('خطأ', 'Error'), error?.response?.data?.error || error.message || tr('تعذر حذف المنتج', 'Unable to delete product'));
     }
   };
 
   return (
     <ScreenContainer>
       <View style={styles.card}>
-        <Text style={styles.title}>{editingId ? 'تعديل منتج' : 'إضافة منتج'}</Text>
-        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder="اسم المنتج" textAlign="right" />
-        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder="الوصف" textAlign="right" />
-        <TextInput style={styles.input} value={price} onChangeText={setPrice} placeholder="السعر" keyboardType="decimal-pad" textAlign="right" />
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل منتج', 'Edit Product') : tr('إضافة منتج', 'Add Product')}</Text>
+        <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('اسم المنتج', 'Product name')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={description} onChangeText={setDescription} placeholder={tr('الوصف', 'Description')} textAlign={isRTL ? 'right' : 'left'} />
+        <TextInput style={styles.input} value={price} onChangeText={setPrice} placeholder={tr('السعر', 'Price')} keyboardType="decimal-pad" textAlign={isRTL ? 'right' : 'left'} />
 
         <View style={styles.pickerWrap}>
           <Picker selectedValue={unit} onValueChange={setUnit}>
             {unitOptions.map((option) => (
-              <Picker.Item key={option} label={option} value={option} />
+              <Picker.Item key={option.value} label={isRTL ? option.ar : option.en} value={option.value} />
             ))}
           </Picker>
         </View>
@@ -171,7 +177,7 @@ export const OwnerProductsScreen = () => {
         ) : null}
 
         <AppButton
-          label={selectedImages.length ? `تم اختيار ${selectedImages.length} صور` : 'اختيار صور المنتج'}
+          label={selectedImages.length ? tr(`تم اختيار ${selectedImages.length} صور`, `${selectedImages.length} images selected`) : tr('اختيار صور المنتج', 'Choose product images')}
           onPress={pickImage}
           variant="ghost"
         />
@@ -183,8 +189,8 @@ export const OwnerProductsScreen = () => {
           </ScrollView>
         ) : null}
 
-        <AppButton label={editingId ? 'حفظ التعديلات' : 'إضافة المنتج'} onPress={save} loading={saving} />
-        {editingId ? <AppButton label="إلغاء التعديل" onPress={resetForm} variant="ghost" /> : null}
+        <AppButton label={editingId ? tr('حفظ التعديلات', 'Save Changes') : tr('إضافة المنتج', 'Add Product')} onPress={save} loading={saving} />
+        {editingId ? <AppButton label={tr('إلغاء التعديل', 'Cancel Editing')} onPress={resetForm} variant="ghost" /> : null}
       </View>
 
       {products.map((product) => (
@@ -192,15 +198,15 @@ export const OwnerProductsScreen = () => {
           {product.images?.[0]?.imageUrl ? (
             <Image source={{ uri: api.resolveAssetUrl(product.images[0].imageUrl) }} style={styles.itemImage} resizeMode="cover" />
           ) : null}
-          <Text style={styles.itemTitle}>{product.name}</Text>
-          <Text style={styles.itemMeta}>السعر: {product.price} ر.س / {product.unit}</Text>
+          <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{product.name}</Text>
+          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('السعر', 'Price')}: {product.price} ر.س / {product.unit}</Text>
 
-          <View style={styles.actionRow}>
+          <View style={[styles.actionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Pressable onPress={() => startEdit(product)} style={styles.actionBtn}>
-              <Text style={styles.actionText}>تعديل</Text>
+              <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
             <Pressable onPress={() => remove(product.id)} style={styles.actionDanger}>
-              <Text style={styles.actionDangerText}>حذف</Text>
+              <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
         </View>
@@ -211,7 +217,7 @@ export const OwnerProductsScreen = () => {
 
 const styles = StyleSheet.create({
   card: { backgroundColor: 'rgba(255,255,255,0.97)', borderRadius: 16, padding: 14, gap: 8 },
-  title: { textAlign: 'right', fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
+  title: { fontWeight: '900', color: '#0f2f3d', fontSize: 18 },
   input: {
     borderWidth: 1,
     borderColor: '#99f6e4',
@@ -228,7 +234,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdfa',
   },
   previewList: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
   },
   previewThumb: {
@@ -245,11 +251,11 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     backgroundColor: '#cffafe',
   },
-  itemTitle: { textAlign: 'right', fontWeight: '800', color: '#0f2f3d' },
-  itemMeta: { textAlign: 'right', color: '#4a6572' },
+  itemTitle: { fontWeight: '800', color: '#0f2f3d' },
+  itemMeta: { color: '#4a6572' },
   actionRow: {
     marginTop: 6,
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
   },
   actionBtn: {

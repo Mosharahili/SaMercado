@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useLanguage } from '@hooks/useLanguage';
 
 type DatePickerFieldProps = {
   label: string;
@@ -8,10 +9,11 @@ type DatePickerFieldProps = {
   onChange: (value?: string) => void;
 };
 
-const weekDays = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'];
+const weekDaysAr = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'];
+const weekDaysEn = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
 
-const monthLabel = (date: Date) =>
-  date.toLocaleDateString('ar-SA', {
+const monthLabel = (date: Date, locale: 'ar-SA' | 'en-US') =>
+  date.toLocaleDateString(locale, {
     month: 'long',
     year: 'numeric',
   });
@@ -23,6 +25,8 @@ const normalizeWeekday = (date: Date) => {
 };
 
 export const DatePickerField = ({ label, value, placeholder, onChange }: DatePickerFieldProps) => {
+  const { isRTL, tr, locale } = useLanguage();
+  const weekDays = isRTL ? weekDaysAr : weekDaysEn;
   const selectedDate = value ? new Date(value) : undefined;
   const [visible, setVisible] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(
@@ -45,8 +49,8 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
 
   const formattedValue =
     selectedDate && !Number.isNaN(selectedDate.getTime())
-      ? selectedDate.toLocaleDateString('ar-SA')
-      : placeholder || 'اختر التاريخ';
+      ? selectedDate.toLocaleDateString(locale)
+      : placeholder || tr('اختر التاريخ', 'Select date');
 
   const selectedDay =
     selectedDate && !Number.isNaN(selectedDate.getTime()) && selectedDate.getFullYear() === viewDate.getFullYear() && selectedDate.getMonth() === viewDate.getMonth()
@@ -63,7 +67,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
     <View style={styles.wrap}>
       <Text style={styles.label}>{label}</Text>
       <Pressable onPress={() => setVisible(true)} style={styles.field}>
-        <Text style={styles.fieldText}>{formattedValue}</Text>
+        <Text style={[styles.fieldText, { textAlign: isRTL ? 'right' : 'left' }]}>{formattedValue}</Text>
       </Pressable>
 
       <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
@@ -71,11 +75,11 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
           <View style={styles.modalCard}>
             <View style={styles.headerRow}>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={styles.navBtn}>
-                <Text style={styles.navText}>◀</Text>
+                <Text style={styles.navText}>{isRTL ? '◀' : '▶'}</Text>
               </Pressable>
-              <Text style={styles.monthTitle}>{monthLabel(viewDate)}</Text>
+              <Text style={styles.monthTitle}>{monthLabel(viewDate, locale)}</Text>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} style={styles.navBtn}>
-                <Text style={styles.navText}>▶</Text>
+                <Text style={styles.navText}>{isRTL ? '▶' : '◀'}</Text>
               </Pressable>
             </View>
 
@@ -104,7 +108,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
 
             <View style={styles.actionRow}>
               <Pressable onPress={() => setVisible(false)} style={styles.actionBtn}>
-                <Text style={styles.actionText}>إغلاق</Text>
+                <Text style={styles.actionText}>{tr('إغلاق', 'Close')}</Text>
               </Pressable>
               <Pressable
                 onPress={() => {
@@ -113,7 +117,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
                 }}
                 style={styles.actionDanger}
               >
-                <Text style={styles.actionDangerText}>مسح التاريخ</Text>
+                <Text style={styles.actionDangerText}>{tr('مسح التاريخ', 'Clear date')}</Text>
               </Pressable>
             </View>
           </View>
@@ -128,7 +132,6 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   label: {
-    textAlign: 'right',
     color: '#0f2f3d',
     fontWeight: '700',
   },
@@ -141,7 +144,6 @@ const styles = StyleSheet.create({
     paddingVertical: 11,
   },
   fieldText: {
-    textAlign: 'right',
     color: '#0f2f3d',
   },
   overlay: {
@@ -157,7 +159,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
@@ -179,7 +181,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   weekRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
   },
   weekLabel: {
     width: `${100 / 7}%`,
@@ -188,7 +190,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   daysGrid: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     flexWrap: 'wrap',
   },
   dayCell: {
@@ -210,7 +212,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   actionRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
     marginTop: 4,
   },

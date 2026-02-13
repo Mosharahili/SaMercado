@@ -6,27 +6,29 @@ import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
 import { AppButton } from '@components/AppButton';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 
 type Props = NativeStackScreenProps<AdminStackParamList, 'AdminDashboard'>;
 
 export const AdminDashboardScreen = ({ navigation }: Props) => {
   const { logout } = useAuth();
+  const { tr } = useLanguage();
 
   return (
     <ScreenContainer>
-      <AppHeader title="لوحة الأدمن" subtitle="إدارة التشغيل اليومي" />
+      <AppHeader title={tr('لوحة الأدمن', 'Admin Panel')} subtitle={tr('إدارة التشغيل اليومي', 'Daily operations management')} />
       <View style={styles.list}>
-        <AppButton label="عرض الأسواق" onPress={() => navigation.navigate('AdminStoreMarkets')} variant="ghost" />
-        <AppButton label="تصفح المنتجات" onPress={() => navigation.navigate('AdminStoreProducts')} variant="ghost" />
-        <AppButton label="السلة والشراء" onPress={() => navigation.navigate('AdminStoreCart')} variant="ghost" />
-        <AppButton label="الحساب" onPress={() => navigation.navigate('AdminStoreAccount')} variant="ghost" />
+        <AppButton label={tr('عرض الأسواق', 'View Markets')} onPress={() => navigation.navigate('AdminStoreMarkets')} variant="ghost" />
+        <AppButton label={tr('تصفح المنتجات', 'Browse Products')} onPress={() => navigation.navigate('AdminStoreProducts')} variant="ghost" />
+        <AppButton label={tr('السلة والشراء', 'Cart & Checkout')} onPress={() => navigation.navigate('AdminStoreCart')} variant="ghost" />
+        <AppButton label={tr('الحساب', 'Account')} onPress={() => navigation.navigate('AdminStoreAccount')} variant="ghost" />
 
-        <AppButton label="إدارة الأسواق" onPress={() => navigation.navigate('AdminMarkets')} />
-        <AppButton label="إدارة المنتجات" onPress={() => navigation.navigate('AdminProducts')} />
-        <AppButton label="إدارة الطلبات" onPress={() => navigation.navigate('AdminOrders')} />
-        <AppButton label="إدارة المستخدمين" onPress={() => navigation.navigate('AdminUsers')} />
+        <AppButton label={tr('إدارة الأسواق', 'Manage Markets')} onPress={() => navigation.navigate('AdminMarkets')} />
+        <AppButton label={tr('إدارة المنتجات', 'Manage Products')} onPress={() => navigation.navigate('AdminProducts')} />
+        <AppButton label={tr('إدارة الطلبات', 'Manage Orders')} onPress={() => navigation.navigate('AdminOrders')} />
+        <AppButton label={tr('إدارة المستخدمين', 'Manage Users')} onPress={() => navigation.navigate('AdminUsers')} />
 
-        <AppButton label="تسجيل الخروج" onPress={logout} variant="ghost" />
+        <AppButton label={tr('تسجيل الخروج', 'Log out')} onPress={logout} variant="ghost" />
       </View>
     </ScreenContainer>
   );

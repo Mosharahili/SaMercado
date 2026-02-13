@@ -10,12 +10,7 @@ import { Banner, Market, Popup, Product } from '@app-types/models';
 import { api } from '@api/client';
 import { formatSAR } from '@utils/format';
 import { useCart } from '@hooks/useCart';
-
-const featureItems = [
-  { icon: 'leaf-circle-outline', label: 'طازج يوميًا' },
-  { icon: 'truck-fast-outline', label: 'توصيل سريع' },
-  { icon: 'check-decagram-outline', label: 'جودة مضمونة' },
-] as const;
+import { useLanguage } from '@hooks/useLanguage';
 
 const pickRandomProducts = (products: Product[], count: number) => {
   const cloned = [...products];
@@ -28,6 +23,7 @@ const pickRandomProducts = (products: Product[], count: number) => {
 
 export const HomeScreen = () => {
   const { addToCart } = useCart();
+  const { isRTL, tr } = useLanguage();
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<Banner[]>([]);
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -70,12 +66,20 @@ export const HomeScreen = () => {
   const popupImage = api.resolveAssetUrl(popup?.imageUrl);
   const bottomBanner = bottomBanners[0];
   const bottomImage = api.resolveAssetUrl(bottomBanner?.imageUrl);
+  const featureItems = useMemo(
+    () => [
+      { icon: 'leaf-circle-outline' as const, label: tr('طازج يوميًا', 'Fresh Daily') },
+      { icon: 'truck-fast-outline' as const, label: tr('توصيل سريع', 'Fast Delivery') },
+      { icon: 'check-decagram-outline' as const, label: tr('جودة مضمونة', 'Guaranteed Quality') },
+    ],
+    [tr]
+  );
 
   const displayMarkets = useMemo(() => markets, [markets]);
 
   return (
     <ScreenContainer>
-      <AppHeader title="سعودي ميركادو" subtitle="SaudiMercado" />
+      <AppHeader title={tr('سعودي ميركادو', 'Saudi Mercado')} subtitle={tr('سوقك الزراعي الذكي في الرياض', 'Your smart produce marketplace in Riyadh')} />
 
       <ImageBackground
         source={require('../../../assets/home-hero-preview.png')}
@@ -83,13 +87,18 @@ export const HomeScreen = () => {
         imageStyle={styles.heroBackgroundImage}
       >
         <LinearGradient colors={['rgba(20,83,45,0.72)', 'rgba(22,101,52,0.60)']} style={styles.heroCard}>
-          <Text style={styles.heroBrand}>Saudi Mercado</Text>
-          <Text style={styles.heroTitle}>اطلب خضارك وفواكهك مباشرة من السوق</Text>
-          <Text style={styles.heroHint}>منصة سعودية تربطك بأسواق الخضار والفواكه في الرياض، بتجربة سريعة ومنظمة وجودة يومية.</Text>
+          <Text style={[styles.heroBrand, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('Saudi Mercado', 'Saudi Mercado')}</Text>
+          <Text style={[styles.heroTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('اطلب خضارك وفواكهك مباشرة من السوق', 'Order your fruits and vegetables directly from the market')}</Text>
+          <Text style={[styles.heroHint, { textAlign: isRTL ? 'right' : 'left' }]}>
+            {tr(
+              'منصة سعودية تربطك بأسواق الخضار والفواكه في الرياض، بتجربة سريعة ومنظمة وجودة يومية.',
+              'A Saudi platform connecting you with Riyadh produce markets through a fast, organized, and reliable experience.'
+            )}
+          </Text>
         </LinearGradient>
       </ImageBackground>
 
-      <View style={styles.featureRow}>
+      <View style={[styles.featureRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {featureItems.map((feature) => (
           <View key={feature.label} style={styles.featureBox}>
             <MaterialCommunityIcons name={feature.icon} size={20} color="#1b5e20" />
@@ -100,8 +109,8 @@ export const HomeScreen = () => {
 
       {banners.length ? <BannerCarousel banners={banners} /> : null}
 
-      <Text style={styles.sectionTitle}>اسواق الرياض</Text>
-      <Text style={styles.sectionHint}>الأسواق المعتمدة التي نعمل معها داخل مدينة الرياض.</Text>
+      <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('اسواق الرياض', 'Riyadh Markets')}</Text>
+      <Text style={[styles.sectionHint, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الأسواق المعتمدة التي نعمل معها داخل مدينة الرياض.', 'Approved markets we work with across Riyadh.')}</Text>
       <View style={styles.marketGrid}>
         {displayMarkets.map((market) => {
           const image = api.resolveAssetUrl(market.imageUrl);
@@ -112,15 +121,15 @@ export const HomeScreen = () => {
               ) : (
                 <Image source={require('../../../assets/icon.png')} style={styles.marketImage} resizeMode="cover" />
               )}
-              <Text style={styles.marketName}>{market.name}</Text>
-              <Text style={styles.marketInfo}>{market.description || 'سوق موثوق بمنتجات يومية طازجة.'}</Text>
+              <Text style={[styles.marketName, { textAlign: isRTL ? 'right' : 'left' }]}>{market.name}</Text>
+              <Text style={[styles.marketInfo, { textAlign: isRTL ? 'right' : 'left' }]}>{market.description || tr('سوق موثوق بمنتجات يومية طازجة.', 'Trusted market with fresh daily products.')}</Text>
             </View>
           );
         })}
       </View>
 
-      <Text style={styles.bestTitle}>افضل الخضار والفواكه</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productRow}>
+      <Text style={[styles.bestTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('افضل الخضار والفواكه', 'Best Fruits & Vegetables')}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.productRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {featuredProducts.map((product) => {
           const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
           return (
@@ -130,13 +139,13 @@ export const HomeScreen = () => {
                 style={styles.productImage}
                 resizeMode="cover"
               />
-              <Text numberOfLines={2} style={styles.productName}>
+              <Text numberOfLines={2} style={[styles.productName, { textAlign: isRTL ? 'right' : 'left' }]}>
                 {product.name}
               </Text>
-              <Text style={styles.productPrice}>{formatSAR(Number(product.price))}</Text>
-              <Pressable style={styles.addBtn} onPress={() => addToCart(product)}>
+              <Text style={[styles.productPrice, { textAlign: isRTL ? 'right' : 'left' }]}>{formatSAR(Number(product.price))}</Text>
+              <Pressable style={[styles.addBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => addToCart(product)}>
                 <MaterialCommunityIcons name="cart-plus" size={16} color="#ffffff" />
-                <Text style={styles.addBtnText}>أضف للسلة</Text>
+                <Text style={styles.addBtnText}>{tr('أضف للسلة', 'Add to Cart')}</Text>
               </Pressable>
             </View>
           );
@@ -146,19 +155,19 @@ export const HomeScreen = () => {
       {bottomBanner ? (
         <View style={styles.bottomBanner}>
           {bottomImage ? <Image source={{ uri: bottomImage }} style={styles.bottomImage} resizeMode="cover" /> : null}
-          <Text style={styles.bottomTitle}>{bottomBanner.title}</Text>
-          <Text style={styles.bottomDesc}>{bottomBanner.description || 'عروض يومية على أفضل المنتجات'}</Text>
+          <Text style={[styles.bottomTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{bottomBanner.title}</Text>
+          <Text style={[styles.bottomDesc, { textAlign: isRTL ? 'right' : 'left' }]}>{bottomBanner.description || tr('عروض يومية على أفضل المنتجات', 'Daily offers on top products')}</Text>
         </View>
       ) : null}
 
       <Modal visible={popupVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={styles.modalTitle}>{popup?.title || 'إعلان'}</Text>
+            <Text style={[styles.modalTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{popup?.title || tr('إعلان', 'Announcement')}</Text>
             {popupImage ? <Image source={{ uri: popupImage }} style={styles.modalImage} resizeMode="cover" /> : null}
-            <Text style={styles.modalMessage}>{popup?.message || 'تابع أحدث العروض الحصرية اليوم'}</Text>
-            <Pressable onPress={() => setPopupVisible(false)} style={styles.dismissBtn}>
-              <Text style={styles.dismissText}>{popup?.secondaryCtaText || 'إغلاق'}</Text>
+            <Text style={[styles.modalMessage, { textAlign: isRTL ? 'right' : 'left' }]}>{popup?.message || tr('تابع أحدث العروض الحصرية اليوم', 'Discover today’s latest exclusive offers')}</Text>
+            <Pressable onPress={() => setPopupVisible(false)} style={[styles.dismissBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
+              <Text style={styles.dismissText}>{popup?.secondaryCtaText || tr('إغلاق', 'Close')}</Text>
             </Pressable>
           </View>
         </View>
@@ -183,24 +192,20 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   heroBrand: {
-    textAlign: 'right',
     color: '#dcfce7',
     fontWeight: '700',
     fontSize: 12,
   },
   heroTitle: {
-    textAlign: 'right',
     color: '#ffffff',
     fontWeight: '900',
     fontSize: 20,
   },
   heroHint: {
-    textAlign: 'right',
     color: '#e8fbe8',
     lineHeight: 20,
   },
   featureRow: {
-    flexDirection: 'row-reverse',
     gap: 8,
   },
   featureBox: {
@@ -224,10 +229,8 @@ const styles = StyleSheet.create({
     color: '#14532d',
     fontWeight: '900',
     fontSize: 20,
-    textAlign: 'right',
   },
   sectionHint: {
-    textAlign: 'right',
     color: '#4b6a5a',
     marginTop: -4,
   },
@@ -250,24 +253,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecfdf3',
   },
   marketName: {
-    textAlign: 'right',
     color: '#14532d',
     fontWeight: '900',
     fontSize: 15,
   },
   marketInfo: {
-    textAlign: 'right',
     color: '#4b6a5a',
     fontSize: 13,
   },
   bestTitle: {
-    textAlign: 'right',
     color: '#166534',
     fontWeight: '900',
     fontSize: 19,
   },
   productRow: {
-    flexDirection: 'row-reverse',
     gap: 10,
     paddingBottom: 2,
   },
@@ -289,20 +288,17 @@ const styles = StyleSheet.create({
   productName: {
     color: '#14532d',
     fontWeight: '800',
-    textAlign: 'right',
     minHeight: 36,
   },
   productPrice: {
     color: '#0f766e',
     fontWeight: '900',
-    textAlign: 'right',
   },
   addBtn: {
     borderRadius: 10,
     backgroundColor: '#2f9e44',
     paddingVertical: 8,
     paddingHorizontal: 8,
-    flexDirection: 'row-reverse',
     justifyContent: 'center',
     alignItems: 'center',
     gap: 6,
@@ -327,12 +323,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecfdf3',
   },
   bottomTitle: {
-    textAlign: 'right',
     color: '#14532d',
     fontWeight: '900',
   },
   bottomDesc: {
-    textAlign: 'right',
     color: '#4b6a5a',
   },
   modalOverlay: {
@@ -348,7 +342,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   modalTitle: {
-    textAlign: 'right',
     color: '#14532d',
     fontWeight: '900',
     fontSize: 16,
@@ -360,11 +353,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecfdf3',
   },
   modalMessage: {
-    textAlign: 'right',
     color: '#4b6a5a',
   },
   dismissBtn: {
-    alignSelf: 'flex-end',
     borderRadius: 10,
     backgroundColor: '#dcfce7',
     paddingVertical: 8,

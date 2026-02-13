@@ -3,6 +3,7 @@ import { Animated, Image, Pressable, StyleSheet, Text, View } from 'react-native
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Product } from '@app-types/models';
 import { api } from '@api/client';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 import { formatSAR } from '@utils/format';
 
@@ -15,6 +16,7 @@ export const ProductCard = ({
   onAdd?: () => void;
   onPress?: () => void;
 }) => {
+  const { isRTL, tr } = useLanguage();
   const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
   const addScale = useRef(new Animated.Value(1)).current;
 
@@ -40,17 +42,17 @@ export const ProductCard = ({
       <View style={styles.mediaWrap}>
         {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{product.category?.nameAr || 'منتج'}</Text>
+          <Text style={styles.badgeText}>{product.category?.nameAr || tr('منتج', 'Product')}</Text>
         </View>
       </View>
       <View style={styles.body}>
-        <Text style={styles.name} numberOfLines={2}>
+        <Text style={[styles.name, { textAlign: isRTL ? 'right' : 'left' }]} numberOfLines={2}>
           {product.name}
         </Text>
-        <Text style={styles.meta}>{product.market?.name || 'سوق الرياض'}</Text>
+        <Text style={[styles.meta, { textAlign: isRTL ? 'right' : 'left' }]}>{product.market?.name || tr('سوق الرياض', 'Riyadh Market')}</Text>
 
-        <View style={styles.bottomRow}>
-          <View style={styles.priceWrap}>
+        <View style={[styles.bottomRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.priceWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Text style={styles.unit}>/{product.unit}</Text>
             <Text style={styles.price}>{formatSAR(Number(product.price))}</Text>
           </View>
@@ -60,10 +62,10 @@ export const ProductCard = ({
                 event.stopPropagation();
                 handleAdd();
               }}
-              style={styles.addButton}
+              style={[styles.addButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
             >
               <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
-              <Text style={styles.addText}>إضافة</Text>
+              <Text style={styles.addText}>{tr('إضافة', 'Add')}</Text>
             </Pressable>
           </Animated.View>
         </View>
@@ -99,7 +101,6 @@ const styles = StyleSheet.create({
   name: {
     fontWeight: '800',
     color: theme.colors.text,
-    textAlign: 'right',
     minHeight: 42,
   },
   badge: {
@@ -118,25 +119,21 @@ const styles = StyleSheet.create({
   },
   meta: {
     color: theme.colors.textMuted,
-    textAlign: 'right',
     fontSize: 12,
     marginTop: 2,
   },
   bottomRow: {
     marginTop: 8,
-    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 8,
   },
   priceWrap: {
-    flexDirection: 'row-reverse',
     alignItems: 'baseline',
     gap: 4,
     flexShrink: 1,
   },
   price: {
-    textAlign: 'right',
     fontSize: 15,
     fontWeight: '900',
     color: theme.colors.primary,
@@ -154,7 +151,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row-reverse',
     gap: 6,
   },
   addText: {

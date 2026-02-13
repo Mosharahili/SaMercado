@@ -3,19 +3,23 @@ import { Image, StyleSheet, Text, View } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Market } from '@app-types/models';
 import { api } from '@api/client';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 
 export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }) => {
+  const { isRTL, tr } = useLanguage();
   const image = api.resolveAssetUrl(market.imageUrl);
 
   return (
     <View style={styles.card}>
       {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
-      <View style={styles.row}>
+      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} />
-        <Text style={styles.title}>{market.name}</Text>
+        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{market.name}</Text>
       </View>
-      <Text style={styles.description}>{market.description || 'سوق موثوق بمنتجات طازجة وجودة يومية.'}</Text>
+      <Text style={[styles.description, { textAlign: isRTL ? 'right' : 'left' }]}>
+        {market.description || tr('سوق موثوق بمنتجات طازجة وجودة يومية.', 'Trusted market with fresh daily quality products.')}
+      </Text>
     </View>
   );
 };
@@ -43,19 +47,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
   },
   row: {
-    flexDirection: 'row-reverse',
     alignItems: 'center',
     gap: 8,
   },
   title: {
     flex: 1,
-    textAlign: 'right',
     fontWeight: '800',
     fontSize: 16,
     color: theme.colors.text,
   },
   description: {
-    textAlign: 'right',
     color: theme.colors.textMuted,
     fontSize: 13,
   },

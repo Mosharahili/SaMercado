@@ -11,13 +11,15 @@ import { api } from '@api/client';
 import { Banner, Product } from '@app-types/models';
 import { formatSAR } from '@utils/format';
 import { theme } from '@theme/theme';
+import { useLanguage } from '@hooks/useLanguage';
 
 export const ProductsScreen = () => {
   const { addToCart } = useCart();
+  const { isRTL, tr } = useLanguage();
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'خضار' | 'فواكه' | 'تمور'>('ALL');
+  const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'VEGETABLES' | 'FRUITS' | 'DATES'>('ALL');
 
   const [products, setProducts] = useState<Product[]>([]);
   const [topBanners, setTopBanners] = useState<Banner[]>([]);
@@ -63,8 +65,17 @@ export const ProductsScreen = () => {
         (product.market?.name || '').toLowerCase().includes(keyword)
       );
 
-      const categoryName = product.category?.nameAr || '';
-      const matchesCategory = categoryFilter === 'ALL' || categoryName === categoryFilter;
+      const categoryRaw = `${product.category?.slug || ''} ${product.category?.nameAr || ''}`.toLowerCase();
+      const categoryKey: 'VEGETABLES' | 'FRUITS' | 'DATES' | 'ALL' =
+        categoryRaw.includes('date') || categoryRaw.includes('تمر')
+          ? 'DATES'
+          : categoryRaw.includes('fruit') || categoryRaw.includes('فواك')
+            ? 'FRUITS'
+            : categoryRaw.includes('vegetable') || categoryRaw.includes('خض')
+              ? 'VEGETABLES'
+              : 'ALL';
+
+      const matchesCategory = categoryFilter === 'ALL' || categoryKey === categoryFilter;
       return matchesSearch && matchesCategory;
     });
   }, [products, search, categoryFilter]);
@@ -74,20 +85,20 @@ export const ProductsScreen = () => {
 
   return (
     <ScreenContainer>
-      <AppHeader title="المنتجات" subtitle="تشكيلة يومية طازجة" />
+      <AppHeader title={tr('المنتجات', 'Products')} subtitle={tr('تشكيلة يومية طازجة', 'Fresh daily selection')} />
 
       <BannerCarousel banners={topBanners} />
 
       {topOffer ? (
         <View style={styles.offerCard}>
-          <Text style={styles.offerTag}>عرض خاص</Text>
+          <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
           {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} resizeMode="cover" /> : null}
-          <Text style={styles.offerTitle}>{topOffer.title}</Text>
-          {!!topOffer.description && <Text style={styles.offerDesc}>{topOffer.description}</Text>}
+          <Text style={[styles.offerTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{topOffer.title}</Text>
+          {!!topOffer.description && <Text style={[styles.offerDesc, { textAlign: isRTL ? 'right' : 'left' }]}>{topOffer.description}</Text>}
         </View>
       ) : null}
 
-      <View style={styles.searchWrap}>
+      <View style={[styles.searchWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <Pressable
           style={styles.searchBtn}
           onPress={() => {
@@ -101,9 +112,9 @@ export const ProductsScreen = () => {
           style={styles.searchInput}
           value={searchInput}
           onChangeText={setSearchInput}
-          placeholder="ابحث عن منتج أو سوق"
+          placeholder={tr('ابحث عن منتج أو سوق', 'Search for a product or market')}
           placeholderTextColor="#6b7280"
-          textAlign="right"
+          textAlign={isRTL ? 'right' : 'left'}
           onSubmitEditing={() => {
             setSearch(searchInput);
             fetchProducts(searchInput);
@@ -111,18 +122,18 @@ export const ProductsScreen = () => {
         />
       </View>
 
-      <View style={styles.filtersRow}>
+      <View style={[styles.filtersRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {[
-          { key: 'ALL', label: 'الكل' },
-          { key: 'تمور', label: 'تمور' },
-          { key: 'خضار', label: 'خضار' },
-          { key: 'فواكه', label: 'فواكه' },
+          { key: 'ALL', label: tr('الكل', 'All') },
+          { key: 'DATES', label: tr('تمور', 'Dates') },
+          { key: 'VEGETABLES', label: tr('خضار', 'Vegetables') },
+          { key: 'FRUITS', label: tr('فواكه', 'Fruits') },
         ].map((item) => {
           const active = categoryFilter === item.key;
           return (
             <Pressable
               key={item.key}
-              onPress={() => setCategoryFilter(item.key as 'ALL' | 'خضار' | 'فواكه' | 'تمور')}
+              onPress={() => setCategoryFilter(item.key as 'ALL' | 'VEGETABLES' | 'FRUITS' | 'DATES')}
               style={[styles.filterChip, active ? styles.filterChipActive : null]}
             >
               <Text style={[styles.filterText, active ? styles.filterTextActive : null]}>{item.label}</Text>
@@ -131,15 +142,15 @@ export const ProductsScreen = () => {
         })}
       </View>
 
-      <View style={styles.rowBetween}>
-        <Text style={styles.countText}>عدد المنتجات: {visibleProducts.length}</Text>
-        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={styles.toggleBtn}>
+      <View style={[styles.rowBetween, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Text style={[styles.countText, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}</Text>
+        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <MaterialCommunityIcons name={viewMode === 'grid' ? 'view-list' : 'view-grid'} size={20} color="white" />
-          <Text style={styles.toggleText}>{viewMode === 'grid' ? 'عرض قائمة' : 'عرض شبكي'}</Text>
+          <Text style={styles.toggleText}>{viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}</Text>
         </Pressable>
       </View>
 
-      {!visibleProducts.length ? <Text style={styles.emptyText}>لا توجد منتجات مطابقة حالياً.</Text> : null}
+      {!visibleProducts.length ? <Text style={[styles.emptyText, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('لا توجد منتجات مطابقة حالياً.', 'No matching products found right now.')}</Text> : null}
 
       <FlatList
         data={visibleProducts}
@@ -159,11 +170,11 @@ export const ProductsScreen = () => {
       <Modal visible={!!selectedProduct} transparent animationType="fade" onRequestClose={() => setSelectedProduct(null)}>
         <View style={styles.previewOverlay}>
           <View style={styles.previewCard}>
-            <View style={styles.previewHeader}>
+            <View style={[styles.previewHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
               <Pressable onPress={() => setSelectedProduct(null)} style={styles.previewClose}>
                 <MaterialCommunityIcons name="close" size={20} color="#0f2f3d" />
               </Pressable>
-              <Text style={styles.previewTitle}>تفاصيل المنتج</Text>
+              <Text style={[styles.previewTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('تفاصيل المنتج', 'Product Details')}</Text>
             </View>
 
             {selectedProduct ? (
@@ -171,7 +182,7 @@ export const ProductsScreen = () => {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={styles.previewImagesRow}
+                  contentContainerStyle={[styles.previewImagesRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
                 >
                   {(selectedProduct.images?.length
                     ? selectedProduct.images
@@ -186,16 +197,16 @@ export const ProductsScreen = () => {
                   })}
                 </ScrollView>
 
-                <Text style={styles.previewName}>{selectedProduct.name}</Text>
-                <Text style={styles.previewMeta}>التصنيف: {selectedProduct.category?.nameAr || '-'}</Text>
-                <Text style={styles.previewMeta}>السوق: {selectedProduct.market?.name || '-'}</Text>
-                <Text style={styles.previewMeta}>{selectedProduct.description || 'منتج طازج بجودة عالية.'}</Text>
-                <Text style={styles.previewPrice}>
+                <Text style={[styles.previewName, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedProduct.name}</Text>
+                <Text style={[styles.previewMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('التصنيف', 'Category')}: {selectedProduct.category?.nameAr || '-'}</Text>
+                <Text style={[styles.previewMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('السوق', 'Market')}: {selectedProduct.market?.name || '-'}</Text>
+                <Text style={[styles.previewMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedProduct.description || tr('منتج طازج بجودة عالية.', 'Fresh product with premium quality.')}</Text>
+                <Text style={[styles.previewPrice, { textAlign: isRTL ? 'right' : 'left' }]}>
                   {formatSAR(Number(selectedProduct.price))} / {selectedProduct.unit}
                 </Text>
 
                 <AppButton
-                  label="إضافة إلى السلة"
+                  label={tr('إضافة إلى السلة', 'Add to Cart')}
                   onPress={() => {
                     addToCart(selectedProduct);
                     setSelectedProduct(null);
@@ -235,17 +246,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#ecfdf3',
   },
   offerTitle: {
-    textAlign: 'right',
     color: theme.colors.text,
     fontWeight: '900',
     fontSize: 16,
   },
   offerDesc: {
-    textAlign: 'right',
     color: theme.colors.textMuted,
   },
   searchWrap: {
-    flexDirection: 'row-reverse',
     gap: 8,
     alignItems: 'center',
   },
@@ -267,7 +275,6 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   filtersRow: {
-    flexDirection: 'row-reverse',
     gap: 8,
     flexWrap: 'wrap',
   },
@@ -292,7 +299,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   rowBetween: {
-    flexDirection: 'row-reverse',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -301,12 +307,11 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   emptyText: {
-    textAlign: 'right',
     color: '#4b6a5a',
     marginBottom: 2,
   },
   toggleBtn: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 6,
     alignItems: 'center',
     backgroundColor: '#2f9e44',
@@ -333,7 +338,7 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
   },
   previewHeader: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
   },
@@ -341,7 +346,6 @@ const styles = StyleSheet.create({
     color: '#0f2f3d',
     fontWeight: '900',
     fontSize: 17,
-    textAlign: 'right',
   },
   previewClose: {
     width: 34,
@@ -352,7 +356,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   previewImagesRow: {
-    flexDirection: 'row-reverse',
+    flexDirection: 'row',
     gap: 8,
   },
   previewImage: {
@@ -368,17 +372,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
   },
   previewName: {
-    textAlign: 'right',
     color: '#0f2f3d',
     fontWeight: '900',
     fontSize: 18,
   },
   previewMeta: {
-    textAlign: 'right',
     color: '#4a6572',
   },
   previewPrice: {
-    textAlign: 'right',
     color: '#0f766e',
     fontWeight: '900',
     fontSize: 16,

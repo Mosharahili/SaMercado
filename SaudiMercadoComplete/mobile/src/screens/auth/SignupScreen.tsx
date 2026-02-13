@@ -4,7 +4,9 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { AuthStackParamList } from '@navigation/types';
 import { useAuth } from '@hooks/useAuth';
+import { useLanguage } from '@hooks/useLanguage';
 import { AppButton } from '@components/AppButton';
+import { LanguageSwitcher } from '@components/LanguageSwitcher';
 import { theme } from '@theme/theme';
 import { ApiError } from '@api/client';
 
@@ -12,6 +14,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
 export const SignupScreen = ({ navigation }: Props) => {
   const { signup } = useAuth();
+  const { isRTL, t } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -19,12 +22,12 @@ export const SignupScreen = ({ navigation }: Props) => {
 
   const onSignup = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('تنبيه', 'يرجى تعبئة جميع الحقول');
+      Alert.alert(t('alert.notice'), t('auth.fillAll'));
       return;
     }
 
     if (password.length < 6) {
-      Alert.alert('تنبيه', 'كلمة المرور يجب أن تكون 6 أحرف على الأقل');
+      Alert.alert(t('alert.notice'), t('auth.passwordMin'));
       return;
     }
 
@@ -33,7 +36,7 @@ export const SignupScreen = ({ navigation }: Props) => {
       await signup({ name: name.trim(), email: email.trim(), password });
     } catch (error) {
       const err = error as ApiError;
-      Alert.alert('خطأ', err.response?.data?.error || err.message || 'فشل إنشاء الحساب');
+      Alert.alert(t('alert.error'), err.response?.data?.error || err.message || t('auth.signupFailed'));
     } finally {
       setLoading(false);
     }
@@ -43,22 +46,29 @@ export const SignupScreen = ({ navigation }: Props) => {
     <LinearGradient colors={theme.gradients.app} style={styles.container}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
-          <Text style={styles.title}>إنشاء حساب جديد</Text>
+          <LanguageSwitcher />
+          <Text style={styles.title}>{t('auth.signup')}</Text>
 
           <View style={styles.card}>
-            <Text style={styles.label}>الاسم</Text>
-            <TextInput style={styles.input} value={name} onChangeText={setName} />
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.name')}</Text>
+            <TextInput style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]} value={name} onChangeText={setName} />
 
-            <Text style={styles.label}>البريد الإلكتروني</Text>
-            <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
+            <TextInput
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
 
-            <Text style={styles.label}>كلمة المرور</Text>
-            <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry />
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
+            <TextInput style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]} value={password} onChangeText={setPassword} secureTextEntry />
 
-            <AppButton label="إنشاء الحساب" onPress={onSignup} loading={loading} />
+            <AppButton label={t('auth.signup')} onPress={onSignup} loading={loading} />
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkWrap}>
-              <Text style={styles.link}>لديك حساب؟ تسجيل الدخول</Text>
+              <Text style={styles.link}>{t('auth.hasAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -89,7 +99,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   label: {
-    textAlign: 'right',
     color: theme.colors.text,
     fontWeight: '700',
   },
@@ -100,7 +109,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
     paddingHorizontal: 12,
     paddingVertical: 10,
-    textAlign: 'right',
   },
   linkWrap: { marginTop: 8 },
   link: {
