@@ -20,19 +20,16 @@
     "ios": {
       "bundleIdentifier": "com.saudimercado.complete",
       "supportsTablet": true,
-      "supportsRTL": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "ar",
         "CFBundleLocalizations": [
           "ar",
           "en"
-        ],
-        "NSForceRightToLeftLayoutDirection": true
+        ]
       }
     },
     "android": {
-      "package": "com.saudimercado.complete",
-      "supportsRTL": true
+      "package": "com.saudimercado.complete"
     },
     "plugins": [
       "expo-secure-store",

@@ -15,8 +15,6 @@ export const AppButton = ({
   loading?: boolean;
   variant?: 'primary' | 'ghost';
 }) => {
-  const { isRTL } = useLanguage();
-  
   const handlePress = React.useCallback(() => {
     if (!loading && onPress) {
       onPress();
@@ -39,7 +37,6 @@ export const AppButton = ({
           style={[
             styles.label,
             variant === 'ghost' && styles.ghostLabel,
-            { writingDirection: isRTL ? 'rtl' : 'ltr' },
           ]}
         >
           {label}

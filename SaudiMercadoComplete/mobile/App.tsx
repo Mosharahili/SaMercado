@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, View, I18nManager, Platform } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider } from '@hooks/useAuth';
@@ -31,36 +31,21 @@ const StartupSplash = () => {
 
 const AppInner = () => {
   useRegisterPushToken();
-  const { isLoading, isRTL, forceRemount } = useLanguage();
+  const { isLoading } = useLanguage();
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
-    // Initialize RTL support
-    I18nManager.allowRTL(true);
-    
-    // For native platforms, ensure RTL is set from the start
-    if (Platform.OS !== 'web') {
-      I18nManager.forceRTL(isRTL);
-    }
-    
     const textDefaults = BaseText.defaultProps || {};
     const inputDefaults = BaseTextInput.defaultProps || {};
 
-    const directionStyle = {
-      textAlign: isRTL ? 'right' : 'left',
-      writingDirection: isRTL ? 'rtl' : 'ltr',
-    } as const;
-
     BaseText.defaultProps = {
       ...textDefaults,
-      style: BASE_TEXT_STYLE ? [BASE_TEXT_STYLE, directionStyle] : directionStyle,
     };
 
     BaseTextInput.defaultProps = {
       ...inputDefaults,
-      style: BASE_TEXT_INPUT_STYLE ? [BASE_TEXT_INPUT_STYLE, directionStyle] : directionStyle,
     };
-  }, [isRTL, forceRemount]);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowStartupSplash(false), STARTUP_SPLASH_DELAY_MS);
@@ -71,9 +56,9 @@ const AppInner = () => {
     return <StartupSplash />;
   }
 
-  const layoutDirection = isRTL ? 'rtl' : 'ltr';
+  const layoutDirection = 'ltr';
   return (
-    <View key={`app-${forceRemount}`} style={[styles.root, { direction: layoutDirection }]}>
+    <View key="app" style={[styles.root, { direction: layoutDirection }]}>
       <RootNavigator />
     </View>
   );
