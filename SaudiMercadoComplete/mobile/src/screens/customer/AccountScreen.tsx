@@ -12,6 +12,10 @@ import { Order } from '@app-types/models';
 export const AccountScreen = () => {
   const { user, logout } = useAuth();
   const { isRTL, t } = useLanguage();
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
   const [orders, setOrders] = useState<Order[]>([]);
 
   const loadOrders = async () => {
@@ -33,39 +37,39 @@ export const AccountScreen = () => {
       <AppHeader title={t('account.title')} subtitle={t('account.subtitle')} />
 
       <View style={styles.card}>
-        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.language')}</Text>
+        <Text style={[styles.label, textDirectionStyle]}>{t('account.language')}</Text>
         <LanguageSwitcher />
       </View>
 
       <View style={styles.card}>
-        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.name')}</Text>
-        <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{user?.name || '-'}</Text>
+        <Text style={[styles.label, textDirectionStyle]}>{t('account.name')}</Text>
+        <Text style={[styles.value, textDirectionStyle]}>{user?.name || '-'}</Text>
 
-        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.email')}</Text>
-        <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{user?.email || '-'}</Text>
+        <Text style={[styles.label, textDirectionStyle]}>{t('account.email')}</Text>
+        <Text style={[styles.value, textDirectionStyle]}>{user?.email || '-'}</Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.notifications')}</Text>
+        <Text style={[styles.label, textDirectionStyle]}>{t('account.notifications')}</Text>
         <Pressable style={styles.noticeItem}>
-          <Text style={[styles.noticeText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.orderUpdates')}</Text>
+          <Text style={[styles.noticeText, textDirectionStyle]}>{t('account.orderUpdates')}</Text>
         </Pressable>
         <Pressable style={styles.noticeItem}>
-          <Text style={[styles.noticeText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.promotions')}</Text>
+          <Text style={[styles.noticeText, textDirectionStyle]}>{t('account.promotions')}</Text>
         </Pressable>
       </View>
 
       {user?.role === 'CUSTOMER' ? (
         <View style={styles.card}>
-          <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.myOrders')}</Text>
-          {!orders.length ? <Text style={[styles.value, { textAlign: isRTL ? 'right' : 'left' }]}>{t('account.noOrders')}</Text> : null}
+          <Text style={[styles.label, textDirectionStyle]}>{t('account.myOrders')}</Text>
+          {!orders.length ? <Text style={[styles.value, textDirectionStyle]}>{t('account.noOrders')}</Text> : null}
           {orders.slice(0, 8).map((order) => (
             <View key={order.id} style={styles.orderItem}>
-              <Text style={[styles.orderLine, { textAlign: isRTL ? 'right' : 'left' }]}>#{order.orderNumber}</Text>
-              <Text style={[styles.orderLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text style={[styles.orderLine, textDirectionStyle]}>#{order.orderNumber}</Text>
+              <Text style={[styles.orderLine, textDirectionStyle]}>
                 {t('account.status')}: {order.status}
               </Text>
-              <Text style={[styles.orderLine, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text style={[styles.orderLine, textDirectionStyle]}>
                 {t('account.total')}: {order.totalAmount} ر.س
               </Text>
             </View>

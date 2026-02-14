@@ -7,14 +7,13 @@ export const LanguageSwitcher = () => {
 
   return (
     <Pressable style={[styles.button, isRTL ? styles.rtl : styles.ltr]} onPress={toggleLanguage}>
-      <Text style={styles.text}>{t('language.switch')}</Text>
+      <Text style={[styles.text, isRTL ? styles.textRTL : styles.textLTR]}>{t('language.switch')}</Text>
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
-    alignSelf: 'flex-start',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
@@ -24,14 +23,22 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   rtl: {
-    alignSelf: 'flex-end',
+    marginLeft: 'auto',
   },
   ltr: {
-    alignSelf: 'flex-start',
+    marginRight: 'auto',
   },
   text: {
     color: '#166534',
     fontWeight: '700',
     fontSize: 13,
+  },
+  textRTL: {
+    writingDirection: 'rtl',
+    textAlign: 'right',
+  },
+  textLTR: {
+    writingDirection: 'ltr',
+    textAlign: 'left',
   },
 });

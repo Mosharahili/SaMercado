@@ -46,17 +46,17 @@ export const LoginScreen = ({ navigation }: Props) => {
           <Text style={styles.subtitle}>{t('auth.tagline')}</Text>
 
           <View style={styles.card}>
-            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
+            <Text style={[styles.label, isRTL ? styles.labelRTL : styles.labelLTR]}>{t('auth.email')}</Text>
             <TextInput
-              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.input, isRTL ? styles.inputRTL : styles.inputLTR]}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
             />
 
-            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
-            <TextInput style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]} value={password} onChangeText={setPassword} secureTextEntry />
+            <Text style={[styles.label, isRTL ? styles.labelRTL : styles.labelLTR]}>{t('auth.password')}</Text>
+            <TextInput style={[styles.input, isRTL ? styles.inputRTL : styles.inputLTR]} value={password} onChangeText={setPassword} secureTextEntry />
 
             <AppButton label={t('auth.login')} onPress={onLogin} loading={loading} />
 
@@ -105,6 +105,15 @@ const styles = StyleSheet.create({
   label: {
     color: theme.colors.text,
     fontWeight: '700',
+    width: '100%',
+  },
+  labelRTL: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
+  labelLTR: {
+    textAlign: 'left',
+    writingDirection: 'ltr',
   },
   input: {
     borderWidth: 1,
@@ -113,6 +122,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdf4',
     paddingHorizontal: 12,
     paddingVertical: 10,
+  },
+  inputRTL: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
+  inputLTR: {
+    textAlign: 'left',
+    writingDirection: 'ltr',
   },
   linkWrap: { marginTop: 10 },
   link: {

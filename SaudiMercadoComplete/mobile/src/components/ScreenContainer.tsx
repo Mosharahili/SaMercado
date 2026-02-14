@@ -29,8 +29,10 @@ export const ScreenContainer = ({
     </Pressable>
   ) : null;
 
+  const dir = isRTL ? 'rtl' : 'ltr';
+  const directionStyle: ViewStyle = { direction: dir as 'rtl' | 'ltr' };
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, contentStyle]}>
+    <ScrollView contentContainerStyle={[styles.content, contentStyle, directionStyle]}>
       {ownerShortcut}
       {children}
     </ScrollView>
@@ -42,8 +44,8 @@ export const ScreenContainer = ({
   );
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={styles.gradient}>
-      <SafeAreaView style={styles.safeArea}>{content}</SafeAreaView>
+    <LinearGradient colors={theme.gradients.app} style={[styles.gradient, { direction: dir }]}>
+      <SafeAreaView style={[styles.safeArea, { direction: dir }]}>{content}</SafeAreaView>
     </LinearGradient>
   );
 };

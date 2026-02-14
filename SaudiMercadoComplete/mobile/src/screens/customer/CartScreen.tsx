@@ -15,6 +15,10 @@ export const CartScreen = () => {
   const { items, updateQuantity, removeItem, clearCart, subtotal } = useCart();
   const { user } = useAuth();
   const { isRTL, tr } = useLanguage();
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
   const [contactPhone, setContactPhone] = useState('');
   const [placing, setPlacing] = useState(false);
@@ -94,8 +98,8 @@ export const CartScreen = () => {
 
       {items.map((item) => (
         <View key={item.id} style={styles.itemCard}>
-          <Text style={[styles.itemName, { textAlign: isRTL ? 'right' : 'left' }]}>{item.product.name}</Text>
-          <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{formatSAR(Number(item.product.price))} / {item.product.unit}</Text>
+          <Text style={[styles.itemName, textDirectionStyle]}>{item.product.name}</Text>
+          <Text style={[styles.itemMeta, textDirectionStyle]}>{formatSAR(Number(item.product.price))} / {item.product.unit}</Text>
 
           <View style={[styles.qtyRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
             <Pressable onPress={() => updateQuantity(item.id, item.quantity - 1)} style={styles.qtyBtn}>
@@ -106,19 +110,19 @@ export const CartScreen = () => {
               <Text style={styles.qtyBtnText}>+</Text>
             </Pressable>
             <Pressable onPress={() => removeItem(item.id)} style={styles.removeBtn}>
-              <Text style={styles.removeText}>{tr('حذف', 'Remove')}</Text>
+              <Text style={[styles.removeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('حذف', 'Remove')}</Text>
             </Pressable>
           </View>
         </View>
       ))}
 
       <View style={styles.summaryCard}>
-        <Text style={[styles.summaryLine, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('المجموع الفرعي', 'Subtotal')}: {formatSAR(subtotal)}</Text>
-        <Text style={[styles.totalLine, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الإجمالي', 'Total')}: {formatSAR(total)}</Text>
+        <Text style={[styles.summaryLine, textDirectionStyle]}>{tr('المجموع الفرعي', 'Subtotal')}: {formatSAR(subtotal)}</Text>
+        <Text style={[styles.totalLine, textDirectionStyle]}>{tr('الإجمالي', 'Total')}: {formatSAR(total)}</Text>
 
-        <Text style={[styles.paymentTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('رقم الجوال', 'Phone number')}</Text>
+        <Text style={[styles.paymentTitle, textDirectionStyle]}>{tr('رقم الجوال', 'Phone number')}</Text>
         <TextInput
-          style={styles.phoneInput}
+          style={[styles.phoneInput, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}
           value={contactPhone}
           onChangeText={(text) => setContactPhone(text.replace(/[^\d]/g, '').slice(0, 10))}
           keyboardType="phone-pad"
@@ -128,7 +132,7 @@ export const CartScreen = () => {
           maxLength={10}
         />
 
-        <Text style={[styles.paymentTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('طريقة الدفع', 'Payment method')}</Text>
+        <Text style={[styles.paymentTitle, textDirectionStyle]}>{tr('طريقة الدفع', 'Payment method')}</Text>
         <View style={styles.pickerWrap}>
           <Picker selectedValue={paymentMethod} onValueChange={setPaymentMethod}>
             <Picker.Item label={tr('Mada (قريبًا)', 'Mada (Soon)')} value="MADA" enabled={false} />
@@ -136,7 +140,7 @@ export const CartScreen = () => {
             <Picker.Item label={tr('الدفع عند الاستلام', 'Cash on Delivery')} value="CASH_ON_DELIVERY" />
           </Picker>
         </View>
-        <Text style={[styles.paymentHint, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('المتاح حاليًا: الدفع عند الاستلام فقط', 'Currently available: Cash on Delivery only')}</Text>
+        <Text style={[styles.paymentHint, textDirectionStyle]}>{tr('المتاح حاليًا: الدفع عند الاستلام فقط', 'Currently available: Cash on Delivery only')}</Text>
 
         <AppButton label={tr('تأكيد الطلب', 'Confirm Order')} onPress={placeOrder} loading={placing} />
       </View>

@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, View } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, View, I18nManager } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider } from '@hooks/useAuth';
@@ -10,6 +10,10 @@ import { RootNavigator } from '@navigation/RootNavigator';
 import { useRegisterPushToken } from '@hooks/useRegisterPushToken';
 
 const STARTUP_SPLASH_DELAY_MS = 3000;
+const BaseText = Text as unknown as { defaultProps?: { style?: unknown } };
+const BaseTextInput = TextInput as unknown as { defaultProps?: { style?: unknown } };
+const BASE_TEXT_STYLE = BaseText.defaultProps?.style;
+const BASE_TEXT_INPUT_STYLE = BaseTextInput.defaultProps?.style;
 
 const StartupSplash = () => {
   const { t } = useLanguage();
@@ -31,6 +35,30 @@ const AppInner = () => {
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
+    // Force RTL/LTR for the entire app
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(isRTL);
+    
+    const textDefaults = BaseText.defaultProps || {};
+    const inputDefaults = BaseTextInput.defaultProps || {};
+
+    const directionStyle = {
+      textAlign: isRTL ? 'right' : 'left',
+      writingDirection: isRTL ? 'rtl' : 'ltr',
+    } as const;
+
+    BaseText.defaultProps = {
+      ...textDefaults,
+      style: BASE_TEXT_STYLE ? [BASE_TEXT_STYLE, directionStyle] : directionStyle,
+    };
+
+    BaseTextInput.defaultProps = {
+      ...inputDefaults,
+      style: BASE_TEXT_INPUT_STYLE ? [BASE_TEXT_INPUT_STYLE, directionStyle] : directionStyle,
+    };
+  }, [isRTL]);
+
+  useEffect(() => {
     const timer = setTimeout(() => setShowStartupSplash(false), STARTUP_SPLASH_DELAY_MS);
     return () => clearTimeout(timer);
   }, []);
@@ -39,8 +67,9 @@ const AppInner = () => {
     return <StartupSplash />;
   }
 
+  const layoutDirection = isRTL ? 'rtl' : 'ltr';
   return (
-    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <View key={layoutDirection} style={[styles.root, { direction: layoutDirection }]}>
       <RootNavigator />
     </View>
   );

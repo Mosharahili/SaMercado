@@ -24,6 +24,10 @@ const pickRandomProducts = (products: Product[], count: number) => {
 export const HomeScreen = () => {
   const { addToCart } = useCart();
   const { isRTL, tr } = useLanguage();
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<Banner[]>([]);
   const [markets, setMarkets] = useState<Market[]>([]);
@@ -87,9 +91,9 @@ export const HomeScreen = () => {
         imageStyle={styles.heroBackgroundImage}
       >
         <LinearGradient colors={['rgba(20,83,45,0.72)', 'rgba(22,101,52,0.60)']} style={styles.heroCard}>
-          <Text style={[styles.heroBrand, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('Saudi Mercado', 'Saudi Mercado')}</Text>
-          <Text style={[styles.heroTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('اطلب خضارك وفواكهك مباشرة من السوق', 'Order your fruits and vegetables directly from the market')}</Text>
-          <Text style={[styles.heroHint, { textAlign: isRTL ? 'right' : 'left' }]}>
+          <Text style={[styles.heroBrand, textDirectionStyle]}>{tr('Saudi Mercado', 'Saudi Mercado')}</Text>
+          <Text style={[styles.heroTitle, textDirectionStyle]}>{tr('اطلب خضارك وفواكهك مباشرة من السوق', 'Order your fruits and vegetables directly from the market')}</Text>
+          <Text style={[styles.heroHint, textDirectionStyle]}>
             {tr(
               'منصة سعودية تربطك بأسواق الخضار والفواكه في الرياض، بتجربة سريعة ومنظمة وجودة يومية.',
               'A Saudi platform connecting you with Riyadh produce markets through a fast, organized, and reliable experience.'
@@ -109,8 +113,8 @@ export const HomeScreen = () => {
 
       {banners.length ? <BannerCarousel banners={banners} /> : null}
 
-      <Text style={[styles.sectionTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('اسواق الرياض', 'Riyadh Markets')}</Text>
-      <Text style={[styles.sectionHint, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الأسواق المعتمدة التي نعمل معها داخل مدينة الرياض.', 'Approved markets we work with across Riyadh.')}</Text>
+      <Text style={[styles.sectionTitle, textDirectionStyle]}>{tr('اسواق الرياض', 'Riyadh Markets')}</Text>
+      <Text style={[styles.sectionHint, textDirectionStyle]}>{tr('الأسواق المعتمدة التي نعمل معها داخل مدينة الرياض.', 'Approved markets we work with across Riyadh.')}</Text>
       <View style={styles.marketGrid}>
         {displayMarkets.map((market) => {
           const image = api.resolveAssetUrl(market.imageUrl);
@@ -121,14 +125,14 @@ export const HomeScreen = () => {
               ) : (
                 <Image source={require('../../../assets/icon.png')} style={styles.marketImage} resizeMode="cover" />
               )}
-              <Text style={[styles.marketName, { textAlign: isRTL ? 'right' : 'left' }]}>{market.name}</Text>
-              <Text style={[styles.marketInfo, { textAlign: isRTL ? 'right' : 'left' }]}>{market.description || tr('سوق موثوق بمنتجات يومية طازجة.', 'Trusted market with fresh daily products.')}</Text>
+              <Text style={[styles.marketName, textDirectionStyle]}>{market.name}</Text>
+              <Text style={[styles.marketInfo, textDirectionStyle]}>{market.description || tr('سوق موثوق بمنتجات يومية طازجة.', 'Trusted market with fresh daily products.')}</Text>
             </View>
           );
         })}
       </View>
 
-      <Text style={[styles.bestTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('افضل الخضار والفواكه', 'Best Fruits & Vegetables')}</Text>
+      <Text style={[styles.bestTitle, textDirectionStyle]}>{tr('افضل الخضار والفواكه', 'Best Fruits & Vegetables')}</Text>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.productRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         {featuredProducts.map((product) => {
           const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
@@ -139,13 +143,13 @@ export const HomeScreen = () => {
                 style={styles.productImage}
                 resizeMode="cover"
               />
-              <Text numberOfLines={2} style={[styles.productName, { textAlign: isRTL ? 'right' : 'left' }]}>
+              <Text numberOfLines={2} style={[styles.productName, textDirectionStyle]}>
                 {product.name}
               </Text>
-              <Text style={[styles.productPrice, { textAlign: isRTL ? 'right' : 'left' }]}>{formatSAR(Number(product.price))}</Text>
+              <Text style={[styles.productPrice, textDirectionStyle]}>{formatSAR(Number(product.price))}</Text>
               <Pressable style={[styles.addBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => addToCart(product)}>
                 <MaterialCommunityIcons name="cart-plus" size={16} color="#ffffff" />
-                <Text style={styles.addBtnText}>{tr('أضف للسلة', 'Add to Cart')}</Text>
+                <Text style={[styles.addBtnText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('أضف للسلة', 'Add to Cart')}</Text>
               </Pressable>
             </View>
           );
@@ -155,18 +159,21 @@ export const HomeScreen = () => {
       {bottomBanner ? (
         <View style={styles.bottomBanner}>
           {bottomImage ? <Image source={{ uri: bottomImage }} style={styles.bottomImage} resizeMode="cover" /> : null}
-          <Text style={[styles.bottomTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{bottomBanner.title}</Text>
-          <Text style={[styles.bottomDesc, { textAlign: isRTL ? 'right' : 'left' }]}>{bottomBanner.description || tr('عروض يومية على أفضل المنتجات', 'Daily offers on top products')}</Text>
+          <Text style={[styles.bottomTitle, textDirectionStyle]}>{bottomBanner.title}</Text>
+          <Text style={[styles.bottomDesc, textDirectionStyle]}>{bottomBanner.description || tr('عروض يومية على أفضل المنتجات', 'Daily offers on top products')}</Text>
         </View>
       ) : null}
 
       <Modal visible={popupVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={[styles.modalTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{popup?.title || tr('إعلان', 'Announcement')}</Text>
+            <Text style={[styles.modalTitle, textDirectionStyle]}>{popup?.title || tr('إعلان', 'Announcement')}</Text>
             {popupImage ? <Image source={{ uri: popupImage }} style={styles.modalImage} resizeMode="cover" /> : null}
-            <Text style={[styles.modalMessage, { textAlign: isRTL ? 'right' : 'left' }]}>{popup?.message || tr('تابع أحدث العروض الحصرية اليوم', 'Discover today’s latest exclusive offers')}</Text>
-            <Pressable onPress={() => setPopupVisible(false)} style={[styles.dismissBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Text style={[styles.modalMessage, textDirectionStyle]}>{popup?.message || tr('تابع أحدث العروض الحصرية اليوم', 'Discover today’s latest exclusive offers')}</Text>
+            <Pressable
+              onPress={() => setPopupVisible(false)}
+              style={[styles.dismissBtn, isRTL ? styles.dismissBtnRTL : styles.dismissBtnLTR]}
+            >
               <Text style={styles.dismissText}>{popup?.secondaryCtaText || tr('إغلاق', 'Close')}</Text>
             </Pressable>
           </View>
@@ -360,6 +367,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
     paddingVertical: 8,
     paddingHorizontal: 14,
+  },
+  dismissBtnRTL: {
+    marginLeft: 'auto',
+  },
+  dismissBtnLTR: {
+    marginRight: 'auto',
   },
   dismissText: {
     color: '#166534',

@@ -16,6 +16,10 @@ import { useLanguage } from '@hooks/useLanguage';
 export const ProductsScreen = () => {
   const { addToCart } = useCart();
   const { isRTL, tr } = useLanguage();
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchInput, setSearchInput] = useState('');
   const [search, setSearch] = useState('');
@@ -91,10 +95,10 @@ export const ProductsScreen = () => {
 
       {topOffer ? (
         <View style={styles.offerCard}>
-          <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
+          <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start', writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
           {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} resizeMode="cover" /> : null}
-          <Text style={[styles.offerTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{topOffer.title}</Text>
-          {!!topOffer.description && <Text style={[styles.offerDesc, { textAlign: isRTL ? 'right' : 'left' }]}>{topOffer.description}</Text>}
+          <Text style={[styles.offerTitle, textDirectionStyle]}>{topOffer.title}</Text>
+          {!!topOffer.description && <Text style={[styles.offerDesc, textDirectionStyle]}>{topOffer.description}</Text>}
         </View>
       ) : null}
 
@@ -109,7 +113,7 @@ export const ProductsScreen = () => {
           <MaterialCommunityIcons name="magnify" size={20} color="white" />
         </Pressable>
         <TextInput
-          style={styles.searchInput}
+          style={[styles.searchInput, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}
           value={searchInput}
           onChangeText={setSearchInput}
           placeholder={tr('ابحث عن منتج أو سوق', 'Search for a product or market')}
@@ -143,14 +147,14 @@ export const ProductsScreen = () => {
       </View>
 
       <View style={[styles.rowBetween, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-        <Text style={[styles.countText, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}</Text>
+        <Text style={[styles.countText, textDirectionStyle]}>{tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}</Text>
         <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <MaterialCommunityIcons name={viewMode === 'grid' ? 'view-list' : 'view-grid'} size={20} color="white" />
-          <Text style={styles.toggleText}>{viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}</Text>
+          <Text style={[styles.toggleText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}</Text>
         </Pressable>
       </View>
 
-      {!visibleProducts.length ? <Text style={[styles.emptyText, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('لا توجد منتجات مطابقة حالياً.', 'No matching products found right now.')}</Text> : null}
+      {!visibleProducts.length ? <Text style={[styles.emptyText, textDirectionStyle]}>{tr('لا توجد منتجات مطابقة حالياً.', 'No matching products found right now.')}</Text> : null}
 
       <FlatList
         data={visibleProducts}
@@ -174,7 +178,7 @@ export const ProductsScreen = () => {
               <Pressable onPress={() => setSelectedProduct(null)} style={styles.previewClose}>
                 <MaterialCommunityIcons name="close" size={20} color="#0f2f3d" />
               </Pressable>
-              <Text style={[styles.previewTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('تفاصيل المنتج', 'Product Details')}</Text>
+              <Text style={[styles.previewTitle, textDirectionStyle]}>{tr('تفاصيل المنتج', 'Product Details')}</Text>
             </View>
 
             {selectedProduct ? (
@@ -197,11 +201,11 @@ export const ProductsScreen = () => {
                   })}
                 </ScrollView>
 
-                <Text style={[styles.previewName, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedProduct.name}</Text>
-                <Text style={[styles.previewMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('التصنيف', 'Category')}: {selectedProduct.category?.nameAr || '-'}</Text>
-                <Text style={[styles.previewMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('السوق', 'Market')}: {selectedProduct.market?.name || '-'}</Text>
-                <Text style={[styles.previewMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{selectedProduct.description || tr('منتج طازج بجودة عالية.', 'Fresh product with premium quality.')}</Text>
-                <Text style={[styles.previewPrice, { textAlign: isRTL ? 'right' : 'left' }]}>
+                <Text style={[styles.previewName, textDirectionStyle]}>{selectedProduct.name}</Text>
+                <Text style={[styles.previewMeta, textDirectionStyle]}>{tr('التصنيف', 'Category')}: {selectedProduct.category?.nameAr || '-'}</Text>
+                <Text style={[styles.previewMeta, textDirectionStyle]}>{tr('السوق', 'Market')}: {selectedProduct.market?.name || '-'}</Text>
+                <Text style={[styles.previewMeta, textDirectionStyle]}>{selectedProduct.description || tr('منتج طازج بجودة عالية.', 'Fresh product with premium quality.')}</Text>
+                <Text style={[styles.previewPrice, textDirectionStyle]}>
                   {formatSAR(Number(selectedProduct.price))} / {selectedProduct.unit}
                 </Text>
 

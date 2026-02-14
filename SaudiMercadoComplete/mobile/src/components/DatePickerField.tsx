@@ -27,6 +27,12 @@ const normalizeWeekday = (date: Date) => {
 export const DatePickerField = ({ label, value, placeholder, onChange }: DatePickerFieldProps) => {
   const { isRTL, tr, locale } = useLanguage();
   const weekDays = isRTL ? weekDaysAr : weekDaysEn;
+  const directionStyle = { direction: isRTL ? 'rtl' : 'ltr' } as const;
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
+  const rowDirectionStyle = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
   const selectedDate = value ? new Date(value) : undefined;
   const [visible, setVisible] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(
@@ -65,25 +71,25 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
 
   return (
     <View style={styles.wrap}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, textDirectionStyle]}>{label}</Text>
       <Pressable onPress={() => setVisible(true)} style={styles.field}>
-        <Text style={[styles.fieldText, { textAlign: isRTL ? 'right' : 'left' }]}>{formattedValue}</Text>
+        <Text style={[styles.fieldText, textDirectionStyle]}>{formattedValue}</Text>
       </Pressable>
 
       <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
         <View style={styles.overlay}>
-          <View style={styles.modalCard}>
-            <View style={styles.headerRow}>
+          <View style={[styles.modalCard, directionStyle]}>
+            <View style={[styles.headerRow, rowDirectionStyle]}>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={styles.navBtn}>
                 <Text style={styles.navText}>{isRTL ? '◀' : '▶'}</Text>
               </Pressable>
-              <Text style={styles.monthTitle}>{monthLabel(viewDate, locale)}</Text>
+              <Text style={[styles.monthTitle, directionStyle]}>{monthLabel(viewDate, locale)}</Text>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} style={styles.navBtn}>
                 <Text style={styles.navText}>{isRTL ? '▶' : '◀'}</Text>
               </Pressable>
             </View>
 
-            <View style={styles.weekRow}>
+            <View style={[styles.weekRow, rowDirectionStyle]}>
               {weekDays.map((day) => (
                 <Text key={day} style={styles.weekLabel}>
                   {day}
@@ -91,7 +97,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
               ))}
             </View>
 
-            <View style={styles.daysGrid}>
+            <View style={[styles.daysGrid, rowDirectionStyle]}>
               {calendarCells.map((day, index) => {
                 if (!day) {
                   return <View key={`empty-${index}`} style={styles.dayCell} />;
@@ -106,7 +112,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
               })}
             </View>
 
-            <View style={styles.actionRow}>
+            <View style={[styles.actionRow, rowDirectionStyle]}>
               <Pressable onPress={() => setVisible(false)} style={styles.actionBtn}>
                 <Text style={styles.actionText}>{tr('إغلاق', 'Close')}</Text>
               </Pressable>

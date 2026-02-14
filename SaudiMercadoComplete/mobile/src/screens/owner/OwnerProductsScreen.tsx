@@ -182,7 +182,11 @@ export const OwnerProductsScreen = () => {
           variant="ghost"
         />
         {selectedImages.length ? (
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.previewList}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[styles.previewList, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+          >
             {selectedImages.map((imageFile, index) => (
               <Image key={`${imageFile.uri}-${index}`} source={{ uri: imageFile.uri }} style={styles.previewThumb} resizeMode="cover" />
             ))}

@@ -9,6 +9,10 @@ import { useLanguage } from '@hooks/useLanguage';
 
 export const MarketsScreen = () => {
   const { isRTL, tr } = useLanguage();
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
   const [markets, setMarkets] = useState<Market[]>([]);
 
   const fetchMarkets = async () => {
@@ -27,9 +31,9 @@ export const MarketsScreen = () => {
   return (
     <ScreenContainer>
       <AppHeader title={tr('الأسواق', 'Markets')} subtitle={tr('الأسواق التي نعمل معها', 'Markets we work with')} />
-      <Text style={[styles.hint, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('نعرض لك أسواقنا المعتمدة لمتابعة مصدر المنتجات والجودة.', 'Browse our approved markets and track product origin and quality.')}</Text>
+      <Text style={[styles.hint, textDirectionStyle]}>{tr('نعرض لك أسواقنا المعتمدة لمتابعة مصدر المنتجات والجودة.', 'Browse our approved markets and track product origin and quality.')}</Text>
 
-      {!markets.length ? <Text style={[styles.emptyText, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('لا توجد أسواق متاحة حالياً.', 'No markets available right now.')}</Text> : null}
+      {!markets.length ? <Text style={[styles.emptyText, textDirectionStyle]}>{tr('لا توجد أسواق متاحة حالياً.', 'No markets available right now.')}</Text> : null}
       {markets.map((market) => (
         <MarketCard key={market.id} market={market} />
       ))}

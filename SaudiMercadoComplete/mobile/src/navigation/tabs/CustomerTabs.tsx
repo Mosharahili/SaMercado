@@ -32,6 +32,7 @@ export const CustomerTabs = () => {
 
   return (
     <Tab.Navigator
+      key={isRTL ? 'tabs-rtl' : 'tabs-ltr'}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
@@ -42,6 +43,7 @@ export const CustomerTabs = () => {
           paddingTop: 8,
           backgroundColor: '#ffffff',
           direction: isRTL ? 'rtl' : 'ltr',
+          flexDirection: isRTL ? 'row-reverse' : 'row',
         },
         sceneStyle: {
           direction: isRTL ? 'rtl' : 'ltr',

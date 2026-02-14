@@ -7,18 +7,31 @@ export const AppHeader = ({ title, subtitle }: { title: string; subtitle?: strin
   const { isRTL } = useLanguage();
 
   return (
-    <View style={[styles.container, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-      <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
-      <View style={styles.textWrap}>
-        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{title}</Text>
-        {!!subtitle && <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'left' }]}>{subtitle}</Text>}
-      </View>
+    <View style={styles.container}>
+      {isRTL ? (
+        <>
+          <View style={[styles.textWrap, styles.textWrapRTL]}>
+            <Text style={[styles.title, styles.titleRTL]}>{title}</Text>
+            {!!subtitle && <Text style={[styles.subtitle, styles.subtitleRTL]}>{subtitle}</Text>}
+          </View>
+          <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
+        </>
+      ) : (
+        <>
+          <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
+          <View style={styles.textWrap}>
+            <Text style={styles.title}>{title}</Text>
+            {!!subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+          </View>
+        </>
+      )}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
+    flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
   },
@@ -32,14 +45,25 @@ const styles = StyleSheet.create({
   textWrap: {
     flex: 1,
   },
+  textWrapRTL: {
+    alignItems: 'flex-end',
+  },
   title: {
     color: '#0f2f3d',
     fontSize: 20,
     fontWeight: '800',
   },
+  titleRTL: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
+  },
   subtitle: {
     color: '#4a6572',
     fontSize: 13,
     marginTop: 2,
+  },
+  subtitleRTL: {
+    textAlign: 'right',
+    writingDirection: 'rtl',
   },
 });

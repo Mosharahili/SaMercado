@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, StyleSheet, View, I18nManager } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
@@ -14,6 +14,12 @@ export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
   const { isRTL } = useLanguage();
 
+  // Force RTL/LTR direction for the entire app
+  React.useEffect(() => {
+    I18nManager.allowRTL(true);
+    I18nManager.forceRTL(isRTL);
+  }, [isRTL]);
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -23,9 +29,9 @@ export const RootNavigator = () => {
   }
 
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <NavigationContainer
-        direction={isRTL ? 'rtl' : 'ltr'}
+        key={isRTL ? 'nav-rtl' : 'nav-ltr'}
         theme={{
           ...DefaultTheme,
           colors: {

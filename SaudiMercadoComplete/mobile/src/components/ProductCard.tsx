@@ -18,6 +18,10 @@ export const ProductCard = ({
 }) => {
   const { isRTL, tr } = useLanguage();
   const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
   const addScale = useRef(new Animated.Value(1)).current;
 
   const handleAdd = () => {
@@ -42,19 +46,19 @@ export const ProductCard = ({
       <View style={styles.mediaWrap}>
         {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
         <View style={styles.badge}>
-          <Text style={styles.badgeText}>{product.category?.nameAr || tr('منتج', 'Product')}</Text>
+          <Text style={[styles.badgeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{product.category?.nameAr || tr('منتج', 'Product')}</Text>
         </View>
       </View>
       <View style={styles.body}>
-        <Text style={[styles.name, { textAlign: isRTL ? 'right' : 'left' }]} numberOfLines={2}>
+        <Text style={[styles.name, textDirectionStyle]} numberOfLines={2}>
           {product.name}
         </Text>
-        <Text style={[styles.meta, { textAlign: isRTL ? 'right' : 'left' }]}>{product.market?.name || tr('سوق الرياض', 'Riyadh Market')}</Text>
+        <Text style={[styles.meta, textDirectionStyle]}>{product.market?.name || tr('سوق الرياض', 'Riyadh Market')}</Text>
 
         <View style={[styles.bottomRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
           <View style={[styles.priceWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-            <Text style={styles.unit}>/{product.unit}</Text>
-            <Text style={styles.price}>{formatSAR(Number(product.price))}</Text>
+            <Text style={[styles.unit, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>/{product.unit}</Text>
+            <Text style={[styles.price, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{formatSAR(Number(product.price))}</Text>
           </View>
           <Animated.View style={{ transform: [{ scale: addScale }] }}>
             <Pressable
@@ -65,7 +69,7 @@ export const ProductCard = ({
               style={[styles.addButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
             >
               <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
-              <Text style={styles.addText}>{tr('إضافة', 'Add')}</Text>
+              <Text style={[styles.addText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('إضافة', 'Add')}</Text>
             </Pressable>
           </Animated.View>
         </View>

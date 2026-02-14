@@ -1,23 +1,10 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { I18nManager, Platform } from 'react-native';
+import { I18nManager } from 'react-native';
 
 export type AppLanguage = 'ar' | 'en';
 
 const LANGUAGE_KEY = 'app_language';
-
-/** Sync native I18nManager.forceRTL with language. Requires app restart to take effect. */
-const applyRTLAndReloadIfNeeded = (wantsRTL: boolean): boolean => {
-  if (Platform.OS === 'web') return false;
-  if (I18nManager.isRTL === wantsRTL) return false;
-  I18nManager.forceRTL(wantsRTL);
-  try {
-    require('react-native-restart').default.restart();
-  } catch {
-    // Native module not available (e.g. Expo Go)
-  }
-  return true;
-};
 
 const ar = {
   'language.switch': 'English',
@@ -103,6 +90,13 @@ const translations = { ar, en } as const;
 
 export type TranslationKey = keyof typeof ar;
 
+export type RTLStyles = {
+  direction: 'rtl' | 'ltr';
+  flexRow: 'row-reverse' | 'row';
+  textAlign: 'right' | 'left';
+  alignStart: 'flex-end' | 'flex-start';
+};
+
 type LanguageContextValue = {
   language: AppLanguage;
   isRTL: boolean;
@@ -112,6 +106,7 @@ type LanguageContextValue = {
   tr: (arabic: string, english: string) => string;
   locale: 'ar-SA' | 'en-US';
   t: (key: TranslationKey) => string;
+  rtl: RTLStyles;
 };
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
@@ -121,22 +116,19 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    I18nManager.allowRTL(true);
-    I18nManager.swapLeftAndRightInRTL(true);
-  }, []);
-
-  useEffect(() => {
     const bootstrap = async () => {
-      let initialLanguage: AppLanguage = 'ar';
       try {
+        // Allow RTL support
+        I18nManager.allowRTL(true);
+        
+        let initialLanguage: AppLanguage = 'ar';
         const stored = await AsyncStorage.getItem(LANGUAGE_KEY);
         if (stored === 'ar' || stored === 'en') {
           initialLanguage = stored;
         }
-        const wantsRTL = initialLanguage === 'ar';
-        if (applyRTLAndReloadIfNeeded(wantsRTL)) {
-          return; // App is restarting
-        }
+        
+        // Force RTL for Arabic
+        I18nManager.forceRTL(initialLanguage === 'ar');
         setLanguageState(initialLanguage);
       } finally {
         setIsLoading(false);
@@ -148,11 +140,11 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
 
   const setLanguage = async (next: AppLanguage) => {
     if (next === language) return;
-    const wantsRTL = next === 'ar';
+    
+    // Force RTL/LTR when changing language
+    I18nManager.forceRTL(next === 'ar');
+    
     await AsyncStorage.setItem(LANGUAGE_KEY, next);
-    if (applyRTLAndReloadIfNeeded(wantsRTL)) {
-      return; // App is restarting
-    }
     setLanguageState(next);
   };
 
@@ -161,18 +153,25 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     await setLanguage(next);
   };
 
+  const isRTL = language === 'ar';
   const value = useMemo<LanguageContextValue>(
     () => ({
       language,
-      isRTL: language === 'ar',
+      isRTL,
       isLoading,
       setLanguage,
       toggleLanguage,
       tr: (arabic, english) => (language === 'ar' ? arabic : english),
       locale: language === 'ar' ? 'ar-SA' : 'en-US',
       t: (key) => translations[language][key],
+      rtl: {
+        direction: isRTL ? 'rtl' : 'ltr',
+        flexRow: isRTL ? 'row-reverse' : 'row',
+        textAlign: isRTL ? 'right' : 'left',
+        alignStart: isRTL ? 'flex-end' : 'flex-start',
+      },
     }),
-    [language, isLoading]
+    [language, isLoading, isRTL]
   );
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;

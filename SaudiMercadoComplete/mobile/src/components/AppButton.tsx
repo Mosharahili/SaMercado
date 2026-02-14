@@ -1,6 +1,7 @@
 import React from 'react';
 import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { useLanguage } from '@hooks/useLanguage';
 import { theme } from '@theme/theme';
 
 export const AppButton = ({
@@ -14,9 +15,36 @@ export const AppButton = ({
   loading?: boolean;
   variant?: 'primary' | 'ghost';
 }) => {
+  const { isRTL } = useLanguage();
+  
+  const handlePress = React.useCallback(() => {
+    if (!loading && onPress) {
+      onPress();
+    }
+  }, [loading, onPress]);
+
   const content = (
-    <Pressable onPress={onPress} disabled={loading} style={styles.pressable}>
-      {loading ? <ActivityIndicator color={variant === 'ghost' ? theme.colors.primary : '#fff'} /> : <Text style={[styles.label, variant === 'ghost' && styles.ghostLabel]}>{label}</Text>}
+    <Pressable 
+      onPress={handlePress} 
+      disabled={loading} 
+      style={({ pressed }) => [
+        styles.pressable,
+        pressed && styles.pressableActive
+      ]}
+    >
+      {loading ? (
+        <ActivityIndicator color={variant === 'ghost' ? theme.colors.primary : '#fff'} />
+      ) : (
+        <Text
+          style={[
+            styles.label,
+            variant === 'ghost' && styles.ghostLabel,
+            { writingDirection: isRTL ? 'rtl' : 'ltr' },
+          ]}
+        >
+          {label}
+        </Text>
+      )}
     </Pressable>
   );
 
@@ -48,12 +76,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     alignItems: 'center',
   },
+  pressableActive: {
+    opacity: 0.8,
+  },
   label: {
     color: 'white',
     fontWeight: '700',
     fontSize: 16,
   },
   ghostLabel: {
-    color: theme.colors.primary,
+    color: '#166534',
   },
 });

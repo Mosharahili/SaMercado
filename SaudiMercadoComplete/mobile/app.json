@@ -7,6 +7,7 @@
     "icon": "./assets/icon.png",
     "scheme": "saudimercado",
     "userInterfaceStyle": "light",
+    "newArchEnabled": true,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -18,19 +19,19 @@
     },
     "ios": {
       "bundleIdentifier": "com.saudimercado.complete",
-      "newArchEnabled": true,
       "supportsTablet": true,
+      "supportsRTL": true,
       "infoPlist": {
         "CFBundleDevelopmentRegion": "ar",
         "CFBundleLocalizations": [
           "ar",
           "en"
-        ]
+        ],
+        "NSForceRightToLeftLayoutDirection": true
       }
     },
     "android": {
       "package": "com.saudimercado.complete",
-      "newArchEnabled": true,
       "supportsRTL": true
     },
     "plugins": [

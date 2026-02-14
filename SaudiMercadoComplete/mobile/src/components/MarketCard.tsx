@@ -9,15 +9,19 @@ import { theme } from '@theme/theme';
 export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }) => {
   const { isRTL, tr } = useLanguage();
   const image = api.resolveAssetUrl(market.imageUrl);
+  const textDirectionStyle = {
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+    textAlign: isRTL ? 'right' : 'left',
+  } as const;
 
   return (
     <View style={styles.card}>
       {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
       <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} />
-        <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{market.name}</Text>
+        <Text style={[styles.title, textDirectionStyle]}>{market.name}</Text>
       </View>
-      <Text style={[styles.description, { textAlign: isRTL ? 'right' : 'left' }]}>
+      <Text style={[styles.description, textDirectionStyle]}>
         {market.description || tr('سوق موثوق بمنتجات طازجة وجودة يومية.', 'Trusted market with fresh daily quality products.')}
       </Text>
     </View>
