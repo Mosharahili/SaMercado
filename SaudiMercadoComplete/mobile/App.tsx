@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, View, I18nManager } from 'react-native';
+import { Image, StyleSheet, Text, TextInput, View, I18nManager, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider } from '@hooks/useAuth';
@@ -35,9 +35,13 @@ const AppInner = () => {
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
-    // Force RTL/LTR for the entire app
+    // Initialize RTL support
     I18nManager.allowRTL(true);
-    I18nManager.forceRTL(isRTL);
+    
+    // For native platforms, ensure RTL is set from the start
+    if (Platform.OS !== 'web') {
+      I18nManager.forceRTL(isRTL);
+    }
     
     const textDefaults = BaseText.defaultProps || {};
     const inputDefaults = BaseTextInput.defaultProps || {};

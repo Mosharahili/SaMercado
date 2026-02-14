@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { I18nManager } from 'react-native';
+import { I18nManager, Platform } from 'react-native';
+import RNRestart from 'react-native-restart';
 
 export type AppLanguage = 'ar' | 'en';
 
@@ -118,7 +119,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   useEffect(() => {
     const bootstrap = async () => {
       try {
-        // Allow RTL support
+        // Enable RTL support from the start
         I18nManager.allowRTL(true);
         
         let initialLanguage: AppLanguage = 'ar';
@@ -127,8 +128,11 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
           initialLanguage = stored;
         }
         
-        // Force RTL for Arabic
-        I18nManager.forceRTL(initialLanguage === 'ar');
+        // For native platforms, force RTL on initial load
+        if (Platform.OS !== 'web') {
+          I18nManager.forceRTL(initialLanguage === 'ar');
+        }
+        
         setLanguageState(initialLanguage);
       } finally {
         setIsLoading(false);
@@ -141,11 +145,26 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
   const setLanguage = async (next: AppLanguage) => {
     if (next === language) return;
     
-    // Force RTL/LTR when changing language
-    I18nManager.forceRTL(next === 'ar');
-    
+    // Save language preference
     await AsyncStorage.setItem(LANGUAGE_KEY, next);
-    setLanguageState(next);
+    
+    // Force RTL/LTR
+    I18nManager.allowRTL(true);
+    const isNextRTL = next === 'ar';
+    const currentlyRTL = I18nManager.isRTL;
+    
+    // Only restart on native platforms if RTL direction changes
+    if (Platform.OS !== 'web' && currentlyRTL !== isNextRTL) {
+      I18nManager.forceRTL(isNextRTL);
+      // Restart the app to apply RTL changes on native
+      setTimeout(() => {
+        RNRestart.Restart();
+      }, 100);
+    } else {
+      // On web, just update the state
+      I18nManager.forceRTL(isNextRTL);
+      setLanguageState(next);
+    }
   };
 
   const toggleLanguage = async () => {

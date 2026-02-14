@@ -1,0 +1,9 @@
+env: load .env
+env: export EXPO_PUBLIC_API_BASE_URL
+Starting project at /Users/mosharahili/Desktop/SaMercado/SaudiMercadoComplete/mobile
+Starting Metro Bundler
+warning: Bundler cache is empty, rebuilding (this may take a minute)
+Waiting on http://localhost:8081
+Logs for your project will appear below.
+Web Bundled 7734ms node_modules/expo/AppEntry.js (1110 modules)
+Web Bundled 76ms node_modules/expo/AppEntry.js (1 module)

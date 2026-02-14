@@ -1,5 +1,5 @@
 import React from 'react';
-import { ActivityIndicator, StyleSheet, View, I18nManager } from 'react-native';
+import { ActivityIndicator, Platform, StyleSheet, View, I18nManager } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
@@ -14,10 +14,14 @@ export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
   const { isRTL } = useLanguage();
 
-  // Force RTL/LTR direction for the entire app
+  // Initialize RTL on app startup (for initial language)
   React.useEffect(() => {
     I18nManager.allowRTL(true);
-    I18nManager.forceRTL(isRTL);
+    
+    // For native platforms, set RTL during initial load
+    if (Platform.OS !== 'web') {
+      I18nManager.forceRTL(isRTL);
+    }
   }, [isRTL]);
 
   if (isLoading) {
