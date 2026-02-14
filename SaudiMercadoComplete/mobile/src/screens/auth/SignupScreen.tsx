@@ -43,15 +43,23 @@ export const SignupScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={styles.container}>
+    <LinearGradient 
+      colors={theme.gradients.app} 
+      style={[styles.container, { direction: isRTL ? 'rtl' : 'ltr' }]}
+    >
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.content}>
+        <View style={[styles.content, { direction: isRTL ? 'rtl' : 'ltr' }]}>
           <LanguageSwitcher />
-          <Text style={styles.title}>{t('auth.signup')}</Text>
+          <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'center', writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.signup')}</Text>
 
-          <View style={styles.card}>
+          <View style={[styles.card, { direction: isRTL ? 'rtl' : 'ltr' }]}>
             <Text style={[styles.label, isRTL ? styles.labelRTL : styles.labelLTR]}>{t('auth.name')}</Text>
-            <TextInput style={[styles.input, isRTL ? styles.inputRTL : styles.inputLTR]} value={name} onChangeText={setName} />
+            <TextInput 
+              style={[styles.input, isRTL ? styles.inputRTL : styles.inputLTR]} 
+              value={name} 
+              onChangeText={setName}
+              placeholderTextColor="#999"
+            />
 
             <Text style={[styles.label, isRTL ? styles.labelRTL : styles.labelLTR]}>{t('auth.email')}</Text>
             <TextInput
@@ -60,15 +68,22 @@ export const SignupScreen = ({ navigation }: Props) => {
               onChangeText={setEmail}
               keyboardType="email-address"
               autoCapitalize="none"
+              placeholderTextColor="#999"
             />
 
             <Text style={[styles.label, isRTL ? styles.labelRTL : styles.labelLTR]}>{t('auth.password')}</Text>
-            <TextInput style={[styles.input, isRTL ? styles.inputRTL : styles.inputLTR]} value={password} onChangeText={setPassword} secureTextEntry />
+            <TextInput 
+              style={[styles.input, isRTL ? styles.inputRTL : styles.inputLTR]} 
+              value={password} 
+              onChangeText={setPassword} 
+              secureTextEntry
+              placeholderTextColor="#999"
+            />
 
             <AppButton label={t('auth.signup')} onPress={onSignup} loading={loading} />
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkWrap}>
-              <Text style={styles.link}>{t('auth.hasAccount')}</Text>
+              <Text style={[styles.link, { textAlign: isRTL ? 'right' : 'center', writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.hasAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>

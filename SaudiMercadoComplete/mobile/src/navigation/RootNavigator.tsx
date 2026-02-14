@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { ActivityIndicator, Platform, StyleSheet, View, I18nManager } from 'react-native';
-import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
+import { NavigationContainer, DefaultTheme, NavigationContainerRef } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
 import { AuthStack } from './stacks/AuthStack';
@@ -13,15 +13,12 @@ import { theme } from '@theme/theme';
 export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
   const { isRTL, forceRemount } = useLanguage();
+  const navigationRef = useRef<NavigationContainerRef<any>>(null);
 
-  // Initialize RTL on app startup (for initial language)
-  React.useEffect(() => {
+  useEffect(() => {
     I18nManager.allowRTL(true);
-    
-    // For native platforms, set RTL during initial load
-    if (Platform.OS !== 'web') {
-      I18nManager.forceRTL(isRTL);
-    }
+    // Force RTL direction for native platforms
+    I18nManager.forceRTL(isRTL);
   }, [isRTL]);
 
   if (isLoading) {
@@ -33,9 +30,13 @@ export const RootNavigator = () => {
   }
 
   return (
-    <View key={`nav-${forceRemount}`} style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <View 
+      key={`root-${forceRemount}`}
+      style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}
+    >
       <NavigationContainer
-        key={`container-${isRTL}-${forceRemount}`}
+        ref={navigationRef}
+        key={`nav-container-${forceRemount}`}
         theme={{
           ...DefaultTheme,
           colors: {
