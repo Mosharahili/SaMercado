@@ -12,7 +12,7 @@ import { theme } from '@theme/theme';
 
 export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
-  const { isRTL } = useLanguage();
+  const { isRTL, forceRemount } = useLanguage();
 
   // Initialize RTL on app startup (for initial language)
   React.useEffect(() => {
@@ -33,9 +33,9 @@ export const RootNavigator = () => {
   }
 
   return (
-    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <View key={`nav-${forceRemount}`} style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <NavigationContainer
-        key={isRTL ? 'nav-rtl' : 'nav-ltr'}
+        key={`container-${isRTL}-${forceRemount}`}
         theme={{
           ...DefaultTheme,
           colors: {

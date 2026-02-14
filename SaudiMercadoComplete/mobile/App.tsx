@@ -31,7 +31,7 @@ const StartupSplash = () => {
 
 const AppInner = () => {
   useRegisterPushToken();
-  const { isLoading, isRTL } = useLanguage();
+  const { isLoading, isRTL, forceRemount } = useLanguage();
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
@@ -60,7 +60,7 @@ const AppInner = () => {
       ...inputDefaults,
       style: BASE_TEXT_INPUT_STYLE ? [BASE_TEXT_INPUT_STYLE, directionStyle] : directionStyle,
     };
-  }, [isRTL]);
+  }, [isRTL, forceRemount]);
 
   useEffect(() => {
     const timer = setTimeout(() => setShowStartupSplash(false), STARTUP_SPLASH_DELAY_MS);
@@ -73,7 +73,7 @@ const AppInner = () => {
 
   const layoutDirection = isRTL ? 'rtl' : 'ltr';
   return (
-    <View key={layoutDirection} style={[styles.root, { direction: layoutDirection }]}>
+    <View key={`app-${forceRemount}`} style={[styles.root, { direction: layoutDirection }]}>
       <RootNavigator />
     </View>
   );
