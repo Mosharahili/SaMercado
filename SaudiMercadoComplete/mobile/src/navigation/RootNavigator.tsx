@@ -1,5 +1,5 @@
-import React, { useRef } from 'react';
-import { ActivityIndicator, StyleSheet, View, NavigationContainerRef } from 'react-native';
+import React from 'react';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
@@ -12,7 +12,8 @@ import { theme } from '@theme/theme';
 
 export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
-  const navigationRef = useRef<NavigationContainerRef<any>>(null);
+  const { language } = useLanguage();
+  const isRTL = language === 'ar';
 
   if (isLoading) {
     return (
@@ -22,10 +23,17 @@ export const RootNavigator = () => {
     );
   }
 
+  // For web, set direction attribute
+  const isWeb = typeof document !== 'undefined';
+  if (isWeb) {
+    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+  }
+
   return (
-    <View style={styles.root}>
+    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
       <NavigationContainer
-        ref={navigationRef}
+        key={isRTL ? 'nav-rtl' : 'nav-ltr'}
+        direction={isRTL ? 'rtl' : 'ltr'}
         theme={{
           ...DefaultTheme,
           colors: {

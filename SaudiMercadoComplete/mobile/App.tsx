@@ -1,6 +1,6 @@
 import 'react-native-gesture-handler';
+import { I18nManager, Text, TextInput, Image, StyleSheet, View } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { Image, StyleSheet, Text, TextInput, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
 import { AuthProvider } from '@hooks/useAuth';
@@ -29,22 +29,41 @@ const StartupSplash = () => {
   );
 };
 
+const applyGlobalRtlTextDefaults = () => {
+  const rtlTextStyle = { writingDirection: 'rtl', textAlign: 'right' };
+  const rtlInputStyle = { writingDirection: 'rtl', textAlign: 'right' };
+  const textDefaults = (Text as unknown as { defaultProps?: { style?: unknown } }).defaultProps || {};
+  const textStyle = textDefaults.style;
+  (Text as unknown as { defaultProps: { style: unknown } }).defaultProps = {
+    ...textDefaults,
+    style: textStyle ? [rtlTextStyle, textStyle] : rtlTextStyle,
+  };
+  const inputDefaults = (TextInput as unknown as { defaultProps?: { style?: unknown } }).defaultProps || {};
+  const inputStyle = inputDefaults.style;
+  (TextInput as unknown as { defaultProps: { style: unknown } }).defaultProps = {
+    ...inputDefaults,
+    style: inputStyle ? [rtlInputStyle, inputStyle] : rtlInputStyle,
+  };
+};
+
+const ensureRtlEnabled = () => {
+  I18nManager.allowRTL(true);
+  I18nManager.swapLeftAndRightInRTL(true);
+  I18nManager.forceRTL(true);
+  if (__DEV__ && !I18nManager.isRTL) {
+    // forceRTL takes effect after app restart.
+    console.log('RTL mode enabled. Restart the app once if layout is still LTR.');
+  }
+};
+
 const AppInner = () => {
   useRegisterPushToken();
   const { isLoading } = useLanguage();
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
-    const textDefaults = BaseText.defaultProps || {};
-    const inputDefaults = BaseTextInput.defaultProps || {};
-
-    BaseText.defaultProps = {
-      ...textDefaults,
-    };
-
-    BaseTextInput.defaultProps = {
-      ...inputDefaults,
-    };
+    ensureRtlEnabled();
+    applyGlobalRtlTextDefaults();
   }, []);
 
   useEffect(() => {
@@ -56,7 +75,6 @@ const AppInner = () => {
     return <StartupSplash />;
   }
 
-  const layoutDirection = 'ltr';
   return (
     <View style={styles.root}>
       <RootNavigator />

@@ -1,9 +1,12 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { I18nManager, Platform } from 'react-native';
+import Constants from 'expo-constants';
 
 export type AppLanguage = 'ar' | 'en';
 
 const LANGUAGE_KEY = 'app_language';
+const DIRECTION_SYNC_KEY = 'app_direction_sync';
 
 const ar = {
   'language.switch': 'English',
@@ -97,10 +100,36 @@ type LanguageContextValue = {
   tr: (arabic: string, english: string) => string;
   locale: 'ar-SA' | 'en-US';
   t: (key: TranslationKey) => string;
-  isRTL: boolean; // Always false now
+  isRTL: boolean;
 };
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
+const shouldUseNativeDirectionSync =
+  Platform.OS !== 'web' && Constants.appOwnership !== 'expo';
+
+const applyNativeDirection = (language: AppLanguage, restartIfNeeded: boolean) => {
+  if (!shouldUseNativeDirectionSync) return false;
+
+  const wantsRTL = language === 'ar';
+  I18nManager.allowRTL(true);
+  I18nManager.swapLeftAndRightInRTL(true);
+
+  if (I18nManager.isRTL === wantsRTL) {
+    return false;
+  }
+
+  I18nManager.forceRTL(wantsRTL);
+
+  if (!restartIfNeeded) return false;
+
+  try {
+    // Use restart only in standalone/dev-client builds, never Expo Go.
+    require('react-native-restart').default.restart();
+    return true;
+  } catch {
+    return false;
+  }
+};
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguageState] = useState<AppLanguage>('ar');
@@ -115,6 +144,22 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
           initialLanguage = stored;
         }
         setLanguageState(initialLanguage);
+
+        if (shouldUseNativeDirectionSync) {
+          const wantsRTL = initialLanguage === 'ar';
+          const token = `${initialLanguage}:${wantsRTL ? 'rtl' : 'ltr'}`;
+          const alreadyTried = await AsyncStorage.getItem(DIRECTION_SYNC_KEY);
+
+          if (I18nManager.isRTL !== wantsRTL && alreadyTried !== token) {
+            await AsyncStorage.setItem(DIRECTION_SYNC_KEY, token);
+            const restarted = applyNativeDirection(initialLanguage, true);
+            if (restarted) return;
+          }
+
+          if (I18nManager.isRTL === wantsRTL) {
+            await AsyncStorage.removeItem(DIRECTION_SYNC_KEY);
+          }
+        }
       } finally {
         setIsLoading(false);
       }
@@ -127,6 +172,24 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
     if (next === language) return;
     await AsyncStorage.setItem(LANGUAGE_KEY, next);
     setLanguageState(next);
+
+    if (shouldUseNativeDirectionSync) {
+      const wantsRTL = next === 'ar';
+      const token = `${next}:${wantsRTL ? 'rtl' : 'ltr'}`;
+      const alreadyTried = await AsyncStorage.getItem(DIRECTION_SYNC_KEY);
+
+      if (I18nManager.isRTL !== wantsRTL && alreadyTried !== token) {
+        await AsyncStorage.setItem(DIRECTION_SYNC_KEY, token);
+        const restarted = applyNativeDirection(next, true);
+        if (restarted) return;
+      }
+
+      applyNativeDirection(next, false);
+
+      if (I18nManager.isRTL === wantsRTL) {
+        await AsyncStorage.removeItem(DIRECTION_SYNC_KEY);
+      }
+    }
   };
 
   const toggleLanguage = async () => {
@@ -143,7 +206,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       tr: (arabic, english) => (language === 'ar' ? arabic : english),
       locale: language === 'ar' ? 'ar-SA' : 'en-US',
       t: (key) => translations[language][key],
-      isRTL: false, // Always LTR
+      isRTL: language === 'ar',
     }),
     [language, isLoading]
   );

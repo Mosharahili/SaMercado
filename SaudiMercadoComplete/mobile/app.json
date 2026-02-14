@@ -25,7 +25,8 @@
         "CFBundleLocalizations": [
           "ar",
           "en"
-        ]
+        ],
+        "NSForceRightToLeftLayoutDirection": true
       }
     },
     "android": {
