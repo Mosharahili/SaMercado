@@ -102,7 +102,7 @@ export const HomeScreen = () => {
         </LinearGradient>
       </ImageBackground>
 
-      <View style={[styles.featureRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.featureRow, { }]}>
         {featureItems.map((feature) => (
           <View key={feature.label} style={styles.featureBox}>
             <MaterialCommunityIcons name={feature.icon} size={20} color="#1b5e20" />
@@ -133,7 +133,7 @@ export const HomeScreen = () => {
       </View>
 
       <Text style={[styles.bestTitle, textDirectionStyle]}>{tr('افضل الخضار والفواكه', 'Best Fruits & Vegetables')}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.productRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.productRow, { }]}>
         {featuredProducts.map((product) => {
           const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
           return (
@@ -147,7 +147,7 @@ export const HomeScreen = () => {
                 {product.name}
               </Text>
               <Text style={[styles.productPrice, textDirectionStyle]}>{formatSAR(Number(product.price))}</Text>
-              <Pressable style={[styles.addBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]} onPress={() => addToCart(product)}>
+              <Pressable style={[styles.addBtn, { }]} onPress={() => addToCart(product)}>
                 <MaterialCommunityIcons name="cart-plus" size={16} color="#ffffff" />
                 <Text style={[styles.addBtnText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('أضف للسلة', 'Add to Cart')}</Text>
               </Pressable>

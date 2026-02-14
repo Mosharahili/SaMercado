@@ -5,33 +5,24 @@ import { theme } from '@theme/theme';
 
 export const AppHeader = ({ title, subtitle }: { title: string; subtitle?: string }) => {
   const { isRTL } = useLanguage();
+  const textDirectionStyle = {
+    textAlign: isRTL ? 'right' : 'left',
+    writingDirection: isRTL ? 'rtl' : 'ltr',
+  } as const;
 
   return (
-    <View style={styles.container}>
-      {isRTL ? (
-        <>
-          <View style={[styles.textWrap, styles.textWrapRTL]}>
-            <Text style={[styles.title, styles.titleRTL]}>{title}</Text>
-            {!!subtitle && <Text style={[styles.subtitle, styles.subtitleRTL]}>{subtitle}</Text>}
-          </View>
-          <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
-        </>
-      ) : (
-        <>
-          <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
-          <View style={styles.textWrap}>
-            <Text style={styles.title}>{title}</Text>
-            {!!subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
-          </View>
-        </>
-      )}
+    <View style={[styles.container, { }]}>
+      <Image source={require('../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
+      <View style={[styles.textWrap, isRTL ? styles.textWrapRTL : styles.textWrapLTR]}>
+        <Text style={[styles.title, textDirectionStyle]}>{title}</Text>
+        {!!subtitle && <Text style={[styles.subtitle, textDirectionStyle]}>{subtitle}</Text>}
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flexDirection: 'row',
     alignItems: 'center',
     gap: theme.spacing.md,
   },
@@ -45,6 +36,9 @@ const styles = StyleSheet.create({
   textWrap: {
     flex: 1,
   },
+  textWrapLTR: {
+    alignItems: 'flex-start',
+  },
   textWrapRTL: {
     alignItems: 'flex-end',
   },
@@ -53,17 +47,9 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: '800',
   },
-  titleRTL: {
-    textAlign: 'right',
-    writingDirection: 'rtl',
-  },
   subtitle: {
     color: '#4a6572',
     fontSize: 13,
     marginTop: 2,
-  },
-  subtitleRTL: {
-    textAlign: 'right',
-    writingDirection: 'rtl',
   },
 });

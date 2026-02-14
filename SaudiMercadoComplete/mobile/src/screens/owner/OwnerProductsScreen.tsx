@@ -185,7 +185,7 @@ export const OwnerProductsScreen = () => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[styles.previewList, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+            contentContainerStyle={[styles.previewList, { }]}
           >
             {selectedImages.map((imageFile, index) => (
               <Image key={`${imageFile.uri}-${index}`} source={{ uri: imageFile.uri }} style={styles.previewThumb} resizeMode="cover" />
@@ -205,7 +205,7 @@ export const OwnerProductsScreen = () => {
           <Text style={[styles.itemTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{product.name}</Text>
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('السعر', 'Price')}: {product.price} ر.س / {product.unit}</Text>
 
-          <View style={[styles.actionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.actionRow, { }]}>
             <Pressable onPress={() => startEdit(product)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
@@ -238,8 +238,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f0fdfa',
   },
   previewList: {
-    flexDirection: 'row',
-    gap: 8,
+        gap: 8,
   },
   previewThumb: {
     width: 120,
@@ -259,8 +258,7 @@ const styles = StyleSheet.create({
   itemMeta: { color: '#4a6572' },
   actionRow: {
     marginTop: 6,
-    flexDirection: 'row',
-    gap: 8,
+        gap: 8,
   },
   actionBtn: {
     flex: 1,

@@ -1,5 +1,6 @@
 import React from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useLanguage } from '@hooks/useLanguage';
 import { AuthStackParamList } from '../types';
 import { LoginScreen } from '@screens/auth/LoginScreen';
 import { SignupScreen } from '@screens/auth/SignupScreen';
@@ -7,10 +8,13 @@ import { SignupScreen } from '@screens/auth/SignupScreen';
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export const AuthStack = () => {
+  const { isRTL } = useLanguage();
+
   return (
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
+        contentStyle: { direction: isRTL ? 'rtl' : 'ltr' },
       }}
     >
       <Stack.Screen name="Login" component={LoginScreen} />

@@ -101,7 +101,7 @@ export const CartScreen = () => {
           <Text style={[styles.itemName, textDirectionStyle]}>{item.product.name}</Text>
           <Text style={[styles.itemMeta, textDirectionStyle]}>{formatSAR(Number(item.product.price))} / {item.product.unit}</Text>
 
-          <View style={[styles.qtyRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.qtyRow, { }]}>
             <Pressable onPress={() => updateQuantity(item.id, item.quantity - 1)} style={styles.qtyBtn}>
               <Text style={styles.qtyBtnText}>-</Text>
             </Pressable>

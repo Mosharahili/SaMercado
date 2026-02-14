@@ -12,11 +12,11 @@ export const VendorAnalyticsScreen = () => {
 
   return (
     <ScreenContainer>
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.row, { }]}>
         <StatCard label={tr('إجمالي المبيعات', 'Total Sales')} value={`${Number(metrics.totalRevenue || 0).toFixed(0)} ر.س`} />
         <StatCard label={tr('إجمالي الطلبات', 'Total Orders')} value={String(metrics.totalOrders || 0)} />
       </View>
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.row, { }]}>
         <StatCard label={tr('أفضل المنتجات', 'Top Products')} value={String((data?.topProducts || []).length)} />
         <StatCard label={tr('النشاط الأسبوعي', 'Weekly Activity')} value={tr('متوسط', 'Average')} />
       </View>
@@ -26,7 +26,6 @@ export const VendorAnalyticsScreen = () => {
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
-    gap: 10,
+        gap: 10,
   },
 });

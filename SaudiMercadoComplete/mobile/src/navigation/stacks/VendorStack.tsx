@@ -11,12 +11,13 @@ import { VendorSupportScreen } from '@screens/vendor/VendorSupportScreen';
 const Stack = createNativeStackNavigator<VendorStackParamList>();
 
 export const VendorStack = () => {
-  const { tr } = useLanguage();
+  const { tr, isRTL } = useLanguage();
 
   return (
     <Stack.Navigator
       screenOptions={{
         headerTitleAlign: 'center',
+        contentStyle: { direction: isRTL ? 'rtl' : 'ltr' },
       }}
     >
       <Stack.Screen name="VendorDashboard" component={VendorDashboardScreen} options={{ title: tr('بوابة البائع', 'Vendor Portal') }} />

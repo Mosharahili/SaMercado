@@ -15,6 +15,13 @@ export const RootNavigator = () => {
   const { language } = useLanguage();
   const isRTL = language === 'ar';
 
+  React.useEffect(() => {
+    if (typeof document !== 'undefined') {
+      document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
+      document.documentElement.lang = language;
+    }
+  }, [language, isRTL]);
+
   if (isLoading) {
     return (
       <View style={styles.loading}>
@@ -23,14 +30,8 @@ export const RootNavigator = () => {
     );
   }
 
-  // For web, set direction attribute
-  const isWeb = typeof document !== 'undefined';
-  if (isWeb) {
-    document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-  }
-
   return (
-    <View style={[styles.root, { direction: isRTL ? 'rtl' : 'ltr' }]}>
+    <View style={styles.root}>
       <NavigationContainer
         key={isRTL ? 'nav-rtl' : 'nav-ltr'}
         direction={isRTL ? 'rtl' : 'ltr'}

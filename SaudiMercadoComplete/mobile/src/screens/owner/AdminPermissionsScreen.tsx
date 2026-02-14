@@ -124,7 +124,7 @@ export const AdminPermissionsScreen = () => {
         <TextInput style={styles.input} value={password} onChangeText={setPassword} placeholder={tr('كلمة المرور', 'Password')} secureTextEntry textAlign={isRTL ? 'right' : 'left'} />
 
         <Text style={[styles.subTitle, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الصلاحيات', 'Permissions')}</Text>
-        <View style={[styles.permissionsWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.permissionsWrap, { }]}>
           {permissionOptions.map((perm) => {
             const active = selectedPermissions.includes(perm);
             return (
@@ -194,8 +194,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
   },
   permissionsWrap: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+        flexWrap: 'wrap',
     gap: 8,
   },
   permissionPill: {

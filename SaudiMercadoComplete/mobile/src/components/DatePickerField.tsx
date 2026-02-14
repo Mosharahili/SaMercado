@@ -27,12 +27,11 @@ const normalizeWeekday = (date: Date) => {
 export const DatePickerField = ({ label, value, placeholder, onChange }: DatePickerFieldProps) => {
   const { isRTL, tr, locale } = useLanguage();
   const weekDays = isRTL ? weekDaysAr : weekDaysEn;
-  const directionStyle = { direction: isRTL ? 'rtl' : 'ltr' } as const;
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
   } as const;
-  const rowDirectionStyle = { flexDirection: isRTL ? 'row-reverse' : 'row' } as const;
+  const rowDirectionStyle = { } as const;
   const selectedDate = value ? new Date(value) : undefined;
   const [visible, setVisible] = useState(false);
   const [viewDate, setViewDate] = useState<Date>(
@@ -78,12 +77,12 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
 
       <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
         <View style={styles.overlay}>
-          <View style={[styles.modalCard, directionStyle]}>
+          <View style={styles.modalCard}>
             <View style={[styles.headerRow, rowDirectionStyle]}>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={styles.navBtn}>
                 <Text style={styles.navText}>{isRTL ? '◀' : '▶'}</Text>
               </Pressable>
-              <Text style={[styles.monthTitle, directionStyle]}>{monthLabel(viewDate, locale)}</Text>
+              <Text style={[styles.monthTitle, textDirectionStyle]}>{monthLabel(viewDate, locale)}</Text>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() - 1, 1))} style={styles.navBtn}>
                 <Text style={styles.navText}>{isRTL ? '▶' : '◀'}</Text>
               </Pressable>
@@ -165,8 +164,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+        alignItems: 'center',
     justifyContent: 'space-between',
   },
   navBtn: {
@@ -187,8 +185,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   weekRow: {
-    flexDirection: 'row',
-  },
+      },
   weekLabel: {
     width: `${100 / 7}%`,
     textAlign: 'center',
@@ -196,8 +193,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   daysGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
+        flexWrap: 'wrap',
   },
   dayCell: {
     width: `${100 / 7}%`,
@@ -218,8 +214,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
   },
   actionRow: {
-    flexDirection: 'row',
-    gap: 8,
+        gap: 8,
     marginTop: 4,
   },
   actionBtn: {

@@ -102,7 +102,7 @@ export const ProductsScreen = () => {
         </View>
       ) : null}
 
-      <View style={[styles.searchWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.searchWrap, { }]}>
         <Pressable
           style={styles.searchBtn}
           onPress={() => {
@@ -126,7 +126,7 @@ export const ProductsScreen = () => {
         />
       </View>
 
-      <View style={[styles.filtersRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.filtersRow, { }]}>
         {[
           { key: 'ALL', label: tr('الكل', 'All') },
           { key: 'DATES', label: tr('تمور', 'Dates') },
@@ -146,9 +146,9 @@ export const ProductsScreen = () => {
         })}
       </View>
 
-      <View style={[styles.rowBetween, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.rowBetween, { }]}>
         <Text style={[styles.countText, textDirectionStyle]}>{tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}</Text>
-        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, { }]}>
           <MaterialCommunityIcons name={viewMode === 'grid' ? 'view-list' : 'view-grid'} size={20} color="white" />
           <Text style={[styles.toggleText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}</Text>
         </Pressable>
@@ -174,7 +174,7 @@ export const ProductsScreen = () => {
       <Modal visible={!!selectedProduct} transparent animationType="fade" onRequestClose={() => setSelectedProduct(null)}>
         <View style={styles.previewOverlay}>
           <View style={styles.previewCard}>
-            <View style={[styles.previewHeader, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+            <View style={[styles.previewHeader, { }]}>
               <Pressable onPress={() => setSelectedProduct(null)} style={styles.previewClose}>
                 <MaterialCommunityIcons name="close" size={20} color="#0f2f3d" />
               </Pressable>
@@ -186,7 +186,7 @@ export const ProductsScreen = () => {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={[styles.previewImagesRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+                  contentContainerStyle={[styles.previewImagesRow, { }]}
                 >
                   {(selectedProduct.images?.length
                     ? selectedProduct.images
@@ -315,8 +315,7 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   toggleBtn: {
-    flexDirection: 'row',
-    gap: 6,
+        gap: 6,
     alignItems: 'center',
     backgroundColor: '#2f9e44',
     paddingHorizontal: 10,
@@ -342,8 +341,7 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
   },
   previewHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
+        justifyContent: 'space-between',
     alignItems: 'center',
   },
   previewTitle: {
@@ -360,8 +358,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   previewImagesRow: {
-    flexDirection: 'row',
-    gap: 8,
+        gap: 8,
   },
   previewImage: {
     width: 220,

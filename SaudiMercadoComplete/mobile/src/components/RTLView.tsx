@@ -14,10 +14,8 @@ export const RTLView = ({
   row?: boolean;
 } & React.ComponentProps<typeof View>) => {
   const { isRTL } = useLanguage();
-  const direction = isRTL ? 'rtl' : 'ltr';
   const directionStyle: ViewStyle = {
-    direction: direction as 'rtl' | 'ltr',
-    ...(row && { flexDirection: isRTL ? 'row-reverse' : 'row' }),
+    ...(row && { }),
   };
   return (
     <View style={[directionStyle, style]} {...props}>

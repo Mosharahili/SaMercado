@@ -204,7 +204,7 @@ export const BannerManagerScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{banner.description || '-'}</Text>
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {banner.isEnabled ? tr('مفعل', 'Active') : tr('متوقف', 'Disabled')}</Text>
 
-          <View style={[styles.actionRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+          <View style={[styles.actionRow, { }]}>
             <Pressable onPress={() => startEdit(banner)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
@@ -267,8 +267,7 @@ const styles = StyleSheet.create({
   itemMeta: { color: '#4a6572' },
   actionRow: {
     marginTop: 6,
-    flexDirection: 'row',
-    gap: 8,
+        gap: 8,
   },
   actionBtn: {
     flex: 1,

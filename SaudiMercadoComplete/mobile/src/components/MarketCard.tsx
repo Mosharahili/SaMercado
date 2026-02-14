@@ -17,7 +17,7 @@ export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }
   return (
     <View style={styles.card}>
       {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.row, { }]}>
         <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} />
         <Text style={[styles.title, textDirectionStyle]}>{market.name}</Text>
       </View>

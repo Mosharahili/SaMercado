@@ -55,8 +55,8 @@ export const ProductCard = ({
         </Text>
         <Text style={[styles.meta, textDirectionStyle]}>{product.market?.name || tr('سوق الرياض', 'Riyadh Market')}</Text>
 
-        <View style={[styles.bottomRow, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
-          <View style={[styles.priceWrap, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+        <View style={[styles.bottomRow, { }]}>
+          <View style={[styles.priceWrap, { }]}>
             <Text style={[styles.unit, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>/{product.unit}</Text>
             <Text style={[styles.price, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{formatSAR(Number(product.price))}</Text>
           </View>
@@ -66,7 +66,7 @@ export const ProductCard = ({
                 event.stopPropagation();
                 handleAdd();
               }}
-              style={[styles.addButton, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}
+              style={[styles.addButton, { }]}
             >
               <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
               <Text style={[styles.addText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('إضافة', 'Add')}</Text>

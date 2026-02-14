@@ -22,30 +22,29 @@ export const ScreenContainer = ({
 
   const isOwnerStoreScreen = typeof route.name === 'string' && route.name.startsWith('OwnerStore');
   const showOwnerBackToDashboard = user?.role === 'OWNER' && isOwnerStoreScreen;
+  const directionStyle: ViewStyle = { direction: isRTL ? 'rtl' : 'ltr' };
 
   const ownerShortcut = showOwnerBackToDashboard ? (
     <Pressable style={[styles.ownerBackBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('OwnerDashboard')}>
-      <Text style={styles.ownerBackText}>{t('common.backToDashboard')}</Text>
+      <Text style={[styles.ownerBackText, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('common.backToDashboard')}</Text>
     </Pressable>
   ) : null;
 
-  const dir = isRTL ? 'rtl' : 'ltr';
-  const directionStyle: ViewStyle = { direction: dir as 'rtl' | 'ltr' };
   const content = scroll ? (
-    <ScrollView contentContainerStyle={[styles.content, contentStyle, directionStyle]}>
+    <ScrollView style={directionStyle} contentContainerStyle={[styles.content, directionStyle, contentStyle]}>
       {ownerShortcut}
       {children}
     </ScrollView>
   ) : (
-    <>
+    <SafeAreaView style={directionStyle}>
       {ownerShortcut}
       {children}
-    </>
+    </SafeAreaView>
   );
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={[styles.gradient, { direction: dir }]}>
-      <SafeAreaView style={[styles.safeArea, { direction: dir }]}>{content}</SafeAreaView>
+    <LinearGradient colors={theme.gradients.app} style={styles.gradient}>
+      <SafeAreaView style={[styles.safeArea, directionStyle]}>{content}</SafeAreaView>
     </LinearGradient>
   );
 };

@@ -19,7 +19,13 @@ export const BannerCarousel = ({ banners }: { banners: Banner[] }) => {
   if (!source.length) return null;
 
   return (
-    <ScrollView horizontal pagingEnabled showsHorizontalScrollIndicator={false} style={styles.wrap}>
+    <ScrollView
+      horizontal
+      pagingEnabled
+      showsHorizontalScrollIndicator={false}
+      style={styles.wrap}
+      contentContainerStyle={{ }}
+    >
       {source.map((banner) => (
         <ImageBackground key={banner.id} source={{ uri: banner.imageUrl }} style={styles.slide} imageStyle={styles.image}>
           <View style={styles.overlay}>
@@ -41,7 +47,7 @@ const styles = StyleSheet.create({
   slide: {
     width: 320,
     height: 180,
-    marginLeft: theme.spacing.sm,
+    marginStart: theme.spacing.sm,
     justifyContent: 'flex-end',
   },
   image: {

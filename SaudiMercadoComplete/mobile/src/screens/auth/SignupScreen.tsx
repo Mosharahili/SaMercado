@@ -14,7 +14,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 
 export const SignupScreen = ({ navigation }: Props) => {
   const { signup } = useAuth();
-  const { t } = useLanguage();
+  const { t, isRTL } = useLanguage();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -47,20 +47,20 @@ export const SignupScreen = ({ navigation }: Props) => {
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
         <View style={styles.content}>
           <LanguageSwitcher />
-          <Text style={styles.title}>{t('auth.signup')}</Text>
+          <Text style={[styles.title, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.signup')}</Text>
 
           <View style={styles.card}>
-            <Text style={styles.label}>{t('auth.name')}</Text>
+            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.name')}</Text>
             <TextInput 
-              style={styles.input}
+              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
               value={name} 
               onChangeText={setName}
               placeholderTextColor="#999"
             />
 
-            <Text style={styles.label}>{t('auth.email')}</Text>
+            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
             <TextInput
-              style={styles.input}
+              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -68,9 +68,9 @@ export const SignupScreen = ({ navigation }: Props) => {
               placeholderTextColor="#999"
             />
 
-            <Text style={styles.label}>{t('auth.password')}</Text>
+            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
             <TextInput 
-              style={styles.input}
+              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
               value={password} 
               onChangeText={setPassword} 
               secureTextEntry
@@ -80,7 +80,7 @@ export const SignupScreen = ({ navigation }: Props) => {
             <AppButton label={t('auth.signup')} onPress={onSignup} loading={loading} />
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkWrap}>
-              <Text style={styles.link}>{t('auth.hasAccount')}</Text>
+              <Text style={[styles.link, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.hasAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>

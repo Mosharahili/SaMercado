@@ -42,15 +42,14 @@ export const CustomerTabs = () => {
           paddingBottom: 8,
           paddingTop: 8,
           backgroundColor: '#ffffff',
-          direction: isRTL ? 'rtl' : 'ltr',
-          flexDirection: isRTL ? 'row-reverse' : 'row',
-        },
+                  },
         sceneStyle: {
           direction: isRTL ? 'rtl' : 'ltr',
         },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '700',
+          textAlign: isRTL ? 'right' : 'left',
           writingDirection: isRTL ? 'rtl' : 'ltr',
         },
         tabBarIcon: ({ color, size }) => (

@@ -12,15 +12,15 @@ export const OwnerAnalyticsScreen = () => {
 
   return (
     <ScreenContainer>
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.row, { }]}>
         <StatCard label={tr('إجمالي الطلبات', 'Total Orders')} value={String(metrics.totalOrders || 0)} />
         <StatCard label={tr('إجمالي الإيرادات', 'Total Revenue')} value={`${Number(metrics.totalRevenue || 0).toFixed(0)} ر.س`} />
       </View>
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.row, { }]}>
         <StatCard label={tr('إجمالي المنتجات', 'Total Products')} value={String(metrics.totalProducts || 0)} />
         <StatCard label={tr('إجمالي البائعين', 'Total Vendors')} value={String(metrics.totalVendors || 0)} />
       </View>
-      <View style={[styles.row, { flexDirection: isRTL ? 'row-reverse' : 'row' }]}>
+      <View style={[styles.row, { }]}>
         <StatCard label={tr('معدل التحويل', 'Conversion Rate')} value={`${metrics.conversionRate || 0}%`} />
         <StatCard label={tr('معدل التخلي عن السلة', 'Cart Abandonment')} value={`${metrics.cartAbandonmentRate || 0}%`} />
       </View>
@@ -37,8 +37,7 @@ export const OwnerAnalyticsScreen = () => {
 
 const styles = StyleSheet.create({
   row: {
-    flexDirection: 'row',
-    gap: 10,
+        gap: 10,
   },
   section: {
     backgroundColor: 'rgba(255,255,255,0.96)',

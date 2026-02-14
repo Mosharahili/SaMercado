@@ -20,12 +20,13 @@ import { AccountScreen } from '@screens/customer/AccountScreen';
 const Stack = createNativeStackNavigator<OwnerStackParamList>();
 
 export const OwnerStack = () => {
-  const { tr } = useLanguage();
+  const { tr, isRTL } = useLanguage();
 
   return (
     <Stack.Navigator
       screenOptions={{
         headerTitleAlign: 'center',
+        contentStyle: { direction: isRTL ? 'rtl' : 'ltr' },
       }}
     >
       <Stack.Screen name="OwnerDashboard" component={OwnerDashboardScreen} options={{ title: tr('لوحة المالك', 'Owner Dashboard') }} />

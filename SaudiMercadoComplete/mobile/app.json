@@ -30,7 +30,8 @@
       }
     },
     "android": {
-      "package": "com.saudimercado.complete"
+      "package": "com.saudimercado.complete",
+      "supportsRTL": true
     },
     "plugins": [
       "expo-secure-store",
