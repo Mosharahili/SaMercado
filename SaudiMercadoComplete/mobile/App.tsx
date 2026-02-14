@@ -58,7 +58,7 @@ const AppInner = () => {
 
   const layoutDirection = 'ltr';
   return (
-    <View key="app" style={[styles.root, { direction: layoutDirection }]}>
+    <View style={styles.root}>
       <RootNavigator />
     </View>
   );

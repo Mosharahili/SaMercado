@@ -97,6 +97,7 @@ type LanguageContextValue = {
   tr: (arabic: string, english: string) => string;
   locale: 'ar-SA' | 'en-US';
   t: (key: TranslationKey) => string;
+  isRTL: boolean; // Always false now
 };
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
@@ -142,6 +143,7 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       tr: (arabic, english) => (language === 'ar' ? arabic : english),
       locale: language === 'ar' ? 'ar-SA' : 'en-US',
       t: (key) => translations[language][key],
+      isRTL: false, // Always LTR
     }),
     [language, isLoading]
   );
