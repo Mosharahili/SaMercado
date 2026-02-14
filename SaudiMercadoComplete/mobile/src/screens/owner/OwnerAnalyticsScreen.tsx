@@ -11,7 +11,7 @@ export const OwnerAnalyticsScreen = () => {
   const metrics = data?.metrics || {};
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <View style={[styles.row, { }]}>
         <StatCard label={tr('إجمالي الطلبات', 'Total Orders')} value={String(metrics.totalOrders || 0)} />
         <StatCard label={tr('إجمالي الإيرادات', 'Total Revenue')} value={`${Number(metrics.totalRevenue || 0).toFixed(0)} ر.س`} />

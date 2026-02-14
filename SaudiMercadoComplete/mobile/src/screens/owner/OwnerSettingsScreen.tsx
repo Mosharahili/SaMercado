@@ -40,7 +40,7 @@ export const OwnerSettingsScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('إعدادات النظام', 'System Settings')}</Text>
         <TextInput style={styles.input} value={appName} onChangeText={setAppName} placeholder={tr('اسم التطبيق', 'App name')} textAlign={isRTL ? 'right' : 'left'} />

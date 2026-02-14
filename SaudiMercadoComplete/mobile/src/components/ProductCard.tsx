@@ -17,11 +17,18 @@ export const ProductCard = ({
   onPress?: () => void;
 }) => {
   const { isRTL, tr } = useLanguage();
+  const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
+  const badgePositionStyle = isRTL ? styles.badgeRTL : styles.badgeLTR;
+  const priceWrapPositionStyle = isRTL ? styles.priceWrapRTL : styles.priceWrapLTR;
+  const addWrapPositionStyle = isRTL ? styles.addWrapRTL : styles.addWrapLTR;
+  const addIconPositionStyle = isRTL ? styles.addIconRTL : styles.addIconLTR;
   const addScale = useRef(new Animated.Value(1)).current;
 
   const handleAdd = () => {
@@ -45,31 +52,37 @@ export const ProductCard = ({
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.mediaWrap}>
         {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
-        <View style={styles.badge}>
-          <Text style={[styles.badgeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{product.category?.nameAr || tr('منتج', 'Product')}</Text>
+        <View style={[styles.badge, badgePositionStyle]}>
+          <Text style={[styles.badgeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>
+            {product.category?.nameAr ? visualPad(product.category.nameAr) : tr('منتج', 'Product')}
+          </Text>
         </View>
       </View>
       <View style={styles.body}>
         <Text style={[styles.name, textDirectionStyle]} numberOfLines={2}>
-          {product.name}
+          {visualPad(product.name)}
         </Text>
-        <Text style={[styles.meta, textDirectionStyle]}>{product.market?.name || tr('سوق الرياض', 'Riyadh Market')}</Text>
+        <Text style={[styles.meta, textDirectionStyle]}>
+          {product.market?.name ? visualPad(product.market.name) : tr('سوق الرياض', 'Riyadh Market')}
+        </Text>
 
-        <View style={[styles.bottomRow, { }]}>
-          <View style={[styles.priceWrap, { }]}>
+        <View style={styles.bottomRow}>
+          <View style={[styles.priceWrap, priceWrapPositionStyle]}>
             <Text style={[styles.unit, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>/{product.unit}</Text>
             <Text style={[styles.price, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{formatSAR(Number(product.price))}</Text>
           </View>
-          <Animated.View style={{ transform: [{ scale: addScale }] }}>
+          <Animated.View style={[styles.addWrap, addWrapPositionStyle, { transform: [{ scale: addScale }] }]}>
             <Pressable
               onPress={(event) => {
                 event.stopPropagation();
                 handleAdd();
               }}
-              style={[styles.addButton, { }]}
+              style={styles.addButton}
             >
-              <MaterialCommunityIcons name="cart-plus" size={17} color="white" />
-              <Text style={[styles.addText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('إضافة', 'Add')}</Text>
+              <MaterialCommunityIcons name="cart-plus" size={17} color="white" style={[styles.addIcon, addIconPositionStyle]} />
+              <Text style={[styles.addText, isRTL ? styles.addTextRTL : styles.addTextLTR, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>
+                {tr('إضافة', 'Add')}
+              </Text>
             </Pressable>
           </Animated.View>
         </View>
@@ -110,11 +123,16 @@ const styles = StyleSheet.create({
   badge: {
     position: 'absolute',
     top: 8,
-    right: 8,
     backgroundColor: 'rgba(20,83,45,0.88)',
     borderRadius: theme.radius.pill,
     paddingHorizontal: 10,
     paddingVertical: 4,
+  },
+  badgeLTR: {
+    right: 8,
+  },
+  badgeRTL: {
+    left: 8,
   },
   badgeText: {
     color: 'white',
@@ -128,14 +146,33 @@ const styles = StyleSheet.create({
   },
   bottomRow: {
     marginTop: 8,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 8,
+    minHeight: 38,
+    justifyContent: 'center',
+    position: 'relative',
   },
   priceWrap: {
-    alignItems: 'baseline',
+    position: 'absolute',
+    top: 0,
     gap: 4,
     flexShrink: 1,
+  },
+  priceWrapLTR: {
+    left: 0,
+    alignItems: 'flex-start',
+  },
+  priceWrapRTL: {
+    right: 0,
+    alignItems: 'flex-end',
+  },
+  addWrap: {
+    position: 'absolute',
+    bottom: 0,
+  },
+  addWrapLTR: {
+    right: 0,
+  },
+  addWrapRTL: {
+    left: 0,
   },
   price: {
     fontSize: 15,
@@ -148,18 +185,34 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   addButton: {
+    position: 'relative',
     backgroundColor: theme.colors.primary,
     borderRadius: theme.radius.md,
     minHeight: 36,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+  },
+  addIcon: {
+    position: 'absolute',
+    top: 9,
+  },
+  addIconLTR: {
+    left: 8,
+  },
+  addIconRTL: {
+    right: 8,
   },
   addText: {
     color: 'white',
     fontWeight: '700',
     fontSize: 11,
+    paddingHorizontal: 20,
+  },
+  addTextLTR: {
+    textAlign: 'left',
+  },
+  addTextRTL: {
+    textAlign: 'right',
   },
 });

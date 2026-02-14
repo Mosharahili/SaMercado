@@ -12,9 +12,12 @@ import { Order } from '@app-types/models';
 export const AccountScreen = () => {
   const { user, logout } = useAuth();
   const { isRTL, t } = useLanguage();
+  const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
   const [orders, setOrders] = useState<Order[]>([]);
 
@@ -33,7 +36,7 @@ export const AccountScreen = () => {
   }, [user?.id, user?.role]);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={t('account.title')} subtitle={t('account.subtitle')} />
 
       <View style={styles.card}>
@@ -43,7 +46,7 @@ export const AccountScreen = () => {
 
       <View style={styles.card}>
         <Text style={[styles.label, textDirectionStyle]}>{t('account.name')}</Text>
-        <Text style={[styles.value, textDirectionStyle]}>{user?.name || '-'}</Text>
+        <Text style={[styles.value, textDirectionStyle]}>{user?.name ? visualPad(user.name) : '-'}</Text>
 
         <Text style={[styles.label, textDirectionStyle]}>{t('account.email')}</Text>
         <Text style={[styles.value, textDirectionStyle]}>{user?.email || '-'}</Text>
@@ -65,7 +68,7 @@ export const AccountScreen = () => {
           {!orders.length ? <Text style={[styles.value, textDirectionStyle]}>{t('account.noOrders')}</Text> : null}
           {orders.slice(0, 8).map((order) => (
             <View key={order.id} style={styles.orderItem}>
-              <Text style={[styles.orderLine, textDirectionStyle]}>#{order.orderNumber}</Text>
+              <Text style={[styles.orderLine, textDirectionStyle]}>#{visualPad(order.orderNumber)}</Text>
               <Text style={[styles.orderLine, textDirectionStyle]}>
                 {t('account.status')}: {order.status}
               </Text>

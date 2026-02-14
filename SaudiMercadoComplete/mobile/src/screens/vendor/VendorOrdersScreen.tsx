@@ -47,7 +47,7 @@ export const VendorOrdersScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       {orders.map((order) => (
         <View key={order.id} style={styles.item}>
           <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('طلب', 'Order')}: {order.orderNumber}</Text>

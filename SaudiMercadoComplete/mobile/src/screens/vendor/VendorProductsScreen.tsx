@@ -20,7 +20,7 @@ export const VendorProductsScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       {products.map((product) => (
         <View key={product.id} style={styles.item}>
           <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{product.name}</Text>

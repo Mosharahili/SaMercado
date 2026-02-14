@@ -15,6 +15,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export const LoginScreen = ({ navigation }: Props) => {
   const { login } = useAuth();
   const { t, isRTL } = useLanguage();
+  const screenDirectionStyle = { direction: isRTL ? 'rtl' : 'ltr' } as const;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -37,9 +38,9 @@ export const LoginScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={styles.container}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.content}>
+    <LinearGradient colors={theme.gradients.app} style={[styles.container, screenDirectionStyle]}>
+      <KeyboardAvoidingView style={[styles.flex, screenDirectionStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={[styles.content, screenDirectionStyle]}>
           <LanguageSwitcher />
           <Image source={require('../../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
           <Text style={[styles.title, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.appName')}</Text>

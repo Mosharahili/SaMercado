@@ -92,8 +92,8 @@ export const OwnerOrdersScreen = () => {
   };
 
   return (
-    <ScreenContainer>
-      <View style={[styles.searchRow, { }]}>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+      <View style={[styles.searchRow, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
         <Pressable style={styles.searchBtn} onPress={() => load(orderSearch)}>
           <Text style={styles.searchBtnText}>{tr('بحث', 'Search')}</Text>
         </Pressable>
@@ -142,7 +142,7 @@ export const OwnerOrdersScreen = () => {
             </Picker>
           </View>
 
-          <Pressable onPress={() => load()} style={styles.refreshBtn}>
+          <Pressable onPress={() => load()} style={[styles.refreshBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
             <Text style={styles.refreshText}>{tr('حفظ الحالة', 'Save Status')}</Text>
           </Pressable>
         </View>
@@ -154,7 +154,6 @@ export const OwnerOrdersScreen = () => {
 const styles = StyleSheet.create({
   searchRow: {
     gap: 8,
-    alignItems: 'center',
   },
   searchInput: {
     flex: 1,
@@ -215,7 +214,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#ccfbf1',
     paddingVertical: 8,
-    alignItems: 'center',
   },
   refreshText: {
     color: '#0f766e',

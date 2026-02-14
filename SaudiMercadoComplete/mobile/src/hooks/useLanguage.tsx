@@ -104,6 +104,7 @@ type LanguageContextValue = {
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
 const isWeb = Platform.OS === 'web';
+const ARABIC_VISUAL_PREFIX = '\u200F\u061C\u00A0\u00A0';
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
   const [language, setLanguageState] = useState<AppLanguage>('ar');
@@ -156,9 +157,9 @@ export const LanguageProvider = ({ children }: { children: React.ReactNode }) =>
       isLoading,
       setLanguage,
       toggleLanguage,
-      tr: (arabic, english) => (language === 'ar' ? arabic : english),
+      tr: (arabic, english) => (language === 'ar' ? `${ARABIC_VISUAL_PREFIX}${arabic}` : english),
       locale: language === 'ar' ? 'ar-SA' : 'en-US',
-      t: (key) => translations[language][key],
+      t: (key) => (language === 'ar' ? `${ARABIC_VISUAL_PREFIX}${translations[language][key]}` : translations[language][key]),
       isRTL: language === 'ar',
     }),
     [language, isLoading]

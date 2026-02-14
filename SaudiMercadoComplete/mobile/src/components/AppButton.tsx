@@ -16,6 +16,10 @@ export const AppButton = ({
   variant?: 'primary' | 'ghost';
 }) => {
   const { isRTL } = useLanguage();
+  const contentAlignStyle = React.useMemo(
+    () => ({ alignItems: isRTL ? 'flex-end' : 'flex-start' } as const),
+    [isRTL]
+  );
 
   const handlePress = React.useCallback(() => {
     if (!loading && onPress) {
@@ -29,6 +33,7 @@ export const AppButton = ({
       disabled={loading} 
       style={({ pressed }) => [
         styles.pressable,
+        contentAlignStyle,
         pressed && styles.pressableActive
       ]}
     >
@@ -74,7 +79,6 @@ const styles = StyleSheet.create({
   pressable: {
     paddingVertical: 14,
     paddingHorizontal: 18,
-    alignItems: 'center',
   },
   pressableActive: {
     opacity: 0.8,

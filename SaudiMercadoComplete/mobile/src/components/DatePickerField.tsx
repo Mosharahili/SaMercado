@@ -78,7 +78,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
       <Modal visible={visible} transparent animationType="fade" onRequestClose={() => setVisible(false)}>
         <View style={styles.overlay}>
           <View style={styles.modalCard}>
-            <View style={[styles.headerRow, rowDirectionStyle]}>
+            <View style={[styles.headerRow, rowDirectionStyle, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Pressable onPress={() => setViewDate((prev) => new Date(prev.getFullYear(), prev.getMonth() + 1, 1))} style={styles.navBtn}>
                 <Text style={styles.navText}>{isRTL ? '◀' : '▶'}</Text>
               </Pressable>
@@ -112,7 +112,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
             </View>
 
             <View style={[styles.actionRow, rowDirectionStyle]}>
-              <Pressable onPress={() => setVisible(false)} style={styles.actionBtn}>
+              <Pressable onPress={() => setVisible(false)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
                 <Text style={styles.actionText}>{tr('إغلاق', 'Close')}</Text>
               </Pressable>
               <Pressable
@@ -120,7 +120,7 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
                   onChange(undefined);
                   setVisible(false);
                 }}
-                style={styles.actionDanger}
+                style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}
               >
                 <Text style={styles.actionDangerText}>{tr('مسح التاريخ', 'Clear date')}</Text>
               </Pressable>
@@ -164,7 +164,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   headerRow: {
-        alignItems: 'center',
     justifyContent: 'space-between',
   },
   navBtn: {
@@ -222,7 +221,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#ecfeff',
     paddingVertical: 9,
-    alignItems: 'center',
   },
   actionText: {
     color: '#0f766e',
@@ -233,7 +231,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     backgroundColor: '#fee2e2',
     paddingVertical: 9,
-    alignItems: 'center',
   },
   actionDangerText: {
     color: '#b91c1c',

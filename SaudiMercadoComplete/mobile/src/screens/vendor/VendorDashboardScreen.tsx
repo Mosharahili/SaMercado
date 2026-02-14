@@ -10,10 +10,10 @@ import { useLanguage } from '@hooks/useLanguage';
 type Props = NativeStackScreenProps<VendorStackParamList, 'VendorDashboard'>;
 
 export const VendorDashboardScreen = ({ navigation }: Props) => {
-  const { tr } = useLanguage();
+  const { tr, isRTL } = useLanguage();
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={tr('بوابة البائع', 'Vendor Portal')} subtitle={tr('إدارة المنتجات والطلبات والتحليلات', 'Manage products, orders, and analytics')} />
       <View style={styles.list}>
         <AppButton label={tr('إدارة المنتجات', 'Manage Products')} onPress={() => navigation.navigate('VendorProducts')} />

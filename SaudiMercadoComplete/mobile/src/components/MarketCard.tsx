@@ -8,21 +8,26 @@ import { theme } from '@theme/theme';
 
 export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }) => {
   const { isRTL, tr } = useLanguage();
+  const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const image = api.resolveAssetUrl(market.imageUrl);
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
+  const iconPositionStyle = isRTL ? styles.rowIconRTL : styles.rowIconLTR;
+  const titlePaddingStyle = isRTL ? styles.titleRTL : styles.titleLTR;
 
   return (
     <View style={styles.card}>
       {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
-      <View style={[styles.row, { }]}>
-        <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} />
-        <Text style={[styles.title, textDirectionStyle]}>{market.name}</Text>
+      <View style={styles.row}>
+        <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} style={[styles.rowIcon, iconPositionStyle]} />
+        <Text style={[styles.title, titlePaddingStyle, textDirectionStyle]}>{visualPad(market.name)}</Text>
       </View>
       <Text style={[styles.description, textDirectionStyle]}>
-        {market.description || tr('سوق موثوق بمنتجات طازجة وجودة يومية.', 'Trusted market with fresh daily quality products.')}
+        {market.description ? visualPad(market.description) : tr('سوق موثوق بمنتجات طازجة وجودة يومية.', 'Trusted market with fresh daily quality products.')}
       </Text>
     </View>
   );
@@ -51,14 +56,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
   },
   row: {
-    alignItems: 'center',
-    gap: 8,
+    minHeight: 30,
+    justifyContent: 'center',
+    position: 'relative',
+  },
+  rowIcon: {
+    position: 'absolute',
+    top: 1,
+  },
+  rowIconLTR: {
+    left: 0,
+  },
+  rowIconRTL: {
+    right: 0,
   },
   title: {
     flex: 1,
     fontWeight: '800',
     fontSize: 16,
     color: theme.colors.text,
+  },
+  titleLTR: {
+    paddingLeft: 34,
+  },
+  titleRTL: {
+    paddingRight: 34,
   },
   description: {
     color: theme.colors.textMuted,

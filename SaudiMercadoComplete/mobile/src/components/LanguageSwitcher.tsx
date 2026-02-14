@@ -3,17 +3,18 @@ import { Pressable, StyleSheet, Text } from 'react-native';
 import { useLanguage } from '@hooks/useLanguage';
 
 export const LanguageSwitcher = () => {
-  const { toggleLanguage, t, isRTL } = useLanguage();
+  const { t, toggleLanguage } = useLanguage();
 
   return (
-    <Pressable style={[styles.button, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} onPress={toggleLanguage}>
-      <Text style={[styles.text, { textAlign: isRTL ? 'right' : 'left', writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('language.switch')}</Text>
+    <Pressable style={styles.button} onPress={toggleLanguage}>
+      <Text style={styles.text}>{t('language.switch')}</Text>
     </Pressable>
   );
 };
 
 const styles = StyleSheet.create({
   button: {
+    alignSelf: 'flex-end', // always right for Arabic
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
@@ -26,5 +27,7 @@ const styles = StyleSheet.create({
     color: '#166534',
     fontWeight: '700',
     fontSize: 13,
+    textAlign: 'right',
+    writingDirection: 'rtl',
   },
 });

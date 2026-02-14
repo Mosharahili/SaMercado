@@ -125,7 +125,7 @@ export const OwnerMarketsScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل سوق', 'Edit Market') : tr('إضافة سوق', 'Add Market')}</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('اسم السوق', 'Market name')} textAlign={isRTL ? 'right' : 'left'} />
@@ -150,13 +150,13 @@ export const OwnerMarketsScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {market.isActive ? tr('مفعل', 'Active') : tr('مؤرشف', 'Archived')}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(market)} style={styles.actionBtn}>
+            <Pressable onPress={() => startEdit(market)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => toggleActive(market)} style={styles.actionBtn}>
+            <Pressable onPress={() => toggleActive(market)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionText}>{market.isActive ? tr('أرشفة', 'Archive') : tr('تفعيل', 'Activate')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(market.id)} style={styles.actionDanger}>
+            <Pressable onPress={() => remove(market.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
@@ -201,7 +201,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    alignItems: 'center',
     backgroundColor: '#ecfeff',
   },
   actionText: {
@@ -212,7 +211,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    alignItems: 'center',
     backgroundColor: '#fee2e2',
   },
   actionDangerText: {

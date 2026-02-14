@@ -22,7 +22,6 @@ export const ScreenContainer = ({
 
   const isOwnerStoreScreen = typeof route.name === 'string' && route.name.startsWith('OwnerStore');
   const showOwnerBackToDashboard = user?.role === 'OWNER' && isOwnerStoreScreen;
-  const directionStyle: ViewStyle = { direction: isRTL ? 'rtl' : 'ltr' };
 
   const ownerShortcut = showOwnerBackToDashboard ? (
     <Pressable style={[styles.ownerBackBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('OwnerDashboard')}>
@@ -31,12 +30,12 @@ export const ScreenContainer = ({
   ) : null;
 
   const content = scroll ? (
-    <ScrollView style={directionStyle} contentContainerStyle={[styles.content, directionStyle, contentStyle]}>
+    <ScrollView contentContainerStyle={[styles.content, contentStyle]}>
       {ownerShortcut}
       {children}
     </ScrollView>
   ) : (
-    <SafeAreaView style={directionStyle}>
+    <SafeAreaView>
       {ownerShortcut}
       {children}
     </SafeAreaView>
@@ -44,7 +43,7 @@ export const ScreenContainer = ({
 
   return (
     <LinearGradient colors={theme.gradients.app} style={styles.gradient}>
-      <SafeAreaView style={[styles.safeArea, directionStyle]}>{content}</SafeAreaView>
+      <SafeAreaView style={styles.safeArea}>{content}</SafeAreaView>
     </LinearGradient>
   );
 };

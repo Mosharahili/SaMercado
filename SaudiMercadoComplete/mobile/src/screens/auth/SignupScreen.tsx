@@ -15,6 +15,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 export const SignupScreen = ({ navigation }: Props) => {
   const { signup } = useAuth();
   const { t, isRTL } = useLanguage();
+  const screenDirectionStyle = { direction: isRTL ? 'rtl' : 'ltr' } as const;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,9 +44,9 @@ export const SignupScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={styles.container}>
-      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={styles.content}>
+    <LinearGradient colors={theme.gradients.app} style={[styles.container, screenDirectionStyle]}>
+      <KeyboardAvoidingView style={[styles.flex, screenDirectionStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={[styles.content, screenDirectionStyle]}>
           <LanguageSwitcher />
           <Text style={[styles.title, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.signup')}</Text>
 

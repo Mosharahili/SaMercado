@@ -12,6 +12,8 @@ export const MarketsScreen = () => {
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
   const [markets, setMarkets] = useState<Market[]>([]);
 
@@ -29,7 +31,7 @@ export const MarketsScreen = () => {
   }, []);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={tr('الأسواق', 'Markets')} subtitle={tr('الأسواق التي نعمل معها', 'Markets we work with')} />
       <Text style={[styles.hint, textDirectionStyle]}>{tr('نعرض لك أسواقنا المعتمدة لمتابعة مصدر المنتجات والجودة.', 'Browse our approved markets and track product origin and quality.')}</Text>
 

@@ -33,7 +33,7 @@ export const OwnerDashboardScreen = ({ navigation }: Props) => {
   ];
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={tr('لوحة المالك', 'Owner Dashboard')} subtitle={tr('تحكم كامل في سعودي ميركادو', 'Full control of Saudi Mercado')} />
       <Text style={[styles.note, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('يمكنك إدارة المنصة وفي نفس الوقت تصفح التطبيق كأي مستخدم.', 'You can manage the platform and browse the app as a customer at the same time.')}</Text>
 

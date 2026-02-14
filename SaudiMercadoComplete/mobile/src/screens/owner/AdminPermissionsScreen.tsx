@@ -116,7 +116,7 @@ export const AdminPermissionsScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('إضافة Admin جديد', 'Add New Admin')}</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('الاسم', 'Name')} textAlign={isRTL ? 'right' : 'left'} />

@@ -16,9 +16,12 @@ import { useLanguage } from '@hooks/useLanguage';
 export const ProductsScreen = () => {
   const { addToCart } = useCart();
   const { isRTL, tr } = useLanguage();
+  const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [searchInput, setSearchInput] = useState('');
@@ -83,12 +86,24 @@ export const ProductsScreen = () => {
       return matchesSearch && matchesCategory;
     });
   }, [products, search, categoryFilter]);
+  const categoryItems = useMemo(
+    () => {
+      const items = [
+        { key: 'ALL', label: tr('الكل', 'All') },
+        { key: 'DATES', label: tr('تمور', 'Dates') },
+        { key: 'VEGETABLES', label: tr('خضار', 'Vegetables') },
+        { key: 'FRUITS', label: tr('فواكه', 'Fruits') },
+      ];
+      return isRTL ? items.reverse() : items;
+    },
+    [isRTL, tr]
+  );
 
   const topOffer = inlineOffers[0];
   const topOfferImage = api.resolveAssetUrl(topOffer?.imageUrl);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={tr('المنتجات', 'Products')} subtitle={tr('تشكيلة يومية طازجة', 'Fresh daily selection')} />
 
       <BannerCarousel banners={topBanners} />
@@ -97,23 +112,18 @@ export const ProductsScreen = () => {
         <View style={styles.offerCard}>
           <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start', writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
           {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} resizeMode="cover" /> : null}
-          <Text style={[styles.offerTitle, textDirectionStyle]}>{topOffer.title}</Text>
-          {!!topOffer.description && <Text style={[styles.offerDesc, textDirectionStyle]}>{topOffer.description}</Text>}
+          <Text style={[styles.offerTitle, textDirectionStyle]}>{visualPad(topOffer.title)}</Text>
+          {!!topOffer.description && <Text style={[styles.offerDesc, textDirectionStyle]}>{visualPad(topOffer.description)}</Text>}
         </View>
       ) : null}
 
-      <View style={[styles.searchWrap, { }]}>
-        <Pressable
-          style={styles.searchBtn}
-          onPress={() => {
-            setSearch(searchInput);
-            fetchProducts(searchInput);
-          }}
-        >
-          <MaterialCommunityIcons name="magnify" size={20} color="white" />
-        </Pressable>
+      <View style={styles.searchWrap}>
         <TextInput
-          style={[styles.searchInput, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}
+          style={[
+            styles.searchInput,
+            isRTL ? styles.searchInputRTL : styles.searchInputLTR,
+            { writingDirection: isRTL ? 'rtl' : 'ltr' },
+          ]}
           value={searchInput}
           onChangeText={setSearchInput}
           placeholder={tr('ابحث عن منتج أو سوق', 'Search for a product or market')}
@@ -124,15 +134,19 @@ export const ProductsScreen = () => {
             fetchProducts(searchInput);
           }}
         />
+        <Pressable
+          style={[styles.searchBtn, isRTL ? styles.searchBtnRTL : styles.searchBtnLTR]}
+          onPress={() => {
+            setSearch(searchInput);
+            fetchProducts(searchInput);
+          }}
+        >
+          <MaterialCommunityIcons name="magnify" size={20} color="white" />
+        </Pressable>
       </View>
 
-      <View style={[styles.filtersRow, { }]}>
-        {[
-          { key: 'ALL', label: tr('الكل', 'All') },
-          { key: 'DATES', label: tr('تمور', 'Dates') },
-          { key: 'VEGETABLES', label: tr('خضار', 'Vegetables') },
-          { key: 'FRUITS', label: tr('فواكه', 'Fruits') },
-        ].map((item) => {
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.filtersRow}>
+        {categoryItems.map((item) => {
           const active = categoryFilter === item.key;
           return (
             <Pressable
@@ -140,17 +154,26 @@ export const ProductsScreen = () => {
               onPress={() => setCategoryFilter(item.key as 'ALL' | 'VEGETABLES' | 'FRUITS' | 'DATES')}
               style={[styles.filterChip, active ? styles.filterChipActive : null]}
             >
-              <Text style={[styles.filterText, active ? styles.filterTextActive : null]}>{item.label}</Text>
+              <Text style={[styles.filterText, active ? styles.filterTextActive : null, textDirectionStyle]}>{item.label}</Text>
             </Pressable>
           );
         })}
-      </View>
+      </ScrollView>
 
-      <View style={[styles.rowBetween, { }]}>
-        <Text style={[styles.countText, textDirectionStyle]}>{tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}</Text>
-        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, { }]}>
-          <MaterialCommunityIcons name={viewMode === 'grid' ? 'view-list' : 'view-grid'} size={20} color="white" />
-          <Text style={[styles.toggleText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}</Text>
+      <View style={styles.rowBetween}>
+        <Text style={[styles.countText, textDirectionStyle, isRTL ? styles.countTextRTL : styles.countTextLTR]}>
+          {tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}
+        </Text>
+        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, isRTL ? styles.toggleBtnRTL : styles.toggleBtnLTR]}>
+          <MaterialCommunityIcons
+            name={viewMode === 'grid' ? 'view-list' : 'view-grid'}
+            size={20}
+            color="white"
+            style={[styles.toggleIcon, isRTL ? styles.toggleIconRTL : styles.toggleIconLTR]}
+          />
+          <Text style={[styles.toggleText, isRTL ? styles.toggleTextRTL : styles.toggleTextLTR, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>
+            {viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}
+          </Text>
         </Pressable>
       </View>
 
@@ -174,11 +197,11 @@ export const ProductsScreen = () => {
       <Modal visible={!!selectedProduct} transparent animationType="fade" onRequestClose={() => setSelectedProduct(null)}>
         <View style={styles.previewOverlay}>
           <View style={styles.previewCard}>
-            <View style={[styles.previewHeader, { }]}>
-              <Pressable onPress={() => setSelectedProduct(null)} style={styles.previewClose}>
+            <View style={styles.previewHeader}>
+              <Text style={[styles.previewTitle, textDirectionStyle]}>{tr('تفاصيل المنتج', 'Product Details')}</Text>
+              <Pressable onPress={() => setSelectedProduct(null)} style={[styles.previewClose, isRTL ? styles.previewCloseRTL : styles.previewCloseLTR]}>
                 <MaterialCommunityIcons name="close" size={20} color="#0f2f3d" />
               </Pressable>
-              <Text style={[styles.previewTitle, textDirectionStyle]}>{tr('تفاصيل المنتج', 'Product Details')}</Text>
             </View>
 
             {selectedProduct ? (
@@ -186,7 +209,7 @@ export const ProductsScreen = () => {
                 <ScrollView
                   horizontal
                   showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={[styles.previewImagesRow, { }]}
+                  contentContainerStyle={styles.previewImagesRow}
                 >
                   {(selectedProduct.images?.length
                     ? selectedProduct.images
@@ -201,10 +224,16 @@ export const ProductsScreen = () => {
                   })}
                 </ScrollView>
 
-                <Text style={[styles.previewName, textDirectionStyle]}>{selectedProduct.name}</Text>
-                <Text style={[styles.previewMeta, textDirectionStyle]}>{tr('التصنيف', 'Category')}: {selectedProduct.category?.nameAr || '-'}</Text>
-                <Text style={[styles.previewMeta, textDirectionStyle]}>{tr('السوق', 'Market')}: {selectedProduct.market?.name || '-'}</Text>
-                <Text style={[styles.previewMeta, textDirectionStyle]}>{selectedProduct.description || tr('منتج طازج بجودة عالية.', 'Fresh product with premium quality.')}</Text>
+                <Text style={[styles.previewName, textDirectionStyle]}>{visualPad(selectedProduct.name)}</Text>
+                <Text style={[styles.previewMeta, textDirectionStyle]}>
+                  {tr('التصنيف', 'Category')}: {selectedProduct.category?.nameAr ? visualPad(selectedProduct.category.nameAr) : '-'}
+                </Text>
+                <Text style={[styles.previewMeta, textDirectionStyle]}>
+                  {tr('السوق', 'Market')}: {selectedProduct.market?.name ? visualPad(selectedProduct.market.name) : '-'}
+                </Text>
+                <Text style={[styles.previewMeta, textDirectionStyle]}>
+                  {selectedProduct.description ? visualPad(selectedProduct.description) : tr('منتج طازج بجودة عالية.', 'Fresh product with premium quality.')}
+                </Text>
                 <Text style={[styles.previewPrice, textDirectionStyle]}>
                   {formatSAR(Number(selectedProduct.price))} / {selectedProduct.unit}
                 </Text>
@@ -258,19 +287,27 @@ const styles = StyleSheet.create({
     color: theme.colors.textMuted,
   },
   searchWrap: {
-    gap: 8,
-    alignItems: 'center',
+    position: 'relative',
   },
   searchInput: {
-    flex: 1,
+    width: '100%',
     borderWidth: 1,
     borderColor: '#bbf7d0',
     borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.95)',
-    paddingHorizontal: 12,
     paddingVertical: 11,
   },
+  searchInputLTR: {
+    paddingLeft: 56,
+    paddingRight: 12,
+  },
+  searchInputRTL: {
+    paddingRight: 56,
+    paddingLeft: 12,
+  },
   searchBtn: {
+    position: 'absolute',
+    top: 0,
     width: 46,
     height: 46,
     borderRadius: 12,
@@ -278,9 +315,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  searchBtnLTR: {
+    left: 0,
+  },
+  searchBtnRTL: {
+    right: 0,
+  },
   filtersRow: {
     gap: 8,
-    flexWrap: 'wrap',
+    paddingVertical: 2,
   },
   filterChip: {
     borderWidth: 1,
@@ -303,29 +346,62 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   rowBetween: {
-    justifyContent: 'space-between',
-    alignItems: 'center',
+    minHeight: 40,
+    justifyContent: 'center',
+    position: 'relative',
   },
   countText: {
     color: '#166534',
     fontWeight: '700',
+    width: '100%',
+  },
+  countTextLTR: {
+    paddingLeft: 118,
+  },
+  countTextRTL: {
+    paddingRight: 118,
   },
   emptyText: {
     color: '#4b6a5a',
     marginBottom: 2,
   },
   toggleBtn: {
-        gap: 6,
-    alignItems: 'center',
+    position: 'absolute',
+    top: 0,
     backgroundColor: '#2f9e44',
     paddingHorizontal: 10,
     paddingVertical: 8,
     borderRadius: 10,
+    minHeight: 38,
+    justifyContent: 'center',
+  },
+  toggleBtnLTR: {
+    left: 0,
+  },
+  toggleBtnRTL: {
+    right: 0,
+  },
+  toggleIcon: {
+    position: 'absolute',
+    top: 9,
+  },
+  toggleIconLTR: {
+    left: 8,
+  },
+  toggleIconRTL: {
+    right: 8,
   },
   toggleText: {
     color: 'white',
     fontWeight: '700',
     fontSize: 12,
+    paddingHorizontal: 24,
+  },
+  toggleTextLTR: {
+    textAlign: 'left',
+  },
+  toggleTextRTL: {
+    textAlign: 'right',
   },
   previewOverlay: {
     flex: 1,
@@ -341,15 +417,19 @@ const styles = StyleSheet.create({
     maxHeight: '85%',
   },
   previewHeader: {
-        justifyContent: 'space-between',
-    alignItems: 'center',
+    minHeight: 34,
+    justifyContent: 'center',
+    position: 'relative',
   },
   previewTitle: {
     color: '#0f2f3d',
     fontWeight: '900',
     fontSize: 17,
+    width: '100%',
   },
   previewClose: {
+    position: 'absolute',
+    top: 0,
     width: 34,
     height: 34,
     borderRadius: 999,
@@ -357,8 +437,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  previewCloseLTR: {
+    left: 0,
+  },
+  previewCloseRTL: {
+    right: 0,
+  },
   previewImagesRow: {
-        gap: 8,
+    gap: 8,
   },
   previewImage: {
     width: 220,

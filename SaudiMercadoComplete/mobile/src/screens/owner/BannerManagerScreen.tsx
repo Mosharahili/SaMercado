@@ -163,7 +163,7 @@ export const BannerManagerScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل بوستر', 'Edit Banner') : tr('إضافة بوستر جديد', 'Add New Banner')}</Text>
         <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder={tr('العنوان', 'Title')} textAlign={isRTL ? 'right' : 'left'} />
@@ -205,13 +205,13 @@ export const BannerManagerScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {banner.isEnabled ? tr('مفعل', 'Active') : tr('متوقف', 'Disabled')}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(banner)} style={styles.actionBtn}>
+            <Pressable onPress={() => startEdit(banner)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => toggleEnabled(banner)} style={styles.actionBtn}>
+            <Pressable onPress={() => toggleEnabled(banner)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionText}>{banner.isEnabled ? tr('إيقاف', 'Disable') : tr('تفعيل', 'Enable')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(banner.id)} style={styles.actionDanger}>
+            <Pressable onPress={() => remove(banner.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
@@ -273,7 +273,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    alignItems: 'center',
     backgroundColor: '#ecfeff',
   },
   actionText: {
@@ -284,7 +283,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    alignItems: 'center',
     backgroundColor: '#fee2e2',
   },
   actionDangerText: {

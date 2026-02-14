@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
@@ -15,9 +15,12 @@ export const CartScreen = () => {
   const { items, updateQuantity, removeItem, clearCart, subtotal } = useCart();
   const { user } = useAuth();
   const { isRTL, tr } = useLanguage();
+  const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
   const [contactPhone, setContactPhone] = useState('');
@@ -93,15 +96,19 @@ export const CartScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={tr('السلة', 'Cart')} subtitle={tr('إدارة الطلب والدفع', 'Order and payment')} />
 
       {items.map((item) => (
         <View key={item.id} style={styles.itemCard}>
-          <Text style={[styles.itemName, textDirectionStyle]}>{item.product.name}</Text>
+          <Text style={[styles.itemName, textDirectionStyle]}>{visualPad(item.product.name)}</Text>
           <Text style={[styles.itemMeta, textDirectionStyle]}>{formatSAR(Number(item.product.price))} / {item.product.unit}</Text>
 
-          <View style={[styles.qtyRow, { }]}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={[styles.qtyRow, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}
+          >
             <Pressable onPress={() => updateQuantity(item.id, item.quantity - 1)} style={styles.qtyBtn}>
               <Text style={styles.qtyBtnText}>-</Text>
             </Pressable>
@@ -112,7 +119,7 @@ export const CartScreen = () => {
             <Pressable onPress={() => removeItem(item.id)} style={styles.removeBtn}>
               <Text style={[styles.removeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('حذف', 'Remove')}</Text>
             </Pressable>
-          </View>
+          </ScrollView>
         </View>
       ))}
 
@@ -163,7 +170,6 @@ const styles = StyleSheet.create({
     color: '#4b5563',
   },
   qtyRow: {
-    alignItems: 'center',
     gap: 8,
   },
   qtyBtn: {

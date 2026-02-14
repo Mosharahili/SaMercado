@@ -151,7 +151,7 @@ export const OwnerProductsScreen = () => {
   };
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل منتج', 'Edit Product') : tr('إضافة منتج', 'Add Product')}</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('اسم المنتج', 'Product name')} textAlign={isRTL ? 'right' : 'left'} />
@@ -206,10 +206,10 @@ export const OwnerProductsScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('السعر', 'Price')}: {product.price} ر.س / {product.unit}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(product)} style={styles.actionBtn}>
+            <Pressable onPress={() => startEdit(product)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(product.id)} style={styles.actionDanger}>
+            <Pressable onPress={() => remove(product.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>
@@ -264,7 +264,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    alignItems: 'center',
     backgroundColor: '#ecfeff',
   },
   actionText: {
@@ -275,7 +274,6 @@ const styles = StyleSheet.create({
     flex: 1,
     borderRadius: 8,
     paddingVertical: 8,
-    alignItems: 'center',
     backgroundColor: '#fee2e2',
   },
   actionDangerText: {

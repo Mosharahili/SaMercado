@@ -24,9 +24,12 @@ const pickRandomProducts = (products: Product[], count: number) => {
 export const HomeScreen = () => {
   const { addToCart } = useCart();
   const { isRTL, tr } = useLanguage();
+  const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
+    alignSelf: isRTL ? 'flex-end' : 'flex-start',
+    width: '100%',
   } as const;
   const [banners, setBanners] = useState<Banner[]>([]);
   const [bottomBanners, setBottomBanners] = useState<Banner[]>([]);
@@ -71,18 +74,21 @@ export const HomeScreen = () => {
   const bottomBanner = bottomBanners[0];
   const bottomImage = api.resolveAssetUrl(bottomBanner?.imageUrl);
   const featureItems = useMemo(
-    () => [
-      { icon: 'leaf-circle-outline' as const, label: tr('طازج يوميًا', 'Fresh Daily') },
-      { icon: 'truck-fast-outline' as const, label: tr('توصيل سريع', 'Fast Delivery') },
-      { icon: 'check-decagram-outline' as const, label: tr('جودة مضمونة', 'Guaranteed Quality') },
-    ],
-    [tr]
+    () => {
+      const items = [
+        { icon: 'leaf-circle-outline' as const, label: tr('طازج يوميًا', 'Fresh Daily') },
+        { icon: 'truck-fast-outline' as const, label: tr('توصيل سريع', 'Fast Delivery') },
+        { icon: 'check-decagram-outline' as const, label: tr('جودة مضمونة', 'Guaranteed Quality') },
+      ];
+      return isRTL ? items.reverse() : items;
+    },
+    [isRTL, tr]
   );
 
   const displayMarkets = useMemo(() => markets, [markets]);
 
   return (
-    <ScreenContainer>
+    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
       <AppHeader title={tr('سعودي ميركادو', 'Saudi Mercado')} subtitle={tr('سوقك الزراعي الذكي في الرياض', 'Your smart produce marketplace in Riyadh')} />
 
       <ImageBackground
@@ -102,14 +108,14 @@ export const HomeScreen = () => {
         </LinearGradient>
       </ImageBackground>
 
-      <View style={[styles.featureRow, { }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featureRow}>
         {featureItems.map((feature) => (
-          <View key={feature.label} style={styles.featureBox}>
+          <View key={feature.label} style={[styles.featureBox, isRTL ? styles.featureBoxRTL : styles.featureBoxLTR]}>
             <MaterialCommunityIcons name={feature.icon} size={20} color="#1b5e20" />
-            <Text style={styles.featureText}>{feature.label}</Text>
+            <Text style={[styles.featureText, textDirectionStyle]}>{feature.label}</Text>
           </View>
         ))}
-      </View>
+      </ScrollView>
 
       {banners.length ? <BannerCarousel banners={banners} /> : null}
 
@@ -125,15 +131,17 @@ export const HomeScreen = () => {
               ) : (
                 <Image source={require('../../../assets/icon.png')} style={styles.marketImage} resizeMode="cover" />
               )}
-              <Text style={[styles.marketName, textDirectionStyle]}>{market.name}</Text>
-              <Text style={[styles.marketInfo, textDirectionStyle]}>{market.description || tr('سوق موثوق بمنتجات يومية طازجة.', 'Trusted market with fresh daily products.')}</Text>
+              <Text style={[styles.marketName, textDirectionStyle]}>{visualPad(market.name)}</Text>
+              <Text style={[styles.marketInfo, textDirectionStyle]}>
+                {market.description ? visualPad(market.description) : tr('سوق موثوق بمنتجات يومية طازجة.', 'Trusted market with fresh daily products.')}
+              </Text>
             </View>
           );
         })}
       </View>
 
       <Text style={[styles.bestTitle, textDirectionStyle]}>{tr('افضل الخضار والفواكه', 'Best Fruits & Vegetables')}</Text>
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={[styles.productRow, { }]}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.productRow}>
         {featuredProducts.map((product) => {
           const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
           return (
@@ -144,12 +152,25 @@ export const HomeScreen = () => {
                 resizeMode="cover"
               />
               <Text numberOfLines={2} style={[styles.productName, textDirectionStyle]}>
-                {product.name}
+                {visualPad(product.name)}
               </Text>
               <Text style={[styles.productPrice, textDirectionStyle]}>{formatSAR(Number(product.price))}</Text>
-              <Pressable style={[styles.addBtn, { }]} onPress={() => addToCart(product)}>
-                <MaterialCommunityIcons name="cart-plus" size={16} color="#ffffff" />
-                <Text style={[styles.addBtnText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('أضف للسلة', 'Add to Cart')}</Text>
+              <Pressable style={styles.addBtn} onPress={() => addToCart(product)}>
+                <MaterialCommunityIcons
+                  name="cart-plus"
+                  size={16}
+                  color="#ffffff"
+                  style={[styles.addBtnIcon, isRTL ? styles.addBtnIconRTL : styles.addBtnIconLTR]}
+                />
+                <Text
+                  style={[
+                    styles.addBtnText,
+                    isRTL ? styles.addBtnTextRTL : styles.addBtnTextLTR,
+                    { writingDirection: isRTL ? 'rtl' : 'ltr' },
+                  ]}
+                >
+                  {tr('أضف للسلة', 'Add to Cart')}
+                </Text>
               </Pressable>
             </View>
           );
@@ -159,22 +180,26 @@ export const HomeScreen = () => {
       {bottomBanner ? (
         <View style={styles.bottomBanner}>
           {bottomImage ? <Image source={{ uri: bottomImage }} style={styles.bottomImage} resizeMode="cover" /> : null}
-          <Text style={[styles.bottomTitle, textDirectionStyle]}>{bottomBanner.title}</Text>
-          <Text style={[styles.bottomDesc, textDirectionStyle]}>{bottomBanner.description || tr('عروض يومية على أفضل المنتجات', 'Daily offers on top products')}</Text>
+          <Text style={[styles.bottomTitle, textDirectionStyle]}>{visualPad(bottomBanner.title)}</Text>
+          <Text style={[styles.bottomDesc, textDirectionStyle]}>
+            {bottomBanner.description ? visualPad(bottomBanner.description) : tr('عروض يومية على أفضل المنتجات', 'Daily offers on top products')}
+          </Text>
         </View>
       ) : null}
 
       <Modal visible={popupVisible} animationType="fade" transparent>
         <View style={styles.modalOverlay}>
           <View style={styles.modalCard}>
-            <Text style={[styles.modalTitle, textDirectionStyle]}>{popup?.title || tr('إعلان', 'Announcement')}</Text>
+            <Text style={[styles.modalTitle, textDirectionStyle]}>{popup?.title ? visualPad(popup.title) : tr('إعلان', 'Announcement')}</Text>
             {popupImage ? <Image source={{ uri: popupImage }} style={styles.modalImage} resizeMode="cover" /> : null}
-            <Text style={[styles.modalMessage, textDirectionStyle]}>{popup?.message || tr('تابع أحدث العروض الحصرية اليوم', 'Discover today’s latest exclusive offers')}</Text>
+            <Text style={[styles.modalMessage, textDirectionStyle]}>
+              {popup?.message ? visualPad(popup.message) : tr('تابع أحدث العروض الحصرية اليوم', 'Discover today’s latest exclusive offers')}
+            </Text>
             <Pressable
               onPress={() => setPopupVisible(false)}
               style={[styles.dismissBtn, isRTL ? styles.dismissBtnRTL : styles.dismissBtnLTR]}
             >
-              <Text style={styles.dismissText}>{popup?.secondaryCtaText || tr('إغلاق', 'Close')}</Text>
+              <Text style={[styles.dismissText, textDirectionStyle]}>{popup?.secondaryCtaText || tr('إغلاق', 'Close')}</Text>
             </Pressable>
           </View>
         </View>
@@ -213,19 +238,25 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   featureRow: {
+    paddingBottom: 2,
     gap: 8,
   },
   featureBox: {
-    flex: 1,
+    width: 112,
     backgroundColor: 'rgba(255,255,255,0.94)',
     borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 8,
-    alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
     borderWidth: 1,
     borderColor: '#dcfce7',
+  },
+  featureBoxLTR: {
+    alignItems: 'flex-start',
+  },
+  featureBoxRTL: {
+    alignItems: 'flex-end',
   },
   featureText: {
     color: '#1b5e20',
@@ -302,18 +333,35 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
   addBtn: {
+    position: 'relative',
     borderRadius: 10,
     backgroundColor: '#2f9e44',
     paddingVertical: 8,
     paddingHorizontal: 8,
     justifyContent: 'center',
-    alignItems: 'center',
-    gap: 6,
+    minHeight: 36,
+  },
+  addBtnIcon: {
+    position: 'absolute',
+    top: 10,
+  },
+  addBtnIconLTR: {
+    left: 8,
+  },
+  addBtnIconRTL: {
+    right: 8,
   },
   addBtnText: {
     color: '#ffffff',
     fontWeight: '800',
     fontSize: 12,
+    paddingHorizontal: 20,
+  },
+  addBtnTextLTR: {
+    textAlign: 'left',
+  },
+  addBtnTextRTL: {
+    textAlign: 'right',
   },
   bottomBanner: {
     backgroundColor: 'rgba(255,255,255,0.97)',
