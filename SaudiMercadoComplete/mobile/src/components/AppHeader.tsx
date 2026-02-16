@@ -25,7 +25,7 @@ const styles = StyleSheet.create({
   },
   logo: {
     position: 'absolute',
-    right: 0, // always stick to the right
+    end: 0, // always stick to the right
     width: 54,
     height: 54,
     borderRadius: 14,
@@ -40,14 +40,13 @@ const styles = StyleSheet.create({
   },
   title: {
     textAlign: 'right',       // align text to the right
-    writingDirection: 'rtl',  // Arabic
+    // Arabic
     color: '#0f2f3d',
     fontSize: 20,
     fontWeight: '800',
   },
   subtitle: {
     textAlign: 'right',
-    writingDirection: 'rtl',
     color: '#4a6572',
     fontSize: 13,
     marginTop: 2,

@@ -2,7 +2,6 @@ import React from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { useAuth } from '@hooks/useAuth';
-import { useLanguage } from '@hooks/useLanguage';
 import { AuthStack } from './stacks/AuthStack';
 import { CustomerTabs } from './tabs/CustomerTabs';
 import { VendorStack } from './stacks/VendorStack';
@@ -12,15 +11,13 @@ import { theme } from '@theme/theme';
 
 export const RootNavigator = () => {
   const { user, isLoading } = useAuth();
-  const { language } = useLanguage();
-  const isRTL = language === 'ar';
 
   React.useEffect(() => {
     if (typeof document !== 'undefined') {
-      document.documentElement.dir = isRTL ? 'rtl' : 'ltr';
-      document.documentElement.lang = language;
+      document.documentElement.dir = 'rtl';
+      document.documentElement.lang = 'ar';
     }
-  }, [language, isRTL]);
+  }, []);
 
   if (isLoading) {
     return (
@@ -33,8 +30,7 @@ export const RootNavigator = () => {
   return (
     <View style={styles.root}>
       <NavigationContainer
-        key={isRTL ? 'nav-rtl' : 'nav-ltr'}
-        direction={isRTL ? 'rtl' : 'ltr'}
+        direction="rtl"
         theme={{
           ...DefaultTheme,
           colors: {

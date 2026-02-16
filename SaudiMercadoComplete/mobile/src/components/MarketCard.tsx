@@ -11,19 +11,17 @@ export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const image = api.resolveAssetUrl(market.imageUrl);
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
     alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
-  const iconPositionStyle = isRTL ? styles.rowIconRTL : styles.rowIconLTR;
-  const titlePaddingStyle = isRTL ? styles.titleRTL : styles.titleLTR;
+
 
   return (
     <View style={styles.card}>
       {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
       <View style={styles.row}>
-        <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} style={[styles.rowIcon, iconPositionStyle]} />
+        <MaterialCommunityIcons name="storefront-outline" size={26} color={theme.colors.primary} style={styles.rowIcon} />
         <Text style={[styles.title, titlePaddingStyle, textDirectionStyle]}>{visualPad(market.name)}</Text>
       </View>
       <Text style={[styles.description, textDirectionStyle]}>
@@ -64,11 +62,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 1,
   },
-  rowIconLTR: {
-    left: 0,
-  },
-  rowIconRTL: {
-    right: 0,
+  rowIcon: {
+    end: 0,
   },
   title: {
     flex: 1,
@@ -76,11 +71,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: theme.colors.text,
   },
-  titleLTR: {
-    paddingLeft: 34,
-  },
-  titleRTL: {
-    paddingRight: 34,
+  title: {
+    paddingEnd: 34,
   },
   description: {
     color: theme.colors.textMuted,

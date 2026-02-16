@@ -20,15 +20,11 @@ export const ProductCard = ({
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
     alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
-  const badgePositionStyle = isRTL ? styles.badgeRTL : styles.badgeLTR;
-  const priceWrapPositionStyle = isRTL ? styles.priceWrapRTL : styles.priceWrapLTR;
-  const addWrapPositionStyle = isRTL ? styles.addWrapRTL : styles.addWrapLTR;
-  const addIconPositionStyle = isRTL ? styles.addIconRTL : styles.addIconLTR;
+
   const addScale = useRef(new Animated.Value(1)).current;
 
   const handleAdd = () => {
@@ -52,8 +48,8 @@ export const ProductCard = ({
     <Pressable style={styles.card} onPress={onPress}>
       <View style={styles.mediaWrap}>
         {image ? <Image source={{ uri: image }} style={styles.image} resizeMode="cover" /> : <View style={styles.placeholder} />}
-        <View style={[styles.badge, badgePositionStyle]}>
-          <Text style={[styles.badgeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>
+        <View style={styles.badge}>
+          <Text style={[styles.badgeText, { }]}>
             {product.category?.nameAr ? visualPad(product.category.nameAr) : tr('منتج', 'Product')}
           </Text>
         </View>
@@ -67,9 +63,9 @@ export const ProductCard = ({
         </Text>
 
         <View style={styles.bottomRow}>
-          <View style={[styles.priceWrap, priceWrapPositionStyle]}>
-            <Text style={[styles.unit, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>/{product.unit}</Text>
-            <Text style={[styles.price, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{formatSAR(Number(product.price))}</Text>
+          <View style={styles.priceWrap}>
+            <Text style={[styles.unit, { }]}>/{product.unit}</Text>
+            <Text style={[styles.price, { }]}>{formatSAR(Number(product.price))}</Text>
           </View>
           <Animated.View style={[styles.addWrap, addWrapPositionStyle, { transform: [{ scale: addScale }] }]}>
             <Pressable
@@ -80,7 +76,7 @@ export const ProductCard = ({
               style={styles.addButton}
             >
               <MaterialCommunityIcons name="cart-plus" size={17} color="white" style={[styles.addIcon, addIconPositionStyle]} />
-              <Text style={[styles.addText, isRTL ? styles.addTextRTL : styles.addTextLTR, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>
+              <Text style={[styles.addText, isRTL ? styles.addTextRTL : styles.addTextLTR, { }]}>
                 {tr('إضافة', 'Add')}
               </Text>
             </Pressable>
@@ -128,11 +124,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  badgeLTR: {
-    right: 8,
-  },
-  badgeRTL: {
-    left: 8,
+  badge: {
+    end: 8,
   },
   badgeText: {
     color: 'white',
@@ -156,23 +149,16 @@ const styles = StyleSheet.create({
     gap: 4,
     flexShrink: 1,
   },
-  priceWrapLTR: {
-    left: 0,
-    alignItems: 'flex-start',
-  },
-  priceWrapRTL: {
-    right: 0,
+  priceWrap: {
+    end: 0,
     alignItems: 'flex-end',
   },
   addWrap: {
     position: 'absolute',
     bottom: 0,
   },
-  addWrapLTR: {
-    right: 0,
-  },
-  addWrapRTL: {
-    left: 0,
+  addWrap: {
+    start: 0,
   },
   price: {
     fontSize: 15,
@@ -197,11 +183,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 9,
   },
-  addIconLTR: {
-    left: 8,
-  },
-  addIconRTL: {
-    right: 8,
+  addIcon: {
+    end: 8,
   },
   addText: {
     color: 'white',

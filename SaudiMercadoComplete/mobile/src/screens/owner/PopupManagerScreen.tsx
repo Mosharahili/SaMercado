@@ -148,7 +148,7 @@ export const PopupManagerScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل النافذة المنبثقة', 'Edit Popup') : tr('مدير النوافذ المنبثقة', 'Popup Manager')}</Text>
         <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder={tr('العنوان', 'Title')} textAlign={isRTL ? 'right' : 'left'} />

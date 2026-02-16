@@ -151,7 +151,7 @@ export const OwnerProductsScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل منتج', 'Edit Product') : tr('إضافة منتج', 'Add Product')}</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('اسم المنتج', 'Product name')} textAlign={isRTL ? 'right' : 'left'} />

@@ -13,7 +13,7 @@ export const VendorDashboardScreen = ({ navigation }: Props) => {
   const { tr, isRTL } = useLanguage();
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <AppHeader title={tr('بوابة البائع', 'Vendor Portal')} subtitle={tr('إدارة المنتجات والطلبات والتحليلات', 'Manage products, orders, and analytics')} />
       <View style={styles.list}>
         <AppButton label={tr('إدارة المنتجات', 'Manage Products')} onPress={() => navigation.navigate('VendorProducts')} />

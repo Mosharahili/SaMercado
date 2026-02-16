@@ -28,7 +28,6 @@ export const DatePickerField = ({ label, value, placeholder, onChange }: DatePic
   const { isRTL, tr, locale } = useLanguage();
   const weekDays = isRTL ? weekDaysAr : weekDaysEn;
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
   } as const;
   const rowDirectionStyle = { } as const;

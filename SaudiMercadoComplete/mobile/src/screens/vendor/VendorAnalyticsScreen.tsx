@@ -11,7 +11,7 @@ export const VendorAnalyticsScreen = () => {
   const metrics = data?.metrics || {};
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={[styles.row, { }]}>
         <StatCard label={tr('إجمالي المبيعات', 'Total Sales')} value={`${Number(metrics.totalRevenue || 0).toFixed(0)} ر.س`} />
         <StatCard label={tr('إجمالي الطلبات', 'Total Orders')} value={String(metrics.totalOrders || 0)} />

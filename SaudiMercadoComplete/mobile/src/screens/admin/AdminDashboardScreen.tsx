@@ -15,7 +15,7 @@ export const AdminDashboardScreen = ({ navigation }: Props) => {
   const { tr, isRTL } = useLanguage();
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <AppHeader title={tr('لوحة الأدمن', 'Admin Panel')} subtitle={tr('إدارة التشغيل اليومي', 'Daily operations management')} />
       <View style={styles.list}>
         <AppButton label={tr('عرض الأسواق', 'View Markets')} onPress={() => navigation.navigate('AdminStoreMarkets')} variant="ghost" />

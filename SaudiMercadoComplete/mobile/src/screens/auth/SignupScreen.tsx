@@ -6,7 +6,6 @@ import { AuthStackParamList } from '@navigation/types';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
 import { AppButton } from '@components/AppButton';
-import { LanguageSwitcher } from '@components/LanguageSwitcher';
 import { theme } from '@theme/theme';
 import { ApiError } from '@api/client';
 
@@ -15,7 +14,6 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 export const SignupScreen = ({ navigation }: Props) => {
   const { signup } = useAuth();
   const { t, isRTL } = useLanguage();
-  const screenDirectionStyle = { direction: isRTL ? 'rtl' : 'ltr' } as const;
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -44,24 +42,23 @@ export const SignupScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={[styles.container, screenDirectionStyle]}>
-      <KeyboardAvoidingView style={[styles.flex, screenDirectionStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={[styles.content, screenDirectionStyle]}>
-          <LanguageSwitcher />
-          <Text style={[styles.title, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.signup')}</Text>
+    <LinearGradient colors={theme.gradients.app} style={styles.container}>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.content}>
+          <Text style={[styles.title, { }]}>{t('auth.signup')}</Text>
 
           <View style={styles.card}>
-            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.name')}</Text>
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.name')}</Text>
             <TextInput 
-              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
               value={name} 
               onChangeText={setName}
               placeholderTextColor="#999"
             />
 
-            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
             <TextInput
-              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -69,9 +66,9 @@ export const SignupScreen = ({ navigation }: Props) => {
               placeholderTextColor="#999"
             />
 
-            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
             <TextInput 
-              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
               value={password} 
               onChangeText={setPassword} 
               secureTextEntry
@@ -81,7 +78,7 @@ export const SignupScreen = ({ navigation }: Props) => {
             <AppButton label={t('auth.signup')} onPress={onSignup} loading={loading} />
 
             <TouchableOpacity onPress={() => navigation.navigate('Login')} style={styles.linkWrap}>
-              <Text style={[styles.link, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.hasAccount')}</Text>
+              <Text style={[styles.link, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.hasAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>

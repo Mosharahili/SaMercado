@@ -163,7 +163,7 @@ export const BannerManagerScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل بوستر', 'Edit Banner') : tr('إضافة بوستر جديد', 'Add New Banner')}</Text>
         <TextInput style={styles.input} value={title} onChangeText={setTitle} placeholder={tr('العنوان', 'Title')} textAlign={isRTL ? 'right' : 'left'} />

@@ -3,7 +3,6 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ScreenContainer } from '@components/ScreenContainer';
 import { AppHeader } from '@components/AppHeader';
 import { AppButton } from '@components/AppButton';
-import { LanguageSwitcher } from '@components/LanguageSwitcher';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
 import { api } from '@api/client';
@@ -14,7 +13,6 @@ export const AccountScreen = () => {
   const { isRTL, t } = useLanguage();
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
     alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
@@ -36,13 +34,8 @@ export const AccountScreen = () => {
   }, [user?.id, user?.role]);
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <AppHeader title={t('account.title')} subtitle={t('account.subtitle')} />
-
-      <View style={styles.card}>
-        <Text style={[styles.label, textDirectionStyle]}>{t('account.language')}</Text>
-        <LanguageSwitcher />
-      </View>
 
       <View style={styles.card}>
         <Text style={[styles.label, textDirectionStyle]}>{t('account.name')}</Text>

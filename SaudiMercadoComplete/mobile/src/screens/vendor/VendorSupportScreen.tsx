@@ -18,7 +18,7 @@ export const VendorSupportScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('التواصل مع الإدارة', 'Contact Admin')}</Text>
         <TextInput

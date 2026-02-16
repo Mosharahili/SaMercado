@@ -1,13 +1,24 @@
 import 'react-native-gesture-handler';
 import React, { useEffect, useState } from 'react';
-import { Text, Image, StyleSheet, View } from 'react-native';
+import {
+  I18nManager,
+  Text,
+  Image,
+  StyleSheet,
+  View,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
+
 import { AuthProvider } from '@hooks/useAuth';
 import { CartProvider } from '@hooks/useCart';
 import { LanguageProvider, useLanguage } from '@hooks/useLanguage';
 import { RootNavigator } from '@navigation/RootNavigator';
 import { useRegisterPushToken } from '@hooks/useRegisterPushToken';
+
+// Lock the app into RTL permanently, ignoring the phone's language
+I18nManager.allowRTL(true);
+I18nManager.forceRTL(true);
 
 const STARTUP_SPLASH_DELAY_MS = 3000;
 
@@ -17,7 +28,11 @@ const StartupSplash = () => {
   return (
     <LinearGradient colors={['#ecfdf3', '#d9fbe8', '#b7f2cb']} style={styles.splashWrap}>
       <View style={styles.splashCard}>
-        <Image source={require('./assets/icon.png')} style={styles.splashLogo} resizeMode="cover" />
+        <Image
+          source={require('./assets/icon.png')}
+          style={styles.splashLogo}
+          resizeMode="cover"
+        />
         <Text style={styles.splashTitle}>{t('auth.appName')}</Text>
         <Text style={styles.splashSubtitle}>SaudiMercado</Text>
       </View>
@@ -31,7 +46,10 @@ const AppInner = () => {
   const [showStartupSplash, setShowStartupSplash] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setShowStartupSplash(false), STARTUP_SPLASH_DELAY_MS);
+    const timer = setTimeout(
+      () => setShowStartupSplash(false),
+      STARTUP_SPLASH_DELAY_MS
+    );
     return () => clearTimeout(timer);
   }, []);
 

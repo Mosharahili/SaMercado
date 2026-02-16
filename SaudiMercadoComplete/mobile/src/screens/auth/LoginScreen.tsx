@@ -6,7 +6,6 @@ import { AuthStackParamList } from '@navigation/types';
 import { useAuth } from '@hooks/useAuth';
 import { useLanguage } from '@hooks/useLanguage';
 import { AppButton } from '@components/AppButton';
-import { LanguageSwitcher } from '@components/LanguageSwitcher';
 import { theme } from '@theme/theme';
 import { ApiError } from '@api/client';
 
@@ -15,7 +14,6 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export const LoginScreen = ({ navigation }: Props) => {
   const { login } = useAuth();
   const { t, isRTL } = useLanguage();
-  const screenDirectionStyle = { direction: isRTL ? 'rtl' : 'ltr' } as const;
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
@@ -38,18 +36,17 @@ export const LoginScreen = ({ navigation }: Props) => {
   };
 
   return (
-    <LinearGradient colors={theme.gradients.app} style={[styles.container, screenDirectionStyle]}>
-      <KeyboardAvoidingView style={[styles.flex, screenDirectionStyle]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <View style={[styles.content, screenDirectionStyle]}>
-          <LanguageSwitcher />
+    <LinearGradient colors={theme.gradients.app} style={styles.container}>
+      <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        <View style={styles.content}>
           <Image source={require('../../../assets/icon.png')} style={styles.logo} resizeMode="cover" />
-          <Text style={[styles.title, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{t('auth.appName')}</Text>
-          <Text style={[styles.subtitle, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.tagline')}</Text>
+          <Text style={[styles.title, { }]}>{t('auth.appName')}</Text>
+          <Text style={[styles.subtitle, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.tagline')}</Text>
 
           <View style={styles.card}>
-            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.email')}</Text>
             <TextInput
-              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
@@ -57,9 +54,9 @@ export const LoginScreen = ({ navigation }: Props) => {
               placeholderTextColor="#999"
             />
 
-            <Text style={[styles.label, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
+            <Text style={[styles.label, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.password')}</Text>
             <TextInput 
-              style={[styles.input, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}
+              style={[styles.input, { textAlign: isRTL ? 'right' : 'left' }]}
               value={password} 
               onChangeText={setPassword} 
               secureTextEntry
@@ -69,7 +66,7 @@ export const LoginScreen = ({ navigation }: Props) => {
             <AppButton label={t('auth.login')} onPress={onLogin} loading={loading} />
 
             <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.linkWrap}>
-              <Text style={[styles.link, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.noAccount')}</Text>
+              <Text style={[styles.link, { textAlign: isRTL ? 'right' : 'left' }]}>{t('auth.noAccount')}</Text>
             </TouchableOpacity>
           </View>
         </View>

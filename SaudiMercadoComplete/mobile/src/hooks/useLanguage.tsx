@@ -1,14 +1,6 @@
 import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
-
-export type AppLanguage = 'ar' | 'en';
-
-const LANGUAGE_KEY = 'app_language';
-const LANGUAGE_SELECTED_KEY = 'app_language_selected';
 
 const ar = {
-  'language.switch': 'English',
   'tabs.home': 'الرئيسية',
   'tabs.markets': 'الأسواق',
   'tabs.products': 'المنتجات',
@@ -47,130 +39,42 @@ const ar = {
   'common.backToDashboard': 'العودة للوحة التحكم',
 } as const;
 
-const en: Record<keyof typeof ar, string> = {
-  'language.switch': 'العربية',
-  'tabs.home': 'Home',
-  'tabs.markets': 'Markets',
-  'tabs.products': 'Products',
-  'tabs.cart': 'Cart',
-  'tabs.account': 'Account',
-  'auth.appName': 'Saudi Mercado',
-  'auth.tagline': 'Order fresh fruits and vegetables directly from the market',
-  'auth.login': 'Sign In',
-  'auth.signup': 'Create Account',
-  'auth.name': 'Name',
-  'auth.email': 'Email',
-  'auth.password': 'Password',
-  'auth.noAccount': "Don't have an account? Create one",
-  'auth.hasAccount': 'Already have an account? Sign in',
-  'auth.fillLogin': 'Please enter your email and password',
-  'auth.fillAll': 'Please fill in all fields',
-  'auth.passwordMin': 'Password must be at least 6 characters',
-  'auth.loginFailed': 'Failed to sign in',
-  'auth.signupFailed': 'Failed to create account',
-  'alert.notice': 'Notice',
-  'alert.error': 'Error',
-  'account.title': 'Account',
-  'account.subtitle': 'Manage your profile',
-  'account.name': 'Name',
-  'account.email': 'Email',
-  'account.notifications': 'Account notifications',
-  'account.orderUpdates': 'Order status updates - enabled',
-  'account.promotions': 'Promotions - enabled',
-  'account.myOrders': 'My orders',
-  'account.noOrders': 'No orders yet',
-  'account.status': 'Status',
-  'account.total': 'Total',
-  'account.refreshOrders': 'Refresh orders',
-  'account.logout': 'Log out',
-  'account.language': 'Language',
-  'common.backToDashboard': 'Back to dashboard',
-};
-
-const translations = { ar, en } as const;
-
 export type TranslationKey = keyof typeof ar;
 
 type LanguageContextValue = {
-  language: AppLanguage;
   isLoading: boolean;
-  setLanguage: (language: AppLanguage) => Promise<void>;
-  toggleLanguage: () => Promise<void>;
-  tr: (arabic: string, english: string) => string;
-  locale: 'ar-SA' | 'en-US';
+  tr: (arabic: string, _english: string) => string;
+  locale: 'ar-SA';
   t: (key: TranslationKey) => string;
-  isRTL: boolean;
+  isRTL: true;
 };
 
 const LanguageContext = createContext<LanguageContextValue | undefined>(undefined);
-const isWeb = Platform.OS === 'web';
-const ARABIC_VISUAL_PREFIX = '\u200F\u061C\u00A0\u00A0';
 
 export const LanguageProvider = ({ children }: { children: React.ReactNode }) => {
-  const [language, setLanguageState] = useState<AppLanguage>('ar');
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const bootstrap = async () => {
-      try {
-        let initialLanguage: AppLanguage = 'ar';
-        const [storedLanguage, languageSelected] = await Promise.all([
-          AsyncStorage.getItem(LANGUAGE_KEY),
-          AsyncStorage.getItem(LANGUAGE_SELECTED_KEY),
-        ]);
-
-        // Guarantee Arabic by default unless user explicitly selected another language.
-        if (languageSelected === '1' && (storedLanguage === 'ar' || storedLanguage === 'en')) {
-          initialLanguage = storedLanguage;
-        } else {
-          await AsyncStorage.multiSet([
-            [LANGUAGE_KEY, 'ar'],
-            [LANGUAGE_SELECTED_KEY, '0'],
-          ]);
-        }
-        setLanguageState(initialLanguage);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    bootstrap();
+    setIsLoading(false);
   }, []);
-
-  const setLanguage = async (next: AppLanguage) => {
-    if (next === language) return;
-    await AsyncStorage.multiSet([
-      [LANGUAGE_KEY, next],
-      [LANGUAGE_SELECTED_KEY, '1'],
-    ]);
-    setLanguageState(next);
-  };
-
-  const toggleLanguage = async () => {
-    const next = language === 'ar' ? 'en' : 'ar';
-    await setLanguage(next);
-  };
 
   const value = useMemo<LanguageContextValue>(
     () => ({
-      language,
       isLoading,
-      setLanguage,
-      toggleLanguage,
-      tr: (arabic, english) => (language === 'ar' ? `${ARABIC_VISUAL_PREFIX}${arabic}` : english),
-      locale: language === 'ar' ? 'ar-SA' : 'en-US',
-      t: (key) => (language === 'ar' ? `${ARABIC_VISUAL_PREFIX}${translations[language][key]}` : translations[language][key]),
-      isRTL: language === 'ar',
+      tr: (arabic) => arabic,
+      locale: 'ar-SA',
+      t: (key) => ar[key],
+      isRTL: true,
     }),
-    [language, isLoading]
+    [isLoading]
   );
 
   useEffect(() => {
-    if (isWeb && typeof document !== 'undefined') {
-      document.documentElement.lang = language;
-      document.documentElement.dir = language === 'ar' ? 'rtl' : 'ltr';
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = 'ar';
+      document.documentElement.dir = 'rtl';
     }
-  }, [language]);
+  }, []);
 
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 };

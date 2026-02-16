@@ -125,7 +125,7 @@ export const OwnerMarketsScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={styles.card}>
         <Text style={[styles.title, { textAlign: isRTL ? 'right' : 'left' }]}>{editingId ? tr('تعديل سوق', 'Edit Market') : tr('إضافة سوق', 'Add Market')}</Text>
         <TextInput style={styles.input} value={name} onChangeText={setName} placeholder={tr('اسم السوق', 'Market name')} textAlign={isRTL ? 'right' : 'left'} />

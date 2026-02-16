@@ -15,13 +15,12 @@ import { AccountScreen } from '@screens/customer/AccountScreen';
 const Stack = createNativeStackNavigator<AdminStackParamList>();
 
 export const AdminStack = () => {
-  const { tr, isRTL } = useLanguage();
+  const { tr } = useLanguage();
 
   return (
     <Stack.Navigator
       screenOptions={{
         headerTitleAlign: 'center',
-        contentStyle: { direction: isRTL ? 'rtl' : 'ltr' },
       }}
     >
       <Stack.Screen name="AdminDashboard" component={AdminDashboardScreen} options={{ title: tr('لوحة الأدمن', 'Admin Panel') }} />

@@ -92,7 +92,7 @@ export const OwnerOrdersScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <View style={[styles.searchRow, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
         <Pressable style={styles.searchBtn} onPress={() => load(orderSearch)}>
           <Text style={styles.searchBtnText}>{tr('بحث', 'Search')}</Text>

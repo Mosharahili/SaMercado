@@ -44,7 +44,7 @@ export const AppButton = ({
           style={[
             styles.label,
             variant === 'ghost' && styles.ghostLabel,
-            { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' },
+            { textAlign: isRTL ? 'right' : 'left' },
           ]}
         >
           {label}

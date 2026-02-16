@@ -21,7 +21,7 @@ const iconMap: Record<keyof CustomerTabParamList, keyof typeof MaterialCommunity
 };
 
 export const CustomerTabs = () => {
-  const { t, isRTL } = useLanguage();
+  const { t } = useLanguage();
   const labelMap: Record<keyof CustomerTabParamList, string> = {
     Home: t('tabs.home'),
     Markets: t('tabs.markets'),
@@ -32,7 +32,6 @@ export const CustomerTabs = () => {
 
   return (
     <Tab.Navigator
-      key={isRTL ? 'tabs-rtl' : 'tabs-ltr'}
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: theme.colors.primary,
@@ -43,15 +42,11 @@ export const CustomerTabs = () => {
           paddingTop: 8,
           backgroundColor: '#ffffff',
                   },
-        sceneStyle: {
-          direction: isRTL ? 'rtl' : 'ltr',
-        },
         tabBarLabelStyle: {
           fontSize: 11,
           fontWeight: '700',
-          textAlign: isRTL ? 'right' : 'left',
-          writingDirection: isRTL ? 'rtl' : 'ltr',
-        },
+          textAlign: 'right',
+          },
         tabBarIcon: ({ color, size }) => (
           <MaterialCommunityIcons name={iconMap[route.name as keyof CustomerTabParamList]} color={color} size={size} />
         ),

@@ -17,7 +17,6 @@ export const CartScreen = () => {
   const { isRTL, tr } = useLanguage();
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
     alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
@@ -96,7 +95,7 @@ export const CartScreen = () => {
   };
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <AppHeader title={tr('السلة', 'Cart')} subtitle={tr('إدارة الطلب والدفع', 'Order and payment')} />
 
       {items.map((item) => (
@@ -117,7 +116,7 @@ export const CartScreen = () => {
               <Text style={styles.qtyBtnText}>+</Text>
             </Pressable>
             <Pressable onPress={() => removeItem(item.id)} style={styles.removeBtn}>
-              <Text style={[styles.removeText, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('حذف', 'Remove')}</Text>
+              <Text style={[styles.removeText, { }]}>{tr('حذف', 'Remove')}</Text>
             </Pressable>
           </ScrollView>
         </View>
@@ -129,7 +128,7 @@ export const CartScreen = () => {
 
         <Text style={[styles.paymentTitle, textDirectionStyle]}>{tr('رقم الجوال', 'Phone number')}</Text>
         <TextInput
-          style={[styles.phoneInput, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}
+          style={[styles.phoneInput, { }]}
           value={contactPhone}
           onChangeText={(text) => setContactPhone(text.replace(/[^\d]/g, '').slice(0, 10))}
           keyboardType="phone-pad"

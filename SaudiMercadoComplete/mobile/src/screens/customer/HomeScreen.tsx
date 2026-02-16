@@ -26,7 +26,6 @@ export const HomeScreen = () => {
   const { isRTL, tr } = useLanguage();
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
     alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
@@ -88,7 +87,7 @@ export const HomeScreen = () => {
   const displayMarkets = useMemo(() => markets, [markets]);
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <AppHeader title={tr('سعودي ميركادو', 'Saudi Mercado')} subtitle={tr('سوقك الزراعي الذكي في الرياض', 'Your smart produce marketplace in Riyadh')} />
 
       <ImageBackground
@@ -110,7 +109,7 @@ export const HomeScreen = () => {
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.featureRow}>
         {featureItems.map((feature) => (
-          <View key={feature.label} style={[styles.featureBox, isRTL ? styles.featureBoxRTL : styles.featureBoxLTR]}>
+          <View key={feature.label} style={styles.featureBox}>
             <MaterialCommunityIcons name={feature.icon} size={20} color="#1b5e20" />
             <Text style={[styles.featureText, textDirectionStyle]}>{feature.label}</Text>
           </View>
@@ -160,13 +159,12 @@ export const HomeScreen = () => {
                   name="cart-plus"
                   size={16}
                   color="#ffffff"
-                  style={[styles.addBtnIcon, isRTL ? styles.addBtnIconRTL : styles.addBtnIconLTR]}
+                  style={styles.addBtnIcon}
                 />
                 <Text
                   style={[
                     styles.addBtnText,
-                    isRTL ? styles.addBtnTextRTL : styles.addBtnTextLTR,
-                    { writingDirection: isRTL ? 'rtl' : 'ltr' },
+                    { },
                   ]}
                 >
                   {tr('أضف للسلة', 'Add to Cart')}
@@ -197,7 +195,7 @@ export const HomeScreen = () => {
             </Text>
             <Pressable
               onPress={() => setPopupVisible(false)}
-              style={[styles.dismissBtn, isRTL ? styles.dismissBtnRTL : styles.dismissBtnLTR]}
+              style={styles.dismissBtn}
             >
               <Text style={[styles.dismissText, textDirectionStyle]}>{popup?.secondaryCtaText || tr('إغلاق', 'Close')}</Text>
             </Pressable>
@@ -344,23 +342,13 @@ const styles = StyleSheet.create({
   addBtnIcon: {
     position: 'absolute',
     top: 10,
-  },
-  addBtnIconLTR: {
-    left: 8,
-  },
-  addBtnIconRTL: {
-    right: 8,
+    end: 8,
   },
   addBtnText: {
     color: '#ffffff',
     fontWeight: '800',
     fontSize: 12,
     paddingHorizontal: 20,
-  },
-  addBtnTextLTR: {
-    textAlign: 'left',
-  },
-  addBtnTextRTL: {
     textAlign: 'right',
   },
   bottomBanner: {
@@ -415,12 +403,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#dcfce7',
     paddingVertical: 8,
     paddingHorizontal: 14,
-  },
-  dismissBtnRTL: {
-    marginLeft: 'auto',
-  },
-  dismissBtnLTR: {
-    marginRight: 'auto',
+    marginStart: 'auto',
   },
   dismissText: {
     color: '#166534',

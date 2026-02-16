@@ -18,7 +18,6 @@ export const ProductsScreen = () => {
   const { isRTL, tr } = useLanguage();
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
-    writingDirection: isRTL ? 'rtl' : 'ltr',
     textAlign: isRTL ? 'right' : 'left',
     alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
@@ -103,14 +102,14 @@ export const ProductsScreen = () => {
   const topOfferImage = api.resolveAssetUrl(topOffer?.imageUrl);
 
   return (
-    <ScreenContainer contentStyle={{ direction: isRTL ? 'rtl' : 'ltr' }}>
+    <ScreenContainer>
       <AppHeader title={tr('المنتجات', 'Products')} subtitle={tr('تشكيلة يومية طازجة', 'Fresh daily selection')} />
 
       <BannerCarousel banners={topBanners} />
 
       {topOffer ? (
         <View style={styles.offerCard}>
-          <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start', writingDirection: isRTL ? 'rtl' : 'ltr' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
+          <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
           {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} resizeMode="cover" /> : null}
           <Text style={[styles.offerTitle, textDirectionStyle]}>{visualPad(topOffer.title)}</Text>
           {!!topOffer.description && <Text style={[styles.offerDesc, textDirectionStyle]}>{visualPad(topOffer.description)}</Text>}
@@ -121,8 +120,8 @@ export const ProductsScreen = () => {
         <TextInput
           style={[
             styles.searchInput,
-            isRTL ? styles.searchInputRTL : styles.searchInputLTR,
-            { writingDirection: isRTL ? 'rtl' : 'ltr' },
+            styles.searchInput,
+            { },
           ]}
           value={searchInput}
           onChangeText={setSearchInput}
@@ -135,7 +134,7 @@ export const ProductsScreen = () => {
           }}
         />
         <Pressable
-          style={[styles.searchBtn, isRTL ? styles.searchBtnRTL : styles.searchBtnLTR]}
+          style={styles.searchBtn}
           onPress={() => {
             setSearch(searchInput);
             fetchProducts(searchInput);
@@ -161,17 +160,17 @@ export const ProductsScreen = () => {
       </ScrollView>
 
       <View style={styles.rowBetween}>
-        <Text style={[styles.countText, textDirectionStyle, isRTL ? styles.countTextRTL : styles.countTextLTR]}>
+        <Text style={[styles.countText, textDirectionStyle, styles.countText]}>
           {tr('عدد المنتجات', 'Products count')}: {visibleProducts.length}
         </Text>
-        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={[styles.toggleBtn, isRTL ? styles.toggleBtnRTL : styles.toggleBtnLTR]}>
+        <Pressable onPress={() => setViewMode((v) => (v === 'grid' ? 'list' : 'grid'))} style={styles.toggleBtn}>
           <MaterialCommunityIcons
             name={viewMode === 'grid' ? 'view-list' : 'view-grid'}
             size={20}
             color="white"
-            style={[styles.toggleIcon, isRTL ? styles.toggleIconRTL : styles.toggleIconLTR]}
+            style={styles.toggleIcon}
           />
-          <Text style={[styles.toggleText, isRTL ? styles.toggleTextRTL : styles.toggleTextLTR, { writingDirection: isRTL ? 'rtl' : 'ltr' }]}>
+          <Text style={[styles.toggleText, { }]}>
             {viewMode === 'grid' ? tr('عرض قائمة', 'List View') : tr('عرض شبكي', 'Grid View')}
           </Text>
         </Pressable>
@@ -297,13 +296,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.95)',
     paddingVertical: 11,
   },
-  searchInputLTR: {
-    paddingLeft: 56,
-    paddingRight: 12,
-  },
-  searchInputRTL: {
-    paddingRight: 56,
-    paddingLeft: 12,
+  searchInput: {
+    paddingStart: 56,
+    paddingEnd: 12,
   },
   searchBtn: {
     position: 'absolute',
@@ -315,11 +310,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  searchBtnLTR: {
-    left: 0,
-  },
-  searchBtnRTL: {
-    right: 0,
+  searchBtn: {
+    end: 0,
   },
   filtersRow: {
     gap: 8,
@@ -355,11 +347,8 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     width: '100%',
   },
-  countTextLTR: {
-    paddingLeft: 118,
-  },
-  countTextRTL: {
-    paddingRight: 118,
+  countText: {
+    paddingStart: 118,
   },
   emptyText: {
     color: '#4b6a5a',
@@ -375,32 +364,21 @@ const styles = StyleSheet.create({
     minHeight: 38,
     justifyContent: 'center',
   },
-  toggleBtnLTR: {
-    left: 0,
-  },
-  toggleBtnRTL: {
-    right: 0,
+  toggleBtn: {
+    end: 0,
   },
   toggleIcon: {
     position: 'absolute',
     top: 9,
   },
-  toggleIconLTR: {
-    left: 8,
-  },
-  toggleIconRTL: {
-    right: 8,
+  toggleIcon: {
+    end: 8,
   },
   toggleText: {
     color: 'white',
     fontWeight: '700',
     fontSize: 12,
     paddingHorizontal: 24,
-  },
-  toggleTextLTR: {
-    textAlign: 'left',
-  },
-  toggleTextRTL: {
     textAlign: 'right',
   },
   previewOverlay: {

@@ -25,7 +25,7 @@ export const ScreenContainer = ({
 
   const ownerShortcut = showOwnerBackToDashboard ? (
     <Pressable style={[styles.ownerBackBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('OwnerDashboard')}>
-      <Text style={[styles.ownerBackText, { writingDirection: isRTL ? 'rtl' : 'ltr', textAlign: isRTL ? 'right' : 'left' }]}>{t('common.backToDashboard')}</Text>
+      <Text style={[styles.ownerBackText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('common.backToDashboard')}</Text>
     </Pressable>
   ) : null;
 
