@@ -39,14 +39,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 66, // leave space for logo
   },
   title: {
-    textAlign: 'right',       // align text to the right
-    // Arabic
     color: '#0f2f3d',
     fontSize: 20,
     fontWeight: '800',
   },
   subtitle: {
-    textAlign: 'right',
     color: '#4a6572',
     fontSize: 13,
     marginTop: 2,

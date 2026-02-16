@@ -30,7 +30,6 @@ export const RootNavigator = () => {
   return (
     <View style={styles.root}>
       <NavigationContainer
-        direction="rtl"
         theme={{
           ...DefaultTheme,
           colors: {

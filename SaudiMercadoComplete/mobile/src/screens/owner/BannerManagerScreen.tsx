@@ -205,13 +205,13 @@ export const BannerManagerScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {banner.isEnabled ? tr('مفعل', 'Active') : tr('متوقف', 'Disabled')}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(banner)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => startEdit(banner)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => toggleEnabled(banner)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => toggleEnabled(banner)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{banner.isEnabled ? tr('إيقاف', 'Disable') : tr('تفعيل', 'Enable')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(banner.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => remove(banner.id)} style={styles.actionDanger}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>

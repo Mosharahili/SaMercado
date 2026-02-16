@@ -206,10 +206,10 @@ export const OwnerProductsScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('السعر', 'Price')}: {product.price} ر.س / {product.unit}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(product)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => startEdit(product)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(product.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => remove(product.id)} style={styles.actionDanger}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>

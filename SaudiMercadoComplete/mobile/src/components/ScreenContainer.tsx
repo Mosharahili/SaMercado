@@ -24,7 +24,7 @@ export const ScreenContainer = ({
   const showOwnerBackToDashboard = user?.role === 'OWNER' && isOwnerStoreScreen;
 
   const ownerShortcut = showOwnerBackToDashboard ? (
-    <Pressable style={[styles.ownerBackBtn, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]} onPress={() => navigation.navigate('OwnerDashboard')}>
+    <Pressable style={styles.ownerBackBtn} onPress={() => navigation.navigate('OwnerDashboard')}>
       <Text style={[styles.ownerBackText, { textAlign: isRTL ? 'right' : 'left' }]}>{t('common.backToDashboard')}</Text>
     </Pressable>
   ) : null;

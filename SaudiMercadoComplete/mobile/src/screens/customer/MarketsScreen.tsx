@@ -11,7 +11,6 @@ export const MarketsScreen = () => {
   const { isRTL, tr } = useLanguage();
   const textDirectionStyle = {
     textAlign: isRTL ? 'right' : 'left',
-    alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
   const [markets, setMarkets] = useState<Market[]>([]);

@@ -21,7 +21,6 @@ export const ProductCard = ({
   const image = api.resolveAssetUrl(product.images?.[0]?.imageUrl);
   const textDirectionStyle = {
     textAlign: isRTL ? 'right' : 'left',
-    alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
 

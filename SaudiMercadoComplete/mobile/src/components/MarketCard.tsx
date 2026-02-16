@@ -12,7 +12,6 @@ export const MarketCard = ({ market }: { market: Market; onBrowse?: () => void }
   const image = api.resolveAssetUrl(market.imageUrl);
   const textDirectionStyle = {
     textAlign: isRTL ? 'right' : 'left',
-    alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
 

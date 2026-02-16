@@ -150,13 +150,13 @@ export const OwnerMarketsScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {market.isActive ? tr('مفعل', 'Active') : tr('مؤرشف', 'Archived')}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(market)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => startEdit(market)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => toggleActive(market)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => toggleActive(market)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{market.isActive ? tr('أرشفة', 'Archive') : tr('تفعيل', 'Activate')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(market.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => remove(market.id)} style={styles.actionDanger}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>

@@ -198,13 +198,13 @@ export const PopupManagerScreen = () => {
           <Text style={[styles.itemMeta, { textAlign: isRTL ? 'right' : 'left' }]}>{tr('الحالة', 'Status')}: {popup.isEnabled ? tr('مفعل', 'Active') : tr('متوقف', 'Disabled')}</Text>
 
           <View style={[styles.actionRow, { }]}>
-            <Pressable onPress={() => startEdit(popup)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => startEdit(popup)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{tr('تعديل', 'Edit')}</Text>
             </Pressable>
-            <Pressable onPress={() => toggleEnabled(popup)} style={[styles.actionBtn, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => toggleEnabled(popup)} style={styles.actionBtn}>
               <Text style={styles.actionText}>{popup.isEnabled ? tr('إيقاف', 'Disable') : tr('تفعيل', 'Enable')}</Text>
             </Pressable>
-            <Pressable onPress={() => remove(popup.id)} style={[styles.actionDanger, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}>
+            <Pressable onPress={() => remove(popup.id)} style={styles.actionDanger}>
               <Text style={styles.actionDangerText}>{tr('حذف', 'Delete')}</Text>
             </Pressable>
           </View>

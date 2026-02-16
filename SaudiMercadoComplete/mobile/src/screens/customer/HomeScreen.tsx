@@ -27,7 +27,6 @@ export const HomeScreen = () => {
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     textAlign: isRTL ? 'right' : 'left',
-    alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
   const [banners, setBanners] = useState<Banner[]>([]);
@@ -349,7 +348,6 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     fontSize: 12,
     paddingHorizontal: 20,
-    textAlign: 'right',
   },
   bottomBanner: {
     backgroundColor: 'rgba(255,255,255,0.97)',

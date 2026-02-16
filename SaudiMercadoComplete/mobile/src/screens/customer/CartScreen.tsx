@@ -18,7 +18,6 @@ export const CartScreen = () => {
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     textAlign: isRTL ? 'right' : 'left',
-    alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('CASH_ON_DELIVERY');
@@ -106,7 +105,7 @@ export const CartScreen = () => {
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
-            contentContainerStyle={[styles.qtyRow, { alignItems: isRTL ? 'flex-end' : 'flex-start' }]}
+            contentContainerStyle={styles.qtyRow}
           >
             <Pressable onPress={() => updateQuantity(item.id, item.quantity - 1)} style={styles.qtyBtn}>
               <Text style={styles.qtyBtnText}>-</Text>

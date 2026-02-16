@@ -19,7 +19,6 @@ export const ProductsScreen = () => {
   const visualPad = React.useCallback((value: string) => (isRTL ? `\u200F\u061C\u00A0\u00A0${value}` : value), [isRTL]);
   const textDirectionStyle = {
     textAlign: isRTL ? 'right' : 'left',
-    alignSelf: isRTL ? 'flex-end' : 'flex-start',
     width: '100%',
   } as const;
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -109,7 +108,7 @@ export const ProductsScreen = () => {
 
       {topOffer ? (
         <View style={styles.offerCard}>
-          <Text style={[styles.offerTag, { alignSelf: isRTL ? 'flex-end' : 'flex-start' }]}>{tr('عرض خاص', 'Special Offer')}</Text>
+          <Text style={styles.offerTag}>{tr('عرض خاص', 'Special Offer')}</Text>
           {topOfferImage ? <Image source={{ uri: topOfferImage }} style={styles.offerImage} resizeMode="cover" /> : null}
           <Text style={[styles.offerTitle, textDirectionStyle]}>{visualPad(topOffer.title)}</Text>
           {!!topOffer.description && <Text style={[styles.offerDesc, textDirectionStyle]}>{visualPad(topOffer.description)}</Text>}
@@ -198,7 +197,7 @@ export const ProductsScreen = () => {
           <View style={styles.previewCard}>
             <View style={styles.previewHeader}>
               <Text style={[styles.previewTitle, textDirectionStyle]}>{tr('تفاصيل المنتج', 'Product Details')}</Text>
-              <Pressable onPress={() => setSelectedProduct(null)} style={[styles.previewClose, isRTL ? styles.previewCloseRTL : styles.previewCloseLTR]}>
+              <Pressable onPress={() => setSelectedProduct(null)} style={[styles.previewClose, styles.previewClosePosition]}>
                 <MaterialCommunityIcons name="close" size={20} color="#0f2f3d" />
               </Pressable>
             </View>
@@ -263,7 +262,6 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   offerTag: {
-    alignSelf: 'flex-end',
     backgroundColor: '#dcfce7',
     color: '#166534',
     fontWeight: '800',
@@ -379,7 +377,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     fontSize: 12,
     paddingHorizontal: 24,
-    textAlign: 'right',
   },
   previewOverlay: {
     flex: 1,
@@ -415,11 +412,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  previewCloseLTR: {
-    left: 0,
-  },
-  previewCloseRTL: {
-    right: 0,
+  previewClosePosition: {
+    start: 0,
   },
   previewImagesRow: {
     gap: 8,
